@@ -56,20 +56,20 @@
         <h2 id="roomName"></h2>
         <label for="rackOverlay">Rack :</label>
         <select id="rackOverlay">
-          <option value="default">Default</option>
           <option value="rackCapacity">Capacity</option>
-          <option value="rackPowerMaximum">Power Maximum</option>
-          <option value="rackPowerAverage">Power Average</option>
+          <option value="default">Plain</option>
+          <option value="rackPowerMaximum" disabled="true">Power Maximum</option>
+          <option value="rackPowerAverage" disabled="true">Power Average</option>
         </select>
         <select id="rackFilter">
           <option value="all">All</option>
         </select>
         <label for="mountedOverlay">Mounted :</label>
         <select id="mountedOverlay">
-          <option value="default">Default</option>
           <option value="objectModelCategory">Model Category</option>
-          <option value="objectModelEndOfLife">Model End of Life</option>
-          <option value="objectLastAudit">u_last_audit_date - 2 year</option>
+          <option value="default">Plain</option>
+          <option value="objectModelEndOfLife" disabled="true">Model End of Life</option>
+          <option value="objectLastAudit" disabled="true">u_last_audit_date - 2 year</option>
         </select>
         <select id="mountedFilter">
           <option value="all">All</option>
@@ -1468,144 +1468,11 @@
     return mountedData;
   }
 
-
-
-/*
-
-    rackData.forEach(function(rack){
-      rackObject[rack["name"]] = {
-				"block": {
-          "draw_lines": 1,
-          "rgb_block_red": 1,
-          "rgb_block_green": 1,
-          "rgb_block_blue": 1,
-          "rgb_line_red": 0.5,
-          "rgb_line_green": 0.5,
-          "rgb_line_blue": 0.5,
-          "x_location": (rack["u_x_min"] + rack["u_x_max"]) * 0.5,
-          "y_location": (rack["u_y_min"] + rack["u_y_max"]) * 0.5,
-          "z_location": (rack["u_z_min"] + rack["u_z_max"]) * 0.5,
-          "x_dimension": rack["u_x_max"] - rack["u_x_min"],
-          "y_dimension": rack["u_y_max"] - rack["u_y_min"],
-          "z_dimension": rack["u_z_max"] - rack["u_z_min"]
-		},
-        "data" : {
-          "sys_id": rack["sys_id"],
-          "rack_units": rack["rack_units"],
-          "u_x_aligned": rack["u_x_aligned"],
-          "u_z_unit_start": rack["u_z_unit_start"]
-        },
-        "display" : {
-          "u_rack_state": rack["u_rack_state"],
-          "u_max_alloc": rack["u_max_alloc"],
-          "u_qty_alloc": rack["u_qty_alloc"],
-          "u_environment": rack["u_environment"],
-          "u_allocated_kw": rack["u_allocated_kw"],
-          "u_equip_design_kw": rack["u_equip_design_kw"],
-          "u_facil_design_kw": rack["u_facil_design_kw"],
-          "u_equip_kw_consume_design": rack["u_equip_kw_consume_design"]
-        }
-      }
-    })
-
-    // turn scene into object
-    var sceneObject = {}
-    sceneryData.forEach(function(scene){
-      sceneObject[scene["name"]] = {
-				"block": {
-          "draw_lines": scene["u_lines"],
-          "rgb_block_red": scene["u_red"],
-          "rgb_block_green": scene["u_red"],
-          "rgb_block_blue": scene["u_red"],
-          "rgb_line_red": 0.5,
-          "rgb_line_green": 0.5,
-          "rgb_line_blue": 0.5,
-          "x_location": (scene["u_x_min"] + scene["u_x_max"]) * 0.5,
-          "y_location": (scene["u_y_min"] + scene["u_y_max"]) * 0.5,
-          "z_location": (scene["u_z_min"] + scene["u_z_max"]) * 0.5,
-          "x_dimension": scene["u_x_max"] - scene["u_x_min"],
-          "y_dimension": scene["u_y_max"] - scene["u_y_min"],
-          "z_dimension": scene["u_z_max"] - scene["u_z_min"]
-        },
-        "data" : {
-          'sys_id': scene["sys_id"],
-          'tag': scene["u_tag"]
-        }
-      }
-    })
-    //update mountedData
-    var mountedObject = {};
-    var mountedTemp = {};
-    Object.keys(mountedData).forEach(function(mountedName){
-      mountedTemp = mountedData[mountedName];
-      mountedObject[mountedName] = {
-		"block": {
-          "draw_lines": mountedTemp["u_lines"],
-          "rgb_block_red": 1.0,
-          "rgb_block_green": 1.0,
-          "rgb_block_blue": 1.0,
-          "rgb_line_red": 0.5,
-          "rgb_line_green": 0.5,
-          "rgb_line_blue": 0.5,
-          "x_min": mountedTemp["u_x_min"],
-          "x_max": mountedTemp["u_x_max"],
-          "y_min": mountedTemp["u_y_min"],
-          "y_max": mountedTemp["u_y_max"],
-          "z_min": mountedTemp["u_z_min"],
-          "z_max": mountedTemp["u_z_max"],
-          "x_location": (mountedTemp["u_x_min"] + mountedTemp["u_x_max"]) * 0.5,
-          "y_location": (mountedTemp["u_y_min"] + mountedTemp["u_y_max"]) * 0.5,
-          "z_location": (mountedTemp["u_z_min"] + mountedTemp["u_z_max"]) * 0.5,
-          "x_dimension": mountedTemp["u_x_max"] - mountedTemp["u_x_min"],
-          "y_dimension": mountedTemp["u_y_max"] - mountedTemp["u_y_min"],
-          "z_dimension": mountedTemp["u_z_max"] - mountedTemp["u_z_min"]
-        },
-        "data" : {
-          "ci_name": mountedTemp["ci_name"],
-          "ci_sys_id": mountedTemp["ci_sys_id"],
-          "sys_id": mountedTemp["sys_id"]
-        },
-        "display": {
-          "asset_tag": mountedTemp["asset_tag"],
-          "ci_u_cmdb_ci_status_name": mountedTemp["ci_u_cmdb_ci_status_name"],
-          "ci_u_provision_date": mountedTemp["ci_u_provision_date"],
-          "collision": mountedTemp["collision"],
-          "model_category_name": mountedTemp["model_category_name"],
-          "model_u_end_of_life": mountedTemp["model_u_end_of_life"],
-          "model_name": mountedTemp["model_name"],
-          "model_rack_units": mountedTemp["model_rack_units"],
-          "support_group_manager_email": mountedTemp["support_group_manager_email"],
-          "sys_class_name": mountedTemp["sys_class_name"],
-          "u_smdb_table": mountedTemp["u_smdb_table"],
-          "u_last_audit_date": mountedTemp["u_last_audit_date"],
-          "serial_number": mountedTemp["serial_number"]
-        }
-      }
-    })
-    var allData = {}
-    allData["room"] = {}
-    allData["room"]["room_name"] = roomName;
-    allData["camera"] = cameraData;
-    allData["mounted"] = mountedObject;
-    allData["scenery"] = sceneObject;
-    allData["racks"] = rackObject;
-    data.allData = allData;
-		if (true){
-      data.roomName = roomName;
-      data.rackData = rackData;
-      data.mountedData = mountedData;
-      data.sceneryData = sceneryData;
-      data.cameraData = cameraData;
-    }
-    */
-
   function randomEnvironment(){
     var environmentList = ["alpha","bravo","charlie","delta","echo","foxtrot"];
     var dice = Math.floor(Math.random() * 6);
     return environmentList[dice];
   }
-
-//}
 
 </script>
 </body>
