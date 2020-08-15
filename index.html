@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>3d datacenter</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      html, body {
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        background-color: #ffffff;
+        margin: 0;
+        overflow: hidden;
+        font-family: arial;
+      }
+      H2 {
+        display: inline;
+      }
+      p{
+        display: inline;
+      }
+      #main {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+      .stack-top{
+        z-index: 9;
+      }
+      a:link {
+        color: black;
+        text-decoration: none;
+      }
+      a:visited {
+        color: black;
+        text-decoration: none;
+      }
+      a:hover {
+        color: black;
+        text-decoration: none;
+      }
+      a:active {
+        color: black;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="./dependencies/three.min.js"></script>
+    <script src="./dependencies/PointerLockControls.js"></script>
+    <script src="./blockData.js"></script>
+    <div id = "main">
+      <div id="top">
+        <h2 id="roomName"></h2>
+        <label for="rackOverlay">Rack :</label>
+        <select id="rackOverlay">
+          <option value="default">Default</option>
+          <option value="rackCapacity">Capacity</option>
+          <option value="rackPowerMaximum">Power Maximum</option>
+          <option value="rackPowerAverage">Power Average</option>
+        </select>
+        <select id="rackFilter">
+          <option value="all">All</option>
+        </select>
+        <label for="mountedOverlay">Mounted :</label>
+        <select id="mountedOverlay">
+          <option value="default">Default</option>
+          <option value="objectModelCategory">Model Category</option>
+          <option value="objectModelEndOfLife">Model End of Life</option>
+          <option value="objectLastAudit">u_last_audit_date - 2 year</option>
+        </select>
+        <select id="mountedFilter">
+          <option value="all">All</option>
+        </select>
+        <button type="button" id="exportScene">Download Scene</button>
+        <label for="speed">Speed :</label>
+        <input type="number" id="speed" value="6" min="1" step="1" />
+        <p id="fps"></p>
+      </div>
+      <canvas id="my_canvas" width="800" height="400"></canvas>
+      <div id="ghost" class="stack-top"></div>
+      <div id = "lower">
+      </div>
+    </div>
+    <script>
+
+
+
+
+//function main(spUtil){
+  //var allData = {};
+
+
+  var allData = allDataFake();
+
+
+  var anchor;
+  var camera;
+  var cameraData = [];
+  var controls;
+  var controlsEnabled = false;
+  var element = document.body;
+  var havePointerLock;
+  var moveForward = false;
+  var moveBackward = false;
+  var moveLeft = false;
+  var moveRight = false;
+  var moveUp = false;
+  var moveDown = false;
+  var mountedData = {};
+  var mountedColor = {};
+  var powerData = {};
+  var powerIqAverage ={};
+  var powerIqMax = {};
+  var prevTime;
+  var rackData = [];
+  var rackColor = {};
+  var raycaster;
+  var renderer;
+  var roomMaxPower = 0;
+  var roomName = '';
+  var roomSysid;
+  var scene;
+  var sceneryData = [];
+  var selectedCurrentName = "";
+  var selectedPreviousName = "";
+  var serverLink = this;
+  var speed = 6;
+  var speedBoost = false;
+  var titleText;
+  var velocity = new THREE.Vector3();
+  //roomSysid = serverLink.data.roomSysid;
+  rendererResize()
+  window.addEventListener( 'resize', rendererResize, false );
+	/*
+  if (roomSysid == null) {
+    urlParamMissingWarning();
+  } else {
+    serverLink.data.generatingRoom = true;
+    serverLink.server.update().then(function(){
+      serverLink.data.generatingRoom = false;
+      allData = serverLink.data.allData;
+			*/
+		
+      anchor = document.createElement('a');
+      titleText = document.createTextNode(allData["room"]["room_name"]);
+      anchor.appendChild(titleText);
+      anchor.href = "/nav_to.do?uri=%2Fcmdb_ci_computer_room.do%3Fsys_id%3D" + roomSysid;
+      document.getElementById('roomName').appendChild(anchor);
+      havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
+      if ( havePointerLock ) {
+        document.addEventListener('pointerlockchange', pointerlockchange, false );
+        document.addEventListener('mozpointerlockchange', pointerlockchange, false );
+        document.addEventListener('webkitpointerlockchange', pointerlockchange, false );
+        document.getElementById('ghost').addEventListener( 'click', pointerLockRequest, false );
+      } else {
+        console.log('Your browser doesn\'t seem to support Pointer Lock API');
+      }
+      generateScene();
+      animate();
+    //});
+  //}
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function download(data,filename){
+    var jsonData;
+    var encodedData;
+    var download;
+    jsonData = JSON.stringify(data, null, null).replace(/(\r\n|\n|\r)/gm, "");
+    encodedData = 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonData);
+    download = document.createElement('a');
+    download.setAttribute('href', encodedData );
+    download.setAttribute('download', filename);
+    document.body.appendChild(download);
+    download.click();
+    document.body.removeChild(download);
+  }
+
+
+  /**
+   * @function urlParamMissingWarning
+   * @description gives an explanation of how a rack sys_id needs to given as a url parameter
+   */
+  function urlParamMissingWarning() {
+    var errorMessage;
+    errorMessage = "This page requires a room sysid.<br />";
+    errorMessage += "Like this...<br />";
+    errorMessage += "dcse_3d_room%26sysid%3D99dcf36a2b45820054a41bc5a8da1596";
+    spUtil.addErrorMessage(errorMessage);
+  }
+  /**
+   * @function pointerLockRequest
+   * @description attempts to lock the mouse pointer when the page is clicked
+   */
+  function pointerLockRequest(){
+    var element = document.body;
+    element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+    element.requestPointerLock();
+  }
+  /**
+   * @function pointerlockchange
+   * @description actions to take when the pointer is locked
+   */
+  function pointerlockchange(){
+    if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
+      controlsEnabled = true;
+      moveForward = false;
+      moveBackward = false;
+      moveLeft = false;
+      moveRight = false;
+      moveUp = false;
+      moveDown = false;
+      prevTime = performance.now();
+      document.addEventListener( 'click', inspectHardware, false);
+      //document.addEventListener('mousewheel', mouseWheelZoom, false);
+      document.addEventListener('contextmenu', rightclick, false);
+
+    } else {
+      document.removeEventListener( 'click', inspectHardware, false );
+      //document.removeEventListener('mousewheel', mouseWheelZoom, false);
+      controlsEnabled = false;
+    }
+  }
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function rightclick(){
+    console.log("right click")
+  }
+
+
+  /**
+   * @function generateScene
+   * @description generate everything in the 3D scene
+   */
+  function generateScene(){
+    // event listeners
+    var geometry;
+    var material;
+    var crosshair;
+    document.getElementById('rackOverlay').addEventListener('change', rackDropDown, false);
+    document.getElementById('rackFilter').addEventListener('change', rackDropDown, false);
+    document.getElementById('mountedOverlay').addEventListener('change', mountedDropDown, false);
+    document.getElementById('mountedFilter').addEventListener('change', mountedDropDown, false);
+    document.getElementById('exportScene').addEventListener('click', exportScene, false);
+    document.getElementById("speed").addEventListener("change", function(){
+      speed = document.getElementById("speed").value;
+    }, false);
+    document.addEventListener( 'keydown', onKeyDown, false );
+    document.addEventListener( 'keyup', onKeyUp, false );
+    // fill dropdowns
+    generateRackFilter()
+    generateMountedFilter();
+    // scene
+    scene = new THREE.Scene();
+    // light
+    var light = new THREE.AmbientLight(0xffffff);
+    scene.add( light );
+    // camera
+    camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.01, 1000 );
+    controls = new THREE.PointerLockControls( camera, document.body );
+    controls.getObject().position.set(allData["camera"]["camera_position_x"],allData["camera"]["camera_position_y"],allData["camera"]["camera_position_z"]);
+    controls.getObject().rotation.set(allData["camera"]["camera_rotation_x"],allData["camera"]["camera_rotation_y"],allData["camera"]["camera_rotation_z"]);
+    scene.add(camera);
+    // crosshair
+    geometry = new THREE.Geometry();
+    geometry.vertices.push( new THREE.Vector3( 0, 0.001, -0.1 ) );
+    geometry.vertices.push( new THREE.Vector3( 0, -0.001, -0.1 ) );
+    geometry.vertices.push( new THREE.Vector3( 0.001, 0, -0.1 ) );
+    geometry.vertices.push( new THREE.Vector3( -0.001, 0, -0.1 ) );
+    material = new THREE.LineBasicMaterial( { color: 0x000000 } );
+    crosshair = new THREE.LineSegments( geometry, material );
+    camera.add(crosshair);
+    // raycaster
+    raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 100 );
+    // renderer
+    renderer = new THREE.WebGLRenderer({antialias:true, canvas:document.getElementById('my_canvas')});
+    renderer.setClearColor( 0xf0f3f4 );
+    //generateBlocksFromObject(mountedData,"hardware",true);
+    //generateBlocks(sceneryData,"scene",false);
+    //generateBlocks(rackData,"rack",false);
+    newblocks(allData["racks"],"rack",false)
+    newblocks(allData["scenery"],"scene",false)
+    newblocks(allData["mounted"],"mounted",true)
+    rackDropDown();
+    mountedDropDown();
+    rendererResize();
+  }
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function newblocks(inputData,blockType,highlightable){
+    /*
+		"block": {
+          "draw_lines": mountedTemp["u_lines"],
+          "rgb_block_red": 1.0,
+          "rgb_block_green": 1.0,
+          "rgb_block_blue": 1.0,
+          "rgb_line_red": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_blue": 0.5,
+          "x_min": mountedTemp["u_x_min"],
+          "x_max": mountedTemp["u_x_max"],
+          "y_min": mountedTemp["u_y_min"],
+          "y_max": mountedTemp["u_y_max"],
+          "z_min": mountedTemp["u_z_min"],
+          "z_max": mountedTemp["u_z_max"],
+          "x_location": (mountedTemp["u_x_min"] + mountedTemp["u_x_max"]) * 0.5,
+          "y_location": (mountedTemp["u_y_min"] + mountedTemp["u_y_max"]) * 0.5,
+          "z_location": (mountedTemp["u_z_min"] + mountedTemp["u_z_max"]) * 0.5,
+          "x_dimension": mountedTemp["u_x_max"] - mountedTemp["u_x_min"],
+          "y_dimension": mountedTemp["u_y_max"] - mountedTemp["u_y_min"],
+          "z_dimension": mountedTemp["u_z_max"] - mountedTemp["u_z_min"]
+        },
+        */
+    var block = {};
+    var gameXLocation = 0;
+    var gameYLocation = 0;
+    var gameZLocation = 0;
+    var gameXDimension = 0;
+    var gameYDimension = 0;
+    var gameZDimension = 0;
+    Object.keys(inputData).forEach(function(blockName){
+      block = inputData[blockName]["block"];
+      // translate from blender xyz to game xyz
+      gameXLocation = block['y_location'];
+      gameYLocation = block['z_location'];
+      gameZLocation = block['x_location'];
+      gameXDimension = block['y_dimension']
+      gameYDimension = block['z_dimension'];
+      gameZDimension = block['x_dimension'];
+      geometry = new THREE.BoxGeometry(gameXDimension,gameYDimension,gameZDimension);
+      material = new THREE.MeshStandardMaterial();
+      material.color.setRGB(block['rgb_block_red'],block['rgb_block_green'],block['rgb_block_blue']);
+      mesh = new THREE.Mesh(geometry,material);
+      mesh.position.x = gameXLocation;
+      mesh.position.y = gameYLocation;
+      mesh.position.z = gameZLocation;
+      mesh.name = blockName;
+      mesh.userData.blockType = blockType;
+      mesh.userData.highlightable = highlightable;
+      scene.add(mesh);
+      if (block["draw_lines"] == 1){
+        edges = new THREE.EdgesGeometry( geometry );
+        material = new THREE.LineBasicMaterial();
+        material.color.setRGB(block['rgb_line_red'],block['rgb_line_green'],block['rgb_line_blue']);
+        line = new THREE.LineSegments(edges, material);
+        mesh.add(line);
+      }
+    });
+  }
+  /**
+   * @function onKeyDown
+   * @description associate actions with key presses
+   */
+  function onKeyDown(event){
+    switch (event.keyCode){
+      case 38: // up
+      case 87: // w
+        moveForward = true;
+        break;
+      case 37: // left
+      case 65: // a
+        moveLeft = true;
+        break;
+      case 40: // down
+      case 83: // s
+        moveBackward = true;
+        break;
+      case 39: // right
+      case 68: // d
+        moveRight = true;
+        break;
+      case 16: // left shift
+        moveDown = true;
+        break;
+      case 32: // space
+        moveUp = true;
+        break;
+      case 69: // e
+        speedBoost = true;
+        break;
+      case 80: // p
+        cameraPosRot();
+        break;
+    }
+  };
+  /**
+   * @function onKeyUp
+   * @description  associate actions with key releases
+   */
+   function onKeyUp(event){
+    switch(event.keyCode){
+      case 38: // up
+      case 87: // w
+        moveForward = false;
+        break;
+      case 37: // left
+      case 65: // a
+        moveLeft = false;
+        break;
+      case 40: // down
+      case 83: // s
+        moveBackward = false;
+        break;
+      case 39: // right
+      case 68: // d
+        moveRight = false;
+        break;
+      case 16: // left shift
+        moveDown = false;
+        break;
+      case 32: // space
+        moveUp = false;
+        break;
+      case 69: // e
+        speedBoost = false;
+        break;
+    }
+  }
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function cameraPosRot(){
+    var lower = document.getElementById("lower");
+    var camXPos = controls.getObject().position.x.toFixed(3);
+    var camYPos = controls.getObject().position.y.toFixed(3);
+    var camZPos = controls.getObject().position.z.toFixed(3);
+    var camXRot = camera.rotation.x.toFixed(3);
+    var camYRot = camera.rotation.y.toFixed(3);
+    var camZRot = camera.rotation.z.toFixed(3);
+    while (lower.firstChild) {
+      lower.removeChild(lower.lastChild);
+    }
+    lower.innerText = "Camera: [" + camXPos + ", " + camYPos + ", " + camZPos + ", " + camXRot + ", " + camYRot + ", " + camZRot + "]";
+  }
+  /**
+   * @function applyColor
+   * @description apply the colors in mountedColor to the 3d blocks
+   * @param {Array.<Object>} objectData - the 3d blocks
+   * @param {Object} mountedColor - the colors
+   */
+  function applyColor(inputData,inputColor){
+    var red = 1;
+    var green = 1;
+    var blue = 1;
+    var target;
+    Object.keys(inputData).forEach(function(blockName){
+      if (inputColor.hasOwnProperty(blockName)){
+        red = inputColor[blockName][0];
+        green = inputColor[blockName][1];
+        blue = inputColor[blockName][2];
+        target = scene.getObjectByName(blockName);
+        target.material.color.setRGB(red,green,blue);
+      }
+    })
+  }
+  /**
+   * @function generateRackFilter
+   * @description fill the environment dropdown
+   */
+  function generateRackFilter(){
+    var selectElement = document.getElementById('rackFilter');
+    var optionElement;
+    var rackEnvironmentList = [];
+    var design = {};
+    Object.keys(allData["racks"]).forEach(function(rackName){
+      if (rackEnvironmentList.indexOf(allData["racks"][rackName]['u_environment']) < 0){
+        rackEnvironmentList.push(allData["racks"][rackName]['u_environment']);
+      }
+    });
+    rackEnvironmentList.sort();
+    rackEnvironmentList.forEach(function(group){
+      optionElement = document.createElement('option');
+      optionElement.text = group;
+      optionElement.value = group;
+      selectElement.add(optionElement);
+    });
+  }
+  /**
+   * @function generateMountedFilter
+   * @description fill the support group dropdown
+   */
+  function generateMountedFilter(){
+    var selectElement = document.getElementById('mountedFilter');
+    var optionElement;
+    var supportGroupList = [];
+    var mounted = {};
+    Object.keys(allData["mounted"]).forEach(function(blockName){
+      mounted = allData["mounted"][blockName];
+      if (supportGroupList.indexOf(mounted['display']['support_group_name']) < 0){
+        supportGroupList.push(mounted['display']['support_group_name']);
+      }
+    });
+    supportGroupList.sort();
+    supportGroupList.forEach(function(group){
+      optionElement = document.createElement('option');
+      optionElement.text = group;
+      optionElement.value = group;
+      selectElement.add(optionElement);
+    });
+  }
+
+
+
+
+  /**
+   * @function rackDropDown
+   * @description triggers overlays when dropdowns are changed
+   */
+  function rackDropDown(){
+    var overlayValue = document.getElementById('rackOverlay').value;
+    if (overlayValue == 'default'){
+      overlayRackDefault();
+    }
+    if (overlayValue == 'rackCapacity'){
+      overlayRackCapacity();
+    }
+    if (overlayValue == 'rackPowerMaximum'){
+      overlayRackPower('maximum');
+    }
+    if (overlayValue == 'rackPowerAverage'){
+      overlayRackPower('average');
+    }
+  }
+  /**
+   * @function mountedDropDown
+   * @description triggers overlays when dropdowns are changed
+   */
+  function mountedDropDown(){
+    var overlayValue = document.getElementById('mountedOverlay').value;
+    if (overlayValue == 'default'){
+      overlayMountedDefault();
+    }
+    if (overlayValue == 'objectModelCategory'){
+      overlayObjectModelCategory();
+    }
+    if (overlayValue == 'objectModelEndOfLife'){
+      overlayObjectModelEndOfLife();
+    }
+    if (overlayValue == 'objectLastAudit'){
+      overlayObjectLastAudit();
+    }
+  }
+  /**
+   * @function overlayRackDefault
+   * @description all blocks drawn white except collisions, which are red
+   */
+  function overlayRackDefault(){
+    var color = [];
+    Object.keys(allData["racks"]).forEach(function(rackName){
+      rackColor[rackName] = [1,1,1];
+    });
+    applyColor(allData["racks"],rackColor);
+  }
+
+  /**
+   * @function overlayRackCapacity
+   * @description colors all objects in a rack to show that rack's capacity
+   */
+  function overlayRackCapacity(){
+    var rackEnvironmentValue = document.getElementById('rackFilter').value;
+    var color = [];
+    var rack = {};
+    Object.keys(allData["racks"]).forEach(function(rackName){
+      rack = allData["racks"][rackName];
+      color = [1,1,1]
+        if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rack["u_environment"]){
+          if (rack['display']["u_max_alloc"] > 0){
+            if (rack['display']["u_qty_alloc"] > 0){
+              color = spectrumGreenRed(rack['display']["u_qty_alloc"] / rack['display']["u_max_alloc"]);
+            } else {
+              color = spectrumGreenRed(0);
+            }
+          } else {
+            color = [0.8,0.8,0.8];
+          }
+        }
+      rackColor[rackName] = color;
+    });
+    applyColor(allData["racks"],rackColor);
+  }
+  /**
+   * @function overlayRackPower
+   * @description pulls power data from the server and triggers visualisation
+   * @param {string} visualisationType - either average or maximum
+   */
+  function overlayRackPower(visualisationType) {
+    if (Object.keys(powerIqAverage).length > 0) {
+      powerRender(rackData,visualisationType,powerIqMax,powerIqAverage,roomMaxPower);
+    } else {
+      serverLink.data.roomName = roomName;
+      serverLink.data.getPower = true;
+      serverLink.server.update().then(function (d) {
+        serverLink.data.getPower = false;
+        powerIqMax = serverLink.data.powerIqMax;
+        powerIqAverage = serverLink.data.powerIqAverage;
+        roomMaxPower = serverLink.data.roomMaxPower;
+        powerRender(rackData,visualisationType,powerIqMax,powerIqAverage,roomMaxPower);
+      });
+    }
+  }
+  /**
+   * @function powerRender
+   * @description colors all objects in a rack according to the racks power usage
+   * @param {Array.<Object>} rackData - data about the racks
+   * @param {Object} powerData - the power data
+   * @param {string} visualisationType - either average or maximum
+   */
+  function powerRender(rackData,visualisationType,powerIqMax,powerIqAverage,roomMaxPower){
+    var rackEnvironmentValue = document.getElementById('rackFilter').value;
+    var color = [];
+    var rack = {};
+    Object.keys(allData["racks"]).forEach(function(rackName){
+      rack = allData["racks"][rackName];
+      color = [1,1,1]
+      if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rack["u_environment"]){
+        if (rack["u_rack_state"] == "Data missing"){
+          color = powerWithoutDesign(rack,visualisationType,powerIqMax,powerIqAverage,roomMaxPower);
+        } else {
+          color = powerWithDesign(rack,visualisationType,powerIqMax,powerIqAverage,roomMaxPower);
+        }
+      }
+      rackColor[rack['name']] = color;
+    });
+    applyColorList(rackData,rackColor);
+  }
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function powerWithoutDesign(rack,visualisationType,powerIqMax,powerIqAverage,roomMaxPower){
+    var tempColor = [];
+    var color = [0,0,0];
+    if (powerData["racks"].hasOwnProperty(rack["name"])){
+      if (visualisationType == "average"){
+        tempColor = spectrumBluePink((powerIqAverage[rack["name"]]/1000) / roomMaxPower);
+        color = [tempColor[0],tempColor[1],tempColor[2],"Rack has no design data, only power actuals"]
+      } else {
+        // power maximum. red/green
+        tempColor = spectrumBluePink((powerIqMax[rack["name"]]/1000) / roomMaxPower);
+        color = [tempColor[0],tempColor[1],tempColor[2],"Rack has no design data, only power actuals"]
+      }
+    } else {
+      color = [0.8,0.8,0.8,"Rack has no design data and no power data"]
+    }
+    return color;
+  }
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function powerWithDesign(rack,visualisationType,powerIqMax,powerIqAverage,roomMaxPower){
+    var color = [0,0,0];
+    if (rack["u_allocated_kw"] == 0){
+      color = powerUnallocated(rack,visualisationType,powerIqMax,powerIqAverage,roomMaxPower);
+    } else {
+      color = powerAllocated(rack,visualisationType,powerIqMax,powerIqAverage,roomMaxPower);
+    }
+    return color;
+  }
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function powerUnallocated(rack,visualisationType,powerIqMax,powerIqAverage,roomMaxPower){
+    var color = [0,0,0];
+    color = [0.8,0.8,0.8,"Rack is unallocated"];
+    if (powerIqMax.hasOwnProperty(rack["name"]) || powerIqAverage.hasOwnProperty(rack["name"])){
+      if (powerIqMax[rack["name"]] > 0 || powerIqAverage[rack["name"]] > 0){
+        color = [1,0,0,"Rack is unallocated, but is using power anyway"]
+      }
+    }
+    return color;
+  }
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function powerAllocated(rack,visualisationType,powerIqMax,powerIqAverage,roomMaxPower){
+    var tempColor = [];
+    var color = [0,0,0];
+    if (visualisationType == "average"){
+      if (powerIqAverage.hasOwnProperty(rack["name"])){
+        tempColor = spectrumGreenRed((powerIqAverage[rack["name"]]/1000) / rack["u_allocated_kw"]);
+        color = [tempColor[0],tempColor[1],tempColor[2],"Rack has design data and power actuals"]
+      } else {
+        color = [0.8,0.8,0.8,"Rack has design data, but no power data"]
+      }
+    }
+    if (visualisationType == "maximum"){
+      if (powerIqMax.hasOwnProperty(rack["name"])){
+        tempColor = spectrumGreenRed((powerIqMax[rack["name"]]/1000) / rack["u_allocated_kw"]);
+        color = [tempColor[0],tempColor[1],tempColor[2],"Rack has design data and power actuals"]
+      } else {
+        color = [0.8,0.8,0.8,"Rack has design data, but no power data"]
+      }
+    }
+    return color;
+  }
+  /**
+   * @function overlayDefault
+   * @description all blocks drawn white except collisions, which are red
+   */
+  function overlayMountedDefault(){
+    var color = [];
+    var mounted = {};
+    Object.keys(allData["mounted"]).forEach(function(blockName){
+      mounted = allData["mounted"][blockName];
+      color = [1,1,1];
+      if (mounted['display']['collision']){
+        color = [1, 0, 0];
+      }
+      mountedColor[blockName] = color;
+    })
+    applyColor(allData["mounted"],mountedColor);
+  }
+  /**
+   * @function overlayObjectModelCategory
+   * @description colors objects according to their model category
+   */
+  function overlayObjectModelCategory(){
+    var supportGroupValue = document.getElementById('mountedFilter').value;
+    var color = [];
+    // hue 40 sat 40 val 100/60
+    var colorStorage = [1.0, 0.867, 0.6];
+    // hue 120 sat 40 val 100/60
+    var colorNetwork = [0.6, 1.0, 0.6];
+    // hue 200 sat 40 val 100/60
+    var colorServer = [0.6, 0.867, 1.0];
+    // hue 280 sat 40 val 100/60
+    var colorOther = [0.867, 0.6, 1.0];
+    var colorChart = {
+      "IP Firewall": colorNetwork,
+      "IP Router": colorNetwork,
+      "IP Switch": colorNetwork,
+      "Router": colorNetwork,
+      "Network Gear": colorNetwork,
+      "Out of Band Device": colorNetwork,
+      "Linux Server": colorServer,
+      "Server": colorServer,
+      "Server Chassis": colorServer,
+      "Windows Server": colorServer,
+      "Storage Device": colorStorage,
+      "Storage Server": colorStorage,
+      "Storage Shelf": colorStorage,
+      "UPS": colorOther,
+      "PDU": colorOther
+    }
+    var mounted = {};
+    Object.keys(allData["mounted"]).forEach(function(blockName){
+      mounted = allData["mounted"][blockName];
+      color = [1,1,1];
+      if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
+        if (mounted['display']['model_category_name'] in colorChart){
+          color = colorChart[mounted['display']['model_category_name']]
+        }
+        if (!mounted['data']['ci_name']){
+          color = [1, 0.5, 0]
+        }
+        if (mounted['display']['collision']){
+          color = [1, 0, 0]
+        }
+      }
+      mountedColor[blockName] = color;
+    })
+    applyColor(allData["mounted"],mountedColor);
+  }
+  /**
+   * @function overlayObjectModelEndOfLife
+   * @description any models that are end of life are shown as red
+   */
+  function overlayObjectModelEndOfLife(){
+    var supportGroupValue = document.getElementById('mountedFilter').value;
+    var color = [];
+    rackData.forEach(function(rack){
+      mountedColor[rack["name"]] = [1,1,1];
+    });
+    Object.keys(allData["mounted"]).forEach(function(blockName){
+      block = allData["mounted"][blockName];
+      color = [1,1,1];
+      if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
+        if (block['model_u_end_of_life'] == '1'){
+          color = [1, 0, 0];
+        }
+      }
+      mountedColor[blockName] = color;
+    })
+    applyColor(allData["mounted"],mountedColor);
+  }
+  /**
+   * @function overlayObjectLastAudit
+   * @description colors objects in a green to red spectrum by the date of their last audit
+   */
+  function overlayObjectLastAudit(){
+    var supportGroupValue = document.getElementById('mountedFilter').value;
+    var color = [];
+    var now = Date.now();
+    var lastAudit = 0
+    // 2 yeasr * 365 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds;
+    var milliseconds = 63072000000;
+    rackData.forEach(function(rack){
+      mountedColor[rack["name"]] = [1,1,1];
+    });
+    Object.keys(allData["mounted"]).forEach(function(blockName){
+      block = allData["mounted"][blockName];
+      color = [1,1,1];
+      if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
+        if (block['u_last_audit_date']){
+          lastAudit = Date.parse(block['u_last_audit_date']);
+          color = spectrumGreenRed((now - lastAudit) / milliseconds);
+        } else {
+          color = spectrumGreenRed(1);
+        }
+      }
+      if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
+        if (block['model_u_end_of_life'] == '1'){
+          color = [1, 0, 0];
+        }
+      }
+      mountedColor[blockName] = color;
+    })
+    applyColor(allData["mounted"],mountedColor);
+  }
+  /**
+   * @function rendererResize
+   * @description resizes the renderer when the page is resized
+   */
+  function rendererResize(){
+    var canvasWidth = window.innerWidth - 16;
+    var canvasHeight = window.innerHeight - 16;
+    var topHeight = 70;
+    var lowerHeight = 52;
+    var centerHeight = canvasHeight - topHeight - lowerHeight;
+    // top
+    document.getElementById("top").style.position = 'absolute';
+    document.getElementById("top").style.left = "0px";
+    document.getElementById("top").style.top = "0px";
+    document.getElementById("top").style.width = canvasWidth + "px";
+    document.getElementById("top").style.height = topHeight + "px";
+    // center divs
+    document.getElementById("my_canvas").style.position = 'absolute';
+    document.getElementById("my_canvas").style.left = "0px";
+    document.getElementById("my_canvas").style.top = topHeight + "px";
+    document.getElementById("my_canvas").style.width = canvasWidth + "px";
+    document.getElementById("my_canvas").style.height = centerHeight + "px";
+
+    document.getElementById("ghost").style.position = 'absolute';
+    document.getElementById("ghost").style.left = "0px";
+    document.getElementById("ghost").style.top = topHeight + "px";
+    document.getElementById("ghost").style.width = canvasWidth + "px";
+    document.getElementById("ghost").style.height = centerHeight + "px";
+    // lower div
+    document.getElementById("lower").style.position = 'absolute';
+    document.getElementById("lower").style.left = "0px";
+    document.getElementById("lower").style.top = topHeight + centerHeight + "px";
+    document.getElementById("lower").style.width = canvasWidth + "px";
+    document.getElementById("lower").style.height = lowerHeight + "px";
+    document.getElementById("lower").style.overflow='auto';
+    document.getElementById("lower").style.border = "#CCCCCC 1px solid";
+    if (camera){
+      camera.aspect = canvasWidth / centerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize( canvasWidth, centerHeight );
+    }
+  }
+  /**
+   * @function spectrumGreenRed
+   * @description take a number and returns color data from green to red
+   * @param {number} decimal - the number to be converted into color
+   */
+  function spectrumGreenRed(decimal) {
+    var saturation = 0.3;
+    var red;
+    var green;
+    var blue;
+    // green to yellow
+    if (decimal < 0.5) {
+      red = (1 - saturation) + (decimal / 0.5 * saturation);
+      green = 1;
+      blue = (1 - saturation);
+    }
+    // yellow to red
+    if (decimal >= 0.5) {
+      red = 1;
+      green = (1 - saturation) + (saturation - ((decimal - 0.5) / 0.5) * saturation);
+      blue = (1 - saturation);
+    }
+    // max or over, hard red
+    if (decimal >= 1.0) {
+      red = 1;
+      green = 0;
+      blue = 0;
+    }
+    return [red,green,blue];
+  }
+  /**
+   * @function spectrumBluePink
+   * @description take a number and returns color data from blue to pink
+   * @param {number} decimal - the number to be converted into color
+   */
+  function spectrumBluePink(decimal) {
+    var saturation = 0.3;
+    var red;
+    var green;
+    var blue;
+    if (decimal < 0.0) {
+      decimal = 0.0;
+    }
+    red = (1 - saturation) + (decimal * saturation);
+    green = (1 - saturation);
+    blue = 1;
+    return [red,green,blue];
+  }
+  /**
+   * @function exportScene
+   * @description downloads json containing anonymous 3d data and color of blocks that are not rack mounted objects
+   */
+  function exportScene(){
+    var jsonData;
+    var filename;
+    var encodedData;
+    var download;
+    var outputData = [];
+    Object.keys(mountedData).forEach(function(blockName){
+      block = mountedData[blockName];
+      outputData.push({
+        "name": "alm_hardware_" + block["sys_id"],
+        "cmdb_ci_sys_id": block["ci_sys_id"],
+        "type": "mounted",
+        "u_x_min": block['u_x_min'],
+        "u_x_max": block['u_x_max'],
+        "u_y_min": block['u_y_min'],
+        "u_y_max": block['u_y_max'],
+        "u_z_min": block['u_z_min'],
+        "u_z_max": block['u_z_max'],
+        "u_red": mountedColor[blockName][0],
+        "u_green": mountedColor[blockName][1],
+        "u_blue": mountedColor[blockName][2]
+      })
+    });
+    rackData.forEach(function(rack){
+      outputData.push({
+        "name": "cmdb_ci_rack_" + rack["sys_id"],
+        "type": "rack",
+        "u_x_min": rack['u_x_min'],
+        "u_x_max": rack['u_x_max'],
+        "u_y_min": rack['u_y_min'],
+        "u_y_max": rack['u_y_max'],
+        "u_z_min": rack['u_z_min'],
+        "u_z_max": rack['u_z_max'],
+        "u_red": rack['u_red'],
+        "u_green": rack['u_green'],
+        "u_blue": rack['u_blue']
+      })
+    });
+    sceneryData.forEach(function(scene){
+      outputData.push({
+        "name": "u_dcse_vr_scene_" + scene["sys_id"],
+        "type": "scene",
+        "u_x_min": scene['u_x_min'],
+        "u_x_max": scene['u_x_max'],
+        "u_y_min": scene['u_y_min'],
+        "u_y_max": scene['u_y_max'],
+        "u_z_min": scene['u_z_min'],
+        "u_z_max": scene['u_z_max'],
+        "u_red": scene['u_red'],
+        "u_green": scene['u_green'],
+        "u_blue": scene['u_blue']
+      })
+    });
+    jsonData = JSON.stringify(outputData, null, 2);
+    filename = roomName + '.json';
+    encodedData = 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonData);
+    download = document.createElement('a');
+    download.setAttribute('href', encodedData );
+    download.setAttribute('download', filename);
+    document.body.appendChild(download);
+    download.click();
+    document.body.removeChild(download);
+  }
+  /**
+   * @function animate
+   * @description the animation loop
+   */
+  function animate() {
+    var blue;
+    var closest;
+    var closestDistance = -1;
+    var green;
+    var intersects;
+    var red;
+    var targetDarkness = 0.6;
+    requestAnimationFrame( animate );
+    if ( controlsEnabled ) {
+      var cameraPostion = new THREE.Vector3();
+      var cameraDirection = new THREE.Vector3();
+      camera.getWorldPosition(cameraPostion);
+      camera.getWorldDirection(cameraDirection);
+      raycaster.set( cameraPostion, cameraDirection );
+      var intersects = raycaster.intersectObjects(scene.children);
+      if (intersects.length > 0){
+        for ( var i = 0; i < intersects.length; i++ ) {
+          if (intersects[i].object.type == 'Mesh'){
+            if (closestDistance == -1){
+              closestDistance = intersects[i].distance;
+              closest = intersects[i];
+            } else {
+              if (intersects[i].distance < closestDistance){
+                closestDistance = intersects[i].distance;
+                closest = intersects[i];
+              }
+            }
+          }
+        }
+      }
+      // highlighting
+      if (closestDistance != -1){
+        selectedCurrentName = closest.object.name
+        if (closest.object.userData.highlightable){
+          //current block is highlightable
+          red = mountedColor[selectedCurrentName][0] * targetDarkness;
+          green = mountedColor[selectedCurrentName][1] * targetDarkness;
+          blue = mountedColor[selectedCurrentName][2] * targetDarkness;
+          scene.getObjectByName(selectedCurrentName).material.color.setRGB(red, green, blue);
+          if (selectedPreviousName != selectedCurrentName){
+            if (selectedPreviousName){
+              red = mountedColor[selectedPreviousName][0];
+              green = mountedColor[selectedPreviousName][1];
+              blue = mountedColor[selectedPreviousName][2];
+              scene.getObjectByName(selectedPreviousName).material.color.setRGB(red, green, blue);
+            }
+            selectedPreviousName = selectedCurrentName;
+          }
+
+        } else {
+          // current block is not highlightable
+          if (selectedPreviousName){
+            red = mountedColor[selectedPreviousName][0];
+            green = mountedColor[selectedPreviousName][1];
+            blue = mountedColor[selectedPreviousName][2];
+            scene.getObjectByName(selectedPreviousName).material.color.setRGB(red, green, blue);
+            selectedPreviousName = '';
+          }
+        }
+      } else {
+        // nothing found in line of sight
+        if (selectedPreviousName){
+          red = mountedColor[selectedPreviousName][0];
+          green = mountedColor[selectedPreviousName][1];
+          blue = mountedColor[selectedPreviousName][2];
+          scene.getObjectByName(selectedPreviousName).material.color.setRGB(red, green, blue);
+          selectedPreviousName = '';
+        }
+        selectedCurrentName = '';
+      }
+      var time = performance.now();
+      var delta = ( time - prevTime );
+      document.getElementById("fps").innerText = "FPS: " + Math.floor(1000 / delta);
+      if (speedBoost){
+        delta = delta * 5 / 1000;
+      } else {
+        delta = delta / 1000;
+      }
+      velocity.x = 0;
+      velocity.z = 0;
+      if ( moveForward ) velocity.z = -speed * delta;
+      if ( moveBackward ) velocity.z = speed * delta;
+      if ( moveLeft ) velocity.x = -speed * delta;
+      if ( moveRight ) velocity.x = speed * delta;
+      controls.getObject().translateX( velocity.x);
+      controls.getObject().translateZ( velocity.z);
+      if (moveDown){
+        controls.getObject().position.y -= (speed * delta);
+      }
+      if (moveUp){
+        controls.getObject().position.y += (speed * delta);
+      }
+      // minimum height
+      if (controls.getObject().position.y < 1.8){
+        controls.getObject().position.y = 1.8;
+      }
+      prevTime = time;
+    }
+    renderer.render( scene, camera );
+  }
+  /**
+   * @function inspectHardware
+   * @description opens a page on the selected object
+   */
+  function inspectHardware(event){
+    var blockData = {};
+    var anchor;
+    var linebreak;
+    var lower;
+    var preformatted;
+    var textNode;
+    lower = document.getElementById("lower");
+    while (lower.firstChild) {
+      lower.removeChild(lower.lastChild);
+    }
+    if (selectedCurrentName){
+      selectedBlock = scene.getObjectByName(selectedCurrentName);
+      if (selectedBlock.userData.blockType == "mounted"){
+        blockData = allData["mounted"][selectedCurrentName];
+        anchor = document.createElement('a');
+        anchor.setAttribute('href',"/nav_to.do?uri=%2Falm_hardware.do%3Fsys_id%3D" + blockData["data"]["sys_id"]);
+        anchor.innerText = "ServiceNow Link";
+        lower.appendChild(anchor);
+        preformatted = document.createElement("PRE");
+        linebreak = document.createElement("br");
+        textNode = document.createTextNode("Name: " + blockData["data"]["ci_name"] +"\n");
+        preformatted.appendChild(textNode);
+        textNode = document.createTextNode(JSON.stringify(blockData["display"], null, 2));
+        preformatted.appendChild(textNode);
+        lower.appendChild(preformatted);
+      }
+      if (selectedBlock.userData.blockType == "rack"){
+        blockData = allData["racks"][selectedCurrentName];
+        anchor = document.createElement('a');
+        anchor.setAttribute('href',"/nav_to.do?uri=%2Fsp%3Fid%3Ddcscapeng_rackview%26rackSysid%3D" + blockData["data"]["sys_id"]);
+        anchor.innerText = "Rack Visualisation Link";
+        lower.appendChild(anchor);
+        preformatted = document.createElement("PRE");
+        linebreak = document.createElement("br");
+        textNode = document.createTextNode("Rack name: " + selectedCurrentName +"\n");
+        preformatted.appendChild(textNode);
+        textNode = document.createTextNode(JSON.stringify(blockData["display"], null, 2));
+        preformatted.appendChild(textNode);
+        lower.appendChild(preformatted);
+      }
+      if (selectedBlock.userData.blockType == "scene"){
+        blockData = allData["blocks"]["scenery_data"][selectedCurrentName];
+        anchor = document.createElement('a');
+        anchor.setAttribute('href',"/nav_to.do?uri=%2Fu_dcse_vr_scene.do%3Fsys_id%3D" + blockData["config"]["sysid"]);
+        anchor.innerText = "Scenery";
+        lower.appendChild(anchor);
+      }
+    } else {
+      lower.innerHTML = "Room: " + allData["room"]["room_name"];
+    }
+  }
+
+  function allDataFake(){
+    var allData = {};
+    var rowMax = 6;
+    var rackMax = 20;
+    var roomXDimension = 8 + (rackMax * 2);
+    var roomYDimension = 8 + (rowMax * 4);
+    allData["room"] = {}
+    allData["room"]["room_name"] = "roomName";
+    allData["camera"] = {
+        "camera_position_x": -8.0,
+        "camera_position_y": 22.0,
+        "camera_position_z": -8.0,
+        "camera_rotation_x": -2.390,
+        "camera_rotation_y": -0.520,
+        "camera_rotation_z": -2.707
+    };
+    allData["scenery"] = fakeScenery(roomXDimension,roomYDimension);
+    allData["racks"] = fakeRacks(rowMax,rackMax);
+    allData["mounted"] = fakeMounted(allData["racks"]);
+   return allData;
+  }
+
+  function fakeRacks(rowMax,rackMax){
+    var facing = 0;
+    var rackCount = 0;
+    var rackData = {};
+    var rackName;
+    var xloop;
+    var yloop;
+    var zloop;
+    for (yloop = 0; yloop < rowMax; yloop++){
+      for (xloop = 0; xloop < rackMax; xloop++){
+        if (yloop % 2 == 0){
+          facing = 1;
+        } else {
+          facing = 3;
+        }
+        rackName = "rack_" + xloop + "_" + yloop;
+        rackData[rackName] = {
+          "block": {
+            "draw_lines": 1,
+            "rgb_block_red": 1,
+            "rgb_block_green": 1,
+            "rgb_block_blue": 1,
+            "rgb_line_red": 0.5,
+            "rgb_line_green": 0.5,
+            "rgb_line_blue": 0.5,
+            "x_location": 6 + (xloop * 2),
+            "y_location": 6 + (yloop * 4),
+            "z_location": 1.5,
+            "x_dimension": 1.8,
+            "y_dimension": 1.8,
+            "z_dimension": 3
+          },
+          "data" : {
+            "id": rackCount,
+            "rack_units": 50,
+            "facing": facing
+          },
+          "display" : {
+            "u_rack_state": "Landed",
+            "u_max_alloc": 10,
+            "u_qty_alloc": xloop % 10,
+            "u_environment": randomEnvironment(),
+            "u_allocated_kw": 10,
+            "u_equip_design_kw": 10,
+            "u_facil_design_kw": 10,
+            "u_equip_kw_consume_design": 10
+          }
+        }
+        rackCount++;
+      }
+    }
+    return rackData;
+  }
+
+  function fakeScenery(roomXDimension,roomYDimension){
+    var scenery = {};
+    scenery["floor"] = {
+      "block": {
+        "draw_lines": 0,
+        "rgb_block_red": 0.8,
+        "rgb_block_green": 0.8,
+        "rgb_block_blue": 0.8,
+        "rgb_line_red": 0.0,
+        "rgb_line_green": 0.0,
+        "rgb_line_blue": 0.0,
+        "x_location": roomXDimension * 0.5,
+        "y_location": roomYDimension * 0.5,
+        "z_location": -0.1,
+        "x_dimension": roomXDimension,
+        "y_dimension": roomYDimension,
+        "z_dimension": 0.2
+      },
+      "data" : {
+        'sys_id': 0,
+        'tag': "building"
+      }
+    }
+    scenery["x_min_wall"] = {
+      "block": {
+        "draw_lines": 0,
+        "rgb_block_red": 0.85,
+        "rgb_block_green": 0.85,
+        "rgb_block_blue": 0.85,
+        "rgb_line_red": 0.0,
+        "rgb_line_green": 0.0,
+        "rgb_line_blue": 0.0,
+        "x_location": -0.1,
+        "y_location": roomYDimension * 0.5,
+        "z_location": 1.5,
+        "x_dimension": 0.2,
+        "y_dimension": roomYDimension,
+        "z_dimension": 3
+      },
+      "data" : {
+        'sys_id': 0,
+        'tag': "building"
+      }
+    }
+    scenery["x_max_wall"] = {
+      "block": {
+        "draw_lines": 0,
+        "rgb_block_red": 0.85,
+        "rgb_block_green": 0.85,
+        "rgb_block_blue": 0.85,
+        "rgb_line_red": 0.0,
+        "rgb_line_green": 0.0,
+        "rgb_line_blue": 0.0,
+        "x_location": roomXDimension + 0.1,
+        "y_location": roomYDimension * 0.5,
+        "z_location": 1.5,
+        "x_dimension": 0.2,
+        "y_dimension": roomYDimension,
+        "z_dimension": 3
+      },
+      "data" : {
+        'sys_id': 0,
+        'tag': "building"
+      }
+    }
+    scenery["y_min_wall"] = {
+      "block": {
+        "draw_lines": 0,
+        "rgb_block_red": 0.75,
+        "rgb_block_green": 0.75,
+        "rgb_block_blue": 0.75,
+        "rgb_line_red": 0.0,
+        "rgb_line_green": 0.0,
+        "rgb_line_blue": 0.0,
+        "x_location": roomXDimension * 0.5,
+        "y_location": -0.1,
+        "z_location": 1.5,
+        "x_dimension": roomXDimension,
+        "y_dimension": 0.2,
+        "z_dimension": 3
+      },
+      "data" : {
+        'sys_id': 0,
+        'tag': "building"
+      }
+    }
+    scenery["y_max_wall"] = {
+      "block": {
+        "draw_lines": 0,
+        "rgb_block_red": 0.75,
+        "rgb_block_green": 0.75,
+        "rgb_block_blue": 0.75,
+        "rgb_line_red": 0.0,
+        "rgb_line_green": 0.0,
+        "rgb_line_blue": 0.0,
+        "x_location": roomXDimension * 0.5,
+        "y_location": roomYDimension + 0.1,
+        "z_location": 1.5,
+        "x_dimension": roomXDimension,
+        "y_dimension": 0.2,
+        "z_dimension": 3
+      },
+      "data" : {
+        'sys_id': 0,
+        'tag': "building"
+      }
+    }
+    return scenery;
+  }
+  
+  function fakeMounted(rackData){
+    var xLocation = 0;
+    var yLocation = 0;
+    var zLocation = 0;
+    var xDimension = 0;
+    var yDimension = 0;
+    var zDimension = 0;
+    var rack = {};
+    var zloop = 0;
+    var mountedName = "";
+    var mountedData = {};
+    var mountedCount = 0;
+    Object.keys(rackData).forEach(function(rackName){
+      rack = rackData[rackName];
+      if (rack["data"]["facing"] == 0){
+        xLocation = rack["block"]["x_location"] - (rack["block"]["x_dimension"] * 0.5) - 0.006;
+        yLocation = rack["block"]["y_location"];
+        xDimension = 0.01;
+        yDimension = rack["block"]["y_dimension"] * 0.9;
+      }
+      if (rack["data"]["facing"] == 1){
+        xLocation = rack["block"]["x_location"];
+        yLocation = rack["block"]["y_location"] + (rack["block"]["y_dimension"] * 0.5) + 0.006;
+        xDimension = rack["block"]["x_dimension"] * 0.9;
+        yDimension = 0.01;
+      }
+      if (rack["data"]["facing"] == 2){
+        xLocation = rack["block"]["x_location"] + (rack["block"]["x_dimension"] * 0.5) + 0.006;
+        yLocation = rack["block"]["y_location"];
+        xDimension = 0.01;
+        yDimension = rack["block"]["y_dimension"] * 0.9;
+      }
+      if (rack["data"]["facing"] == 3){
+        xLocation = rack["block"]["x_location"];
+        yLocation = rack["block"]["y_location"] - (rack["block"]["y_dimension"] * 0.5) - 0.006;
+        xDimension = rack["block"]["x_dimension"] * 0.9;
+        yDimension = 0.01;
+      }
+      for (zloop = 0; zloop < 10; zloop++){
+        zLocation = rack["block"]["z_location"] - (rack["block"]["z_dimension"] * 0.5)+ (zloop * 0.2) + 0.3;
+        zDimension = 0.19;
+        mountedName = rackName + "_" + zloop;
+        mountedData[mountedName] = {
+          "block": {
+            "draw_lines": 1,
+            "rgb_block_red": 1.0,
+            "rgb_block_green": 1.0,
+            "rgb_block_blue": 1.0,
+            "rgb_line_red": 0.5,
+            "rgb_line_green": 0.5,
+            "rgb_line_blue": 0.5,
+            "x_location": xLocation,
+            "y_location": yLocation,
+            "z_location": zLocation,
+            "x_dimension": xDimension,
+            "y_dimension": yDimension,
+            "z_dimension": zDimension
+          },
+          "data" : {
+            "ci_name": mountedName,
+            "ci_sys_id": mountedCount,
+            "sys_id": mountedCount
+          },
+          "display": {
+            "asset_tag": "fake",
+            "ci_u_cmdb_ci_status_name": "fake",
+            "ci_u_provision_date": "fake",
+            "collision": 0,
+            "model_category_name": "Server",
+            "model_u_end_of_life": 0,
+            "model_name": "fake",
+            "model_rack_units": 1,
+            "support_group_name": "them",
+            "support_group_manager_email": "fake@fake.com",
+            "sys_class_name": "fake",
+            "u_smdb_table": "fake",
+            "u_last_audit_date": "fake",
+            "serial_number": "fake"
+          }
+        }
+        mountedCount += 1;
+      }
+    })
+    return mountedData;
+  }
+
+
+
+/*
+
+    rackData.forEach(function(rack){
+      rackObject[rack["name"]] = {
+				"block": {
+          "draw_lines": 1,
+          "rgb_block_red": 1,
+          "rgb_block_green": 1,
+          "rgb_block_blue": 1,
+          "rgb_line_red": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_blue": 0.5,
+          "x_location": (rack["u_x_min"] + rack["u_x_max"]) * 0.5,
+          "y_location": (rack["u_y_min"] + rack["u_y_max"]) * 0.5,
+          "z_location": (rack["u_z_min"] + rack["u_z_max"]) * 0.5,
+          "x_dimension": rack["u_x_max"] - rack["u_x_min"],
+          "y_dimension": rack["u_y_max"] - rack["u_y_min"],
+          "z_dimension": rack["u_z_max"] - rack["u_z_min"]
+		},
+        "data" : {
+          "sys_id": rack["sys_id"],
+          "rack_units": rack["rack_units"],
+          "u_x_aligned": rack["u_x_aligned"],
+          "u_z_unit_start": rack["u_z_unit_start"]
+        },
+        "display" : {
+          "u_rack_state": rack["u_rack_state"],
+          "u_max_alloc": rack["u_max_alloc"],
+          "u_qty_alloc": rack["u_qty_alloc"],
+          "u_environment": rack["u_environment"],
+          "u_allocated_kw": rack["u_allocated_kw"],
+          "u_equip_design_kw": rack["u_equip_design_kw"],
+          "u_facil_design_kw": rack["u_facil_design_kw"],
+          "u_equip_kw_consume_design": rack["u_equip_kw_consume_design"]
+        }
+      }
+    })
+
+    // turn scene into object
+    var sceneObject = {}
+    sceneryData.forEach(function(scene){
+      sceneObject[scene["name"]] = {
+				"block": {
+          "draw_lines": scene["u_lines"],
+          "rgb_block_red": scene["u_red"],
+          "rgb_block_green": scene["u_red"],
+          "rgb_block_blue": scene["u_red"],
+          "rgb_line_red": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_blue": 0.5,
+          "x_location": (scene["u_x_min"] + scene["u_x_max"]) * 0.5,
+          "y_location": (scene["u_y_min"] + scene["u_y_max"]) * 0.5,
+          "z_location": (scene["u_z_min"] + scene["u_z_max"]) * 0.5,
+          "x_dimension": scene["u_x_max"] - scene["u_x_min"],
+          "y_dimension": scene["u_y_max"] - scene["u_y_min"],
+          "z_dimension": scene["u_z_max"] - scene["u_z_min"]
+        },
+        "data" : {
+          'sys_id': scene["sys_id"],
+          'tag': scene["u_tag"]
+        }
+      }
+    })
+    //update mountedData
+    var mountedObject = {};
+    var mountedTemp = {};
+    Object.keys(mountedData).forEach(function(mountedName){
+      mountedTemp = mountedData[mountedName];
+      mountedObject[mountedName] = {
+		"block": {
+          "draw_lines": mountedTemp["u_lines"],
+          "rgb_block_red": 1.0,
+          "rgb_block_green": 1.0,
+          "rgb_block_blue": 1.0,
+          "rgb_line_red": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_blue": 0.5,
+          "x_min": mountedTemp["u_x_min"],
+          "x_max": mountedTemp["u_x_max"],
+          "y_min": mountedTemp["u_y_min"],
+          "y_max": mountedTemp["u_y_max"],
+          "z_min": mountedTemp["u_z_min"],
+          "z_max": mountedTemp["u_z_max"],
+          "x_location": (mountedTemp["u_x_min"] + mountedTemp["u_x_max"]) * 0.5,
+          "y_location": (mountedTemp["u_y_min"] + mountedTemp["u_y_max"]) * 0.5,
+          "z_location": (mountedTemp["u_z_min"] + mountedTemp["u_z_max"]) * 0.5,
+          "x_dimension": mountedTemp["u_x_max"] - mountedTemp["u_x_min"],
+          "y_dimension": mountedTemp["u_y_max"] - mountedTemp["u_y_min"],
+          "z_dimension": mountedTemp["u_z_max"] - mountedTemp["u_z_min"]
+        },
+        "data" : {
+          "ci_name": mountedTemp["ci_name"],
+          "ci_sys_id": mountedTemp["ci_sys_id"],
+          "sys_id": mountedTemp["sys_id"]
+        },
+        "display": {
+          "asset_tag": mountedTemp["asset_tag"],
+          "ci_u_cmdb_ci_status_name": mountedTemp["ci_u_cmdb_ci_status_name"],
+          "ci_u_provision_date": mountedTemp["ci_u_provision_date"],
+          "collision": mountedTemp["collision"],
+          "model_category_name": mountedTemp["model_category_name"],
+          "model_u_end_of_life": mountedTemp["model_u_end_of_life"],
+          "model_name": mountedTemp["model_name"],
+          "model_rack_units": mountedTemp["model_rack_units"],
+          "support_group_manager_email": mountedTemp["support_group_manager_email"],
+          "sys_class_name": mountedTemp["sys_class_name"],
+          "u_smdb_table": mountedTemp["u_smdb_table"],
+          "u_last_audit_date": mountedTemp["u_last_audit_date"],
+          "serial_number": mountedTemp["serial_number"]
+        }
+      }
+    })
+    var allData = {}
+    allData["room"] = {}
+    allData["room"]["room_name"] = roomName;
+    allData["camera"] = cameraData;
+    allData["mounted"] = mountedObject;
+    allData["scenery"] = sceneObject;
+    allData["racks"] = rackObject;
+    data.allData = allData;
+		if (true){
+      data.roomName = roomName;
+      data.rackData = rackData;
+      data.mountedData = mountedData;
+      data.sceneryData = sceneryData;
+      data.cameraData = cameraData;
+    }
+    */
+
+  function randomEnvironment(){
+    var environmentList = ["alpha","bravo","charlie","delta","echo","foxtrot"];
+    var dice = Math.floor(Math.random() * 6);
+    return environmentList[dice];
+  }
+
+//}
+
+</script>
+</body>
+</html>
