@@ -30,19 +30,19 @@
         z-index: 9;
       }
       a:link {
-        color: black;
+        color: rgb(0, 10, 95);
         text-decoration: none;
       }
       a:visited {
-        color: black;
+        color: rgb(0, 10, 95);
         text-decoration: none;
       }
       a:hover {
-        color: black;
+        color: rgb(0, 10, 95);
         text-decoration: none;
       }
       a:active {
-        color: black;
+        color: rgb(0, 10, 95);
         text-decoration: none;
       }
     </style>
@@ -878,10 +878,10 @@ console.log(allData)
    * @description resizes the renderer when the page is resized
    */
   function rendererResize(){
-    var canvasWidth = window.innerWidth - 16;
-    var canvasHeight = window.innerHeight - 16;
-    var topHeight = 70;
-    var lowerHeight = 52;
+    var canvasWidth = window.innerWidth - 4;
+    var canvasHeight = window.innerHeight - 4;
+    var topHeight = 40;
+    var lowerHeight = 20;
     var centerHeight = canvasHeight - topHeight - lowerHeight;
     // top
     document.getElementById("top").style.position = 'absolute';
@@ -908,7 +908,7 @@ console.log(allData)
     document.getElementById("lower").style.width = canvasWidth + "px";
     document.getElementById("lower").style.height = lowerHeight + "px";
     document.getElementById("lower").style.overflow='auto';
-    document.getElementById("lower").style.border = "#CCCCCC 1px solid";
+    //document.getElementById("lower").style.border = "#CCCCCC 1px solid";
     if (camera){
       camera.aspect = canvasWidth / centerHeight;
       camera.updateProjectionMatrix();
@@ -1156,29 +1156,29 @@ console.log(allData)
         blockData = allData["mounted"][selectedCurrentName];
         anchor = document.createElement('a');
         anchor.setAttribute('href',"/nav_to.do?uri=%2Falm_hardware.do%3Fsys_id%3D" + blockData["data"]["sys_id"]);
-        anchor.innerText = "ServiceNow Link";
+        anchor.innerText = selectedCurrentName;
         lower.appendChild(anchor);
         preformatted = document.createElement("PRE");
-        linebreak = document.createElement("br");
-        textNode = document.createTextNode("Name: " + blockData["data"]["ci_name"] +"\n");
-        preformatted.appendChild(textNode);
-        textNode = document.createTextNode(JSON.stringify(blockData["display"], null, 2));
-        preformatted.appendChild(textNode);
-        lower.appendChild(preformatted);
+        //linebreak = document.createElement("br");
+        //textNode = document.createTextNode("Name: " + blockData["data"]["ci_name"] +"\n");
+        //preformatted.appendChild(textNode);
+        //textNode = document.createTextNode(JSON.stringify(blockData["display"], null, 2));
+        //preformatted.appendChild(textNode);
+        //lower.appendChild(preformatted);
       }
       if (selectedBlock.userData.blockType == "rack"){
         blockData = allData["racks"][selectedCurrentName];
         anchor = document.createElement('a');
         anchor.setAttribute('href',"/nav_to.do?uri=%2Fsp%3Fid%3Ddcscapeng_rackview%26rackSysid%3D" + blockData["data"]["sys_id"]);
-        anchor.innerText = "Rack Visualisation Link";
+        anchor.innerText = selectedCurrentName;
         lower.appendChild(anchor);
         preformatted = document.createElement("PRE");
-        linebreak = document.createElement("br");
-        textNode = document.createTextNode("Rack name: " + selectedCurrentName +"\n");
-        preformatted.appendChild(textNode);
-        textNode = document.createTextNode(JSON.stringify(blockData["display"], null, 2));
-        preformatted.appendChild(textNode);
-        lower.appendChild(preformatted);
+        //linebreak = document.createElement("br");
+        //textNode = document.createTextNode("Rack name: " + selectedCurrentName +"\n");
+        //preformatted.appendChild(textNode);
+        //textNode = document.createTextNode(JSON.stringify(blockData["display"], null, 2));
+        //preformatted.appendChild(textNode);
+        //lower.appendChild(preformatted);
       }
       if (selectedBlock.userData.blockType == "scene"){
         blockData = allData["blocks"]["scenery_data"][selectedCurrentName];
@@ -1424,7 +1424,7 @@ console.log(allData)
         unitCount = (zloop * 2);
         zDimension = (unitHeight * 2) -0.002;
         zLocation = zStart + (unitCount * unitHeight) + unitHeight;
-        mountedName = rackName + "_" + mountedCount;
+        mountedName = "server_" + mountedCount;
         mountedData[mountedName] = {
           "block": {
             "draw_lines": 1,
@@ -1469,7 +1469,7 @@ console.log(allData)
         unitCount = 21 + zloop;
         zDimension = unitHeight - 0.002;
         zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
-        mountedName = rackName + "_" + mountedCount;
+        mountedName = "network_" + mountedCount;
         mountedData[mountedName] = {
           "block": {
             "draw_lines": 1,
@@ -1514,7 +1514,7 @@ console.log(allData)
         unitCount = 25 + zloop * 4;
         zDimension = (unitHeight * 4) - 0.002;
         zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 2);
-        mountedName = rackName + "_" + mountedCount;
+        mountedName = "server_" + mountedCount;
         mountedData[mountedName] = {
           "block": {
             "draw_lines": 1,
