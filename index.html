@@ -58,8 +58,12 @@
         <select id="rackOverlay">
           <option value="default">Plain</option>
           <option value="rackCapacity">Capacity</option>
-          <option value="rackPowerMaximum" >Power Maximum</option>
-          <option value="rackPowerAverage" >Power Average</option>
+          <option value="PowerAverageConsume" >Power Average Consume</option>
+          <option value="PowerMaximumConsume" >Power Maximum Consume</option>
+          <option value="PowerAverageEqip" >Power Average Equip</option>
+          <option value="PowerMaximumEqip" >Power Maximum Equip</option>
+          <option value="PowerAverageFacility" >Power Average Facility</option>
+          <option value="PowerMaximumFacility" >Power Maximum Facility</option>
         </select>
         <select id="rackFilter">
           <option value="all">All</option>
@@ -514,11 +518,23 @@
     if (overlayValue == 'rackCapacity'){
       overlayRackCapacity();
     }
-    if (overlayValue == 'rackPowerMaximum'){
-      overlayRackPower('maximum');
+    if (overlayValue == 'PowerAverageConsume'){
+      overlayRackPower('average','consume');
     }
-    if (overlayValue == 'rackPowerAverage'){
-      overlayRackPower('average');
+    if (overlayValue == 'PowerMaximumConsume'){
+      overlayRackPower('maximum','consume');
+    }
+    if (overlayValue == 'PowerAverageEqip'){
+      overlayRackPower('average','equip');
+    }
+    if (overlayValue == 'PowerMaximumEqip'){
+      overlayRackPower('maximum','equip');
+    }
+    if (overlayValue == 'PowerAverageFacility'){
+      overlayRackPower('average','facility');
+    }
+    if (overlayValue == 'PowerMaximumFacility'){
+      overlayRackPower('maximum','facility');
     }
   }
   /**
@@ -597,16 +613,16 @@
    * @description pulls power data from the server and triggers visualisation
    * @param {string} visualisationType - either average or maximum
    */
-  function overlayRackPower(visualisationType) {
+  function overlayRackPower(averageOrMax,ratingType) {
     if (Object.keys(powerData["racks"]).length > 0) {
-      powerRender(allData,visualisationType,powerData);
+      powerRender(allData,powerData,averageOrMax,ratingType);
     } else {
       serverLink.data.roomName = roomName;
       serverLink.data.getPower = true;
       serverLink.server.update().then(function (d) {
         serverLink.data.getPower = false;
         powerData = serverLink.data.powerIqMax;
-        powerRender(allData,visualisationType,powerData);
+        powerRender(allData,powerData,averageOrMax,ratingType);
       });
     }
   }
@@ -617,21 +633,50 @@
    * @param {Object} powerData - the power data
    * @param {string} visualisationType - either average or maximum
    */
-  function powerRender(allData,visualisationType,powerData){
+  function powerRender(allData,powerData,averageOrMax,ratingType){
     var rackEnvironmentValue = document.getElementById('rackFilter').value;
     var color = [];
     var rack = {};
+    var powerUsage = 0;
+    var powerRated = 0;
+    var roomMaximum = powerData["room_maximum"];
     Object.keys(allData["racks"]).forEach(function(rackName){
-      color = [1,1,1]
-      if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rack["u_environment"]){
-        if (allData["racks"][rackName]["display"]["u_equip_design_kw"] == "no data"){
-          color = powerWithoutDesign(rackName,visualisationType,powerData);
+      // power usage
+      if (powerData["racks"].hasOwnProperty(rackName)){
+        if (averageOrMax == "average"){
+          powerUsage = powerData["racks"][rackName]["average"];
         } else {
-          color = powerWithDesign(rackName,visualisationType,powerData);
+          powerUsage = powerData["racks"][rackName]["maximum"];
+        }
+      } else {
+        powerUsage = "no data";
+      }
+      // power rating
+      if (allData["racks"][rackName]["display"].hasOwnProperty("u_equip_design_kw")){
+        if (ratingType == "equip"){
+          powerRated = allData["racks"][rackName]["display"]["u_equip_design_kw"]
+        }
+        if (ratingType == "facility"){
+          powerRated = allData["racks"][rackName]["display"]["u_facil_design_kw"]
+        }
+        if (ratingType == "consume"){
+          powerRated = allData["racks"][rackName]["display"]["u_equip_kw_consume_design"]
+        }
+      } else {
+        powerRated = "no data";
+      }
+      color = [1,1,1]
+      if (rackEnvironmentValue == 'all' || rackEnvironmentValue == allData["racks"][rackName]["display"]["u_environment"]){
+        if (powerRated == "no data"){
+          color = powerWithoutDesign(rackName,powerUsage,roomMaximum);
+        } else {
+          color = powerWithDesign(rackName,powerUsage,powerRated);
         }
       }
+      console.log(rackName + " " + averageOrMax + " " + powerUsage + " " + powerRated + " " + color)
       rackColor[rackName] = color;
     });
+    console.log()
     applyColor(allData["racks"],rackColor);
   }
   /**
@@ -644,45 +689,14 @@
    * @param {Array.<Object>} xxxxx - xxxxx
    * @return {string} xxxxx - xxxxx
    */
-  function powerWithoutDesign(rackName,visualisationType,powerData){
+  function powerWithoutDesign(rackName,powerUsage,roomMaximum){
     var tempColor = [];
     var color = [0,0,0];
-    if (powerData["racks"].hasOwnProperty(rackName)){
-      if (visualisationType == "average"){
-        tempColor = spectrumBluePink(powerData["racks"][rackName]["average"] / powerData["room_maximum"]);
-        color = [tempColor[0],tempColor[1],tempColor[2],"Rack has no design data, only power actuals"]
-        console.log(rackName)
-        console.log("Rack has no design data, only power actuals")
-      } else {
-        // power maximum. red/green
-        tempColor = spectrumBluePink(powerData["racks"][rackName]["maximum"] / powerData["room_maximum"]);
-        color = [tempColor[0],tempColor[1],tempColor[2],"Rack has no design data, only power actuals"];
-        console.log(rackName)
-        console.log("Rack has no design data, only power actuals")
-      }
-    } else {
+    if (powerUsage == "no data"){
       color = [0.8,0.8,0.8,"Rack has no design data and no power data"];
-        console.log(rackName)
-        console.log("Rack has no design data and no power data")
-    }
-    return color;
-  }
-  /**
-   * @function xxxxxx
-   * @description xxxxxxxxx
-   * @param {string} xxxxx - xxxxx
-   * @param {boolean} xxxxx - xxxxx
-   * @param {number} xxxxx - xxxxx
-   * @param {Object} xxxxx - xxxxx
-   * @param {Array.<Object>} xxxxx - xxxxx
-   * @return {string} xxxxx - xxxxx
-   */
-  function powerWithDesign(rackName,visualisationType,powerData){
-    var color = [0,0,0];
-    if (allData["racks"][rackName]["display"]["u_allocated_kw"] == 0){
-      color = powerUnallocated(rackName,visualisationType,powerData);
     } else {
-      color = powerAllocated(rackName,visualisationType,powerData);
+      tempColor = spectrumBluePink(powerUsage / roomMaximum);
+      color = [tempColor[0],tempColor[1],tempColor[2],"Rack has no design data, only power actuals"]
     }
     return color;
   }
@@ -696,15 +710,30 @@
    * @param {Array.<Object>} xxxxx - xxxxx
    * @return {string} xxxxx - xxxxx
    */
-  function powerUnallocated(rackName,visualisationType,powerData){
+  function powerWithDesign(rackName,powerUsage,powerRated){
+    var color = [0,0,0];
+    if (powerRated == 0){
+      color = powerUnallocated(rackName,powerUsage,powerRated);
+    } else {
+      color = powerAllocated(rackName,powerUsage,powerRated);
+    }
+    return color;
+  }
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function powerUnallocated(rackName,powerUsage,powerRated){
     var color = [0,0,0];
     color = [0.8,0.8,0.8,"Rack is unallocated"];
-    if (powerData["racks"].hasOwnProperty(rackName)){
-      if (powerData["racks"][rackName]["average"] > 0 || powerData["racks"][rackName]["maximum"] > 0){
-        color = [1,0,0,"Rack is unallocated, but is using power anyway"]
-        console.log(rack["name"])
-        console.log("Rack is unallocated, but is using power anyway")
-      }
+    if (powerUsage != "no data" && powerUsage > 0){
+      color = [1,0,0,"Rack is unallocated, but is using power anyway"];
     }
     return color;
   }
@@ -718,32 +747,14 @@
    * @param {Array.<Object>} xxxxx - xxxxx
    * @return {string} xxxxx - xxxxx
    */
-  function powerAllocated(rackName,visualisationType,powerData){
+  function powerAllocated(rackName,powerUsage,powerRated){
     var tempColor = [];
     var color = [0,0,0];
-    if (visualisationType == "average"){
-      if (powerData["racks"].hasOwnProperty(rackName)){
-        tempColor = spectrumGreenRed(powerData["racks"][rackName]["average"] / allData["racks"][rackName]["display"]["u_allocated_kw"]);
-        color = [tempColor[0],tempColor[1],tempColor[2],"Rack has design data and power actuals"]
-        console.log(rackName)
-        console.log("Rack has design data and power actuals")
-      } else {
-        color = [0.8,0.8,0.8,"Rack has design data, but no power data"]
-        console.log(rackName)
-        console.log("Rack has design data, but no power data")
-      }
-    }
-    if (visualisationType == "maximum"){
-      if (powerData["racks"].hasOwnProperty(rackName)){
-        tempColor = spectrumGreenRed(powerData["racks"][rackName]["maximum"] / allData["racks"][rackName]["display"]["u_allocated_kw"]);
-        color = [tempColor[0],tempColor[1],tempColor[2],"Rack has design data and power actuals"]
-        console.log(rackName)
-        console.log("Rack has design data and power actuals")
-      } else {
-        color = [0.8,0.8,0.8,"Rack has design data, but no power data"]
-        console.log(rackName)
-        console.log("Rack has design data, but no power data")
-      }
+    if (powerUsage != "no data"){
+      tempColor = spectrumGreenRed(powerUsage / powerRated);
+      color = [tempColor[0],tempColor[1],tempColor[2],"Rack has design data and power actuals"];
+    } else {
+      color = [0.8,0.8,0.8,"Rack has design data, but no power data"]
     }
     return color;
   }
@@ -1199,101 +1210,17 @@
     allData["room"] = {}
     allData["room"]["room_name"] = "roomName";
     allData["camera"] = {
-        "camera_position_x": 4.306,
-        "camera_position_y": 1.990,
-        "camera_position_z": 0.845,
-        "camera_rotation_x": -3.024,
-        "camera_rotation_y": -0.522,
-        "camera_rotation_z": -3.083
-    };
+        "camera_position_x": 5.672,
+        "camera_position_y": 14.360,
+        "camera_position_z": 2.274,
+        "camera_rotation_x": -2.065,
+        "camera_rotation_y": -0.224,
+        "camera_rotation_z": -2.752
+    }; [5.672, 14.360, 2.274, -2.065, -0.224, -2.752]
     allData["scenery"] = fakeScenery(roomXDimension,roomYDimension);
     allData["racks"] = fakeRacks(rowMax,rackMax);
     allData["mounted"] = fakeMounted(allData["racks"]);
    return allData;
-  }
-
-  function fakeRacks(rowMax,rackMax){
-    var facing = 0;
-    var rackCount = 0;
-    var rackData = {};
-    var rackName;
-    var xloop;
-    var yloop;
-    var zloop;
-    var display = {}
-    var dice = 0;
-    for (yloop = 0; yloop < rowMax; yloop++){
-      for (xloop = 0; xloop < rackMax; xloop++){
-        if (yloop % 2 == 0){
-          facing = 1;
-        } else {
-          facing = 3;
-        }
-        rackName = "rack_" + xloop + "_" + yloop;
-        dice = Math.random();
-        if (dice < 0.6){
-          display = {
-            "u_rack_state": "Landed",
-            "u_max_alloc": 10,
-            "u_qty_alloc": xloop % 10,
-            "u_environment": randomEnvironment(),
-            "u_allocated_kw": 10,
-            "u_equip_design_kw": 10,
-            "u_facil_design_kw": 11,
-            "u_equip_kw_consume_design": 12
-          }
-        }
-        if (dice >= 0.6 && dice < 0.8){
-          display = {
-            "u_rack_state": "Landed",
-            "u_max_alloc": 10,
-            "u_qty_alloc": xloop % 10,
-            "u_environment": randomEnvironment(),
-            "u_allocated_kw": 0,
-            "u_equip_design_kw": 10,
-            "u_facil_design_kw": 11,
-            "u_equip_kw_consume_design": 12
-          }
-        }
-        if (dice >= 0.6 && dice < 0.8){
-          display = {
-            "u_rack_state": "no data",
-            "u_max_alloc": "no data",
-            "u_qty_alloc": "no data",
-            "u_environment": "no data",
-            "u_allocated_kw": "no data",
-            "u_equip_design_kw": "no data",
-            "u_facil_design_kw": "no data",
-            "u_equip_kw_consume_design": "no data"
-          }
-        }
-        rackData[rackName] = {
-          "block": {
-            "draw_lines": 1,
-            "rgb_block_red": 1,
-            "rgb_block_green": 1,
-            "rgb_block_blue": 1,
-            "rgb_line_red": 0.5,
-            "rgb_line_green": 0.5,
-            "rgb_line_blue": 0.5,
-            "x_location": 4 + 0.3 + (xloop * 0.6),
-            "y_location": 4 + 1.2 + (yloop * 2.4),
-            "z_location": 1.2,
-            "x_dimension": 0.58,
-            "y_dimension": 1.2,
-            "z_dimension": 2.4
-          },
-          "data" : {
-            "id": rackCount,
-            "rack_units": 50,
-            "facing": facing
-          },
-          "display" : display
-        }
-        rackCount++;
-      }
-    }
-    return rackData;
   }
 
   function fakeScenery(roomXDimension,roomYDimension){
@@ -1604,15 +1531,106 @@
     powerData["racks"] = {}
     var randomPower = 0;
     Object.keys(allData["racks"]).forEach(function(rackName){
-      randomPower = Math.random() * 10;
-      powerData["racks"][rackName] = {
-        "average": randomPower,
-        "maximum": randomPower * (1.0 + Math.random() * 0.2)  
+      if (allData["racks"][rackName]["display"]["u_equip_design_kw"] != "no data"){
+        if (allData["racks"][rackName]["display"]["u_equip_design_kw"] > 0){
+          randomPower = Math.random() * 10;
+          powerData["racks"][rackName] = {
+            "average": randomPower,
+            "maximum": randomPower * (1.0 + Math.random() * 0.3)  
+          }
+        }
+      } else {
+        randomPower = Math.random() * 10;
+        powerData["racks"][rackName] = {
+          "average": randomPower,
+          "maximum": randomPower * (1.0 + Math.random() * 0.3)  
+          }
       }
     })
     powerData["room_maximum"] = 13;
     return powerData;
   }
+
+function fakeRacks(rowMax,rackMax){
+  var facing = 0;
+  var rackCount = 0;
+  var rackData = {};
+  var rackName;
+  var xloop;
+  var yloop;
+  var zloop;
+  var display = {}
+  for (yloop = 0; yloop < rowMax; yloop++){
+    for (xloop = 0; xloop < rackMax; xloop++){
+      if (yloop % 2 == 0){
+        facing = 1;
+      } else {
+        facing = 3;
+      }
+      rackName = "rack_" + xloop + "_" + yloop;
+      dice = Math.random();
+      display = {
+        "u_rack_state": "Landed",
+        "u_max_alloc": 10,
+        "u_qty_alloc": xloop % 10,
+        "u_environment": randomEnvironment(),
+        "u_allocated_kw": 10,
+        "u_equip_kw_consume_design": 20,
+        "u_equip_design_kw": 16,
+        "u_facil_design_kw": 12
+      }
+      if (xloop == rackMax -1){
+        display = {
+          "u_rack_state": "Landed",
+          "u_max_alloc": 10,
+          "u_qty_alloc": xloop % 10,
+          "u_environment": randomEnvironment(),
+          "u_allocated_kw": 0,
+          "u_equip_kw_consume_design": 0,
+          "u_equip_design_kw": 0,
+          "u_facil_design_kw": 0
+        }
+      }
+      if ( yloop == rowMax -1){
+        display = {
+          "u_rack_state": "no data",
+          "u_max_alloc": "no data",
+          "u_qty_alloc": "no data",
+          "u_environment": "no data",
+          "u_allocated_kw": "no data",
+          "u_equip_design_kw": "no data",
+          "u_facil_design_kw": "no data",
+          "u_equip_kw_consume_design": "no data"
+        }
+      }
+      rackData[rackName] = {
+        "block": {
+          "draw_lines": 1,
+          "rgb_block_red": 1,
+          "rgb_block_green": 1,
+          "rgb_block_blue": 1,
+          "rgb_line_red": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_blue": 0.5,
+          "x_location": 4 + 0.3 + (xloop * 0.6),
+          "y_location": 4 + 1.2 + (yloop * 2.4),
+          "z_location": 1.2,
+          "x_dimension": 0.58,
+          "y_dimension": 1.2,
+          "z_dimension": 2.4
+        },
+        "data" : {
+          "id": rackCount,
+          "rack_units": 50,
+          "facing": facing
+        },
+        "display" : display
+      }
+      rackCount++;
+    }
+  }
+  return rackData;
+}
 
 
 
