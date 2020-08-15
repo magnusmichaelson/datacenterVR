@@ -72,8 +72,8 @@
         <select id="mountedOverlay">
           <option value="objectModelCategory">Model Category</option>
           <option value="default">Plain</option>
-          <option value="objectModelEndOfLife" disabled="true">Model End of Life</option>
-          <option value="objectLastAudit" disabled="true">u_last_audit_date - 2 year</option>
+          <option value="objectModelEndOfLife">Model End of Life</option>
+          <option value="objectLastAudit">u_last_audit_date - 2 year</option>
         </select>
         <select id="mountedFilter">
           <option value="all">All</option>
@@ -673,10 +673,8 @@
           color = powerWithDesign(rackName,powerUsage,powerRated);
         }
       }
-      console.log(rackName + " " + averageOrMax + " " + powerUsage + " " + powerRated + " " + color)
       rackColor[rackName] = color;
     });
-    console.log()
     applyColor(allData["racks"],rackColor);
   }
   /**
@@ -837,10 +835,10 @@
       mountedColor[rack["name"]] = [1,1,1];
     });
     Object.keys(allData["mounted"]).forEach(function(blockName){
-      block = allData["mounted"][blockName];
+      mounted = allData["mounted"][blockName];
       color = [1,1,1];
-      if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
-        if (block['model_u_end_of_life'] == '1'){
+      if (supportGroupValue == 'all' || supportGroupValue == mounted["display"]['support_group_name']){
+        if (mounted["display"]['model_u_end_of_life'] == '1'){
           color = [1, 0, 0];
         }
       }
@@ -865,9 +863,9 @@
     Object.keys(allData["mounted"]).forEach(function(blockName){
       block = allData["mounted"][blockName];
       color = [1,1,1];
-      if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
-        if (block['u_last_audit_date']){
-          lastAudit = Date.parse(block['u_last_audit_date']);
+      if (supportGroupValue == 'all' || supportGroupValue == block['display']['support_group_name']){
+        if (block['display']['u_last_audit_date']){
+          lastAudit = Date.parse(block['display']['u_last_audit_date']);
           color = spectrumGreenRed((now - lastAudit) / milliseconds);
         } else {
           color = spectrumGreenRed(1);
@@ -1348,6 +1346,9 @@
     var mountedData = {};
     var mountedCount = 0;
     var unitCount;
+    var endOfLife;
+    var auditDate;
+    var fakedates = ['2018-07-25 04:21:00','2019-01-25 04:21:00','2019-07-25 04:21:00','2020-01-25 04:21:00','2020-07-25 04:21:00']
     Object.keys(rackData).forEach(function(rackName){
       rack = rackData[rackName];
       if (rack["data"]["facing"] == 0){
@@ -1380,6 +1381,14 @@
         zDimension = (unitHeight * 2) -0.002;
         zLocation = zStart + (unitCount * unitHeight) + unitHeight;
         mountedName = "server_" + mountedCount;
+        if (Math.random() > 0.95){
+          endOfLife = 1;
+        } else {
+          endOfLife = 0;
+        }
+        seconds = Math.random() * 5 * 365 * 24 * 60 * 60 * 1000;
+        dateNow = new Date();
+        auditDate = new Date(dateNow.getTime() - seconds);
         mountedData[mountedName] = {
           "block": {
             "draw_lines": 1,
@@ -1407,14 +1416,14 @@
             "ci_u_provision_date": "fake",
             "collision": 0,
             "model_category_name": "Server",
-            "model_u_end_of_life": 0,
+            "model_u_end_of_life": endOfLife,
             "model_name": "fake",
             "model_rack_units": 1,
             "support_group_name": randomSupportGroup(),
             "support_group_manager_email": "fake@fake.com",
             "sys_class_name": "fake",
             "u_smdb_table": "fake",
-            "u_last_audit_date": "fake",
+            "u_last_audit_date": fakedates[Math.floor(Math.random() * 5)],
             "serial_number": "fake"
           }
         }
@@ -1425,6 +1434,14 @@
         zDimension = unitHeight - 0.002;
         zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
         mountedName = "network_" + mountedCount;
+        if (Math.random() > 0.95){
+          endOfLife = 1;
+        } else {
+          endOfLife = 0;
+        }
+        seconds = Math.random() * 5 * 365 * 24 * 60 * 60 * 1000;
+        dateNow = new Date();
+        auditDate = new Date(dateNow.getTime() - seconds);
         mountedData[mountedName] = {
           "block": {
             "draw_lines": 1,
@@ -1452,14 +1469,14 @@
             "ci_u_provision_date": "fake",
             "collision": 0,
             "model_category_name": "Network Gear",
-            "model_u_end_of_life": 0,
+            "model_u_end_of_life": endOfLife,
             "model_name": "fake",
             "model_rack_units": 1,
             "support_group_name": randomSupportGroup(),
             "support_group_manager_email": "fake@fake.com",
             "sys_class_name": "fake",
             "u_smdb_table": "fake",
-            "u_last_audit_date": "fake",
+            "u_last_audit_date": fakedates[Math.floor(Math.random() * 5)],
             "serial_number": "fake"
           }
         }
@@ -1470,6 +1487,11 @@
         zDimension = (unitHeight * 4) - 0.002;
         zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 2);
         mountedName = "server_" + mountedCount;
+        if (Math.random() > 0.95){
+          endOfLife = 1;
+        } else {
+          endOfLife = 0;
+        }
         mountedData[mountedName] = {
           "block": {
             "draw_lines": 1,
@@ -1497,14 +1519,14 @@
             "ci_u_provision_date": "fake",
             "collision": 0,
             "model_category_name": "Server",
-            "model_u_end_of_life": 0,
+            "model_u_end_of_life": endOfLife,
             "model_name": "fake",
             "model_rack_units": 1,
             "support_group_name": randomSupportGroup(),
             "support_group_manager_email": "fake@fake.com",
             "sys_class_name": "fake",
             "u_smdb_table": "fake",
-            "u_last_audit_date": "fake",
+            "u_last_audit_date": fakedates[Math.floor(Math.random() * 5)],
             "serial_number": "fake"
           }
         }
