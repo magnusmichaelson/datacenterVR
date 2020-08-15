@@ -78,7 +78,7 @@
         <select id="mountedFilter">
           <option value="all">All</option>
         </select>
-        <button type="button" id="exportScene">Download Scene</button>
+        <button type="button" id="exportScene" disabled="true">Download Scene</button>
         <label for="speed">Speed :</label>
         <input type="number" id="speed" value="6" min="1" step="1" />
         <p id="fps"></p>
@@ -980,8 +980,8 @@
     var encodedData;
     var download;
     var outputData = [];
-    Object.keys(mountedData).forEach(function(blockName){
-      block = mountedData[blockName];
+    Object.keys(allData["mounted"]).forEach(function(blockName){
+      block = allData["mounted"][blockName]["block"];
       outputData.push({
         "name": "alm_hardware_" + block["sys_id"],
         "cmdb_ci_sys_id": block["ci_sys_id"],
@@ -997,7 +997,8 @@
         "u_blue": mountedColor[blockName][2]
       })
     });
-    rackData.forEach(function(rack){
+    Object.keys(allData["racks"]).forEach(function(blockName){
+      block = allData["racks"][blockName]["block"];
       outputData.push({
         "name": "cmdb_ci_rack_" + rack["sys_id"],
         "type": "rack",
@@ -1012,12 +1013,28 @@
         "u_blue": rack['u_blue']
       })
     });
-    sceneryData.forEach(function(scene){
+    Object.keys(allData["scenery"]).forEach(function(blockName){
+      block = allData["scenery"][blockName]["block"];
+      /*
+draw_lines: 1
+rgb_block_blue: 1
+rgb_block_green: 1
+rgb_block_red: 1
+rgb_line_blue: 0.5
+rgb_line_green: 0.5
+rgb_line_red: 0.5
+x_dimension: 0.522
+x_location: 4.3
+y_dimension: 0.01
+y_location: 5.806
+z_dimension: 0.042499999999999996
+z_location: 1.0457500000000002
+*/
       outputData.push({
         "name": "u_dcse_vr_scene_" + scene["sys_id"],
         "type": "scene",
-        "u_x_min": scene['u_x_min'],
-        "u_x_max": scene['u_x_max'],
+        "x_dimension": scene['x_dimension'],
+        "y_dimension": scene['y_dimension'],
         "u_y_min": scene['u_y_min'],
         "u_y_max": scene['u_y_max'],
         "u_z_min": scene['u_z_min'],
