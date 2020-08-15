@@ -1200,8 +1200,8 @@
     var allData = {};
     var rowMax = 6;
     var rackMax = 20;
-    var roomXDimension = 8 + (rackMax * 2);
-    var roomYDimension = 8 + (rowMax * 4);
+    var roomXDimension = 8 + (rackMax * 0.6);
+    var roomYDimension = 8 + (((rowMax * 2) -1) * 1.2);
     allData["room"] = {}
     allData["room"]["room_name"] = "roomName";
     allData["camera"] = {
@@ -1243,8 +1243,8 @@
             "rgb_line_red": 0.5,
             "rgb_line_green": 0.5,
             "rgb_line_blue": 0.5,
-            "x_location": 6 + (xloop * 0.6),
-            "y_location": 6 + (yloop * 2.4),
+            "x_location": 4 + 0.3 + (xloop * 0.6),
+            "y_location": 4 + 1.2 + (yloop * 2.4),
             "z_location": 1.2,
             "x_dimension": 0.58,
             "y_dimension": 1.2,
