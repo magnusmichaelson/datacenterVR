@@ -1221,6 +1221,7 @@
     var yloop;
     var zloop;
     var display = {}
+    var dice = 0;
     for (yloop = 0; yloop < rowMax; yloop++){
       for (xloop = 0; xloop < rackMax; xloop++){
         if (yloop % 2 == 0){
@@ -1229,7 +1230,8 @@
           facing = 3;
         }
         rackName = "rack_" + xloop + "_" + yloop;
-        if (Math.random() > 0.1){
+        dice = Math.random();
+        if (dice < 0.6){
           display = {
             "u_rack_state": "Landed",
             "u_max_alloc": 10,
@@ -1240,7 +1242,20 @@
             "u_facil_design_kw": 11,
             "u_equip_kw_consume_design": 12
           }
-        } else {
+        }
+        if (dice >= 0.6 && dice < 0.8){
+          display = {
+            "u_rack_state": "Landed",
+            "u_max_alloc": 10,
+            "u_qty_alloc": xloop % 10,
+            "u_environment": randomEnvironment(),
+            "u_allocated_kw": 0,
+            "u_equip_design_kw": 10,
+            "u_facil_design_kw": 11,
+            "u_equip_kw_consume_design": 12
+          }
+        }
+        if (dice >= 0.6 && dice < 0.8){
           display = {
             "u_rack_state": "no data",
             "u_max_alloc": "no data",
