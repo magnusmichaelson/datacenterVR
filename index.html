@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>3d datacenter</title>
+    <title>datacenterVR</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <style>
@@ -85,16 +85,12 @@
       </div>
     </div>
     <script>
-
-
-
-
 //function main(spUtil){
   //var allData = {};
 
 
   var allData = allDataFake();
-
+console.log(allData)
 
   var anchor;
   var camera;
@@ -496,8 +492,8 @@
     var rackEnvironmentList = [];
     var design = {};
     Object.keys(allData["racks"]).forEach(function(rackName){
-      if (rackEnvironmentList.indexOf(allData["racks"][rackName]['u_environment']) < 0){
-        rackEnvironmentList.push(allData["racks"][rackName]['u_environment']);
+      if (rackEnvironmentList.indexOf(allData["racks"][rackName]["display"]['u_environment']) < 0){
+        rackEnvironmentList.push(allData["racks"][rackName]["display"]['u_environment']);
       }
     });
     rackEnvironmentList.sort();
@@ -596,7 +592,7 @@
     Object.keys(allData["racks"]).forEach(function(rackName){
       rack = allData["racks"][rackName];
       color = [1,1,1]
-        if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rack["u_environment"]){
+        if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rack["display"]["u_environment"]){
           if (rack['display']["u_max_alloc"] > 0){
             if (rack['display']["u_qty_alloc"] > 0){
               color = spectrumGreenRed(rack['display']["u_qty_alloc"] / rack['display']["u_max_alloc"]);
@@ -806,7 +802,7 @@
     Object.keys(allData["mounted"]).forEach(function(blockName){
       mounted = allData["mounted"][blockName];
       color = [1,1,1];
-      if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
+      if (supportGroupValue == 'all' || supportGroupValue == mounted["display"]['support_group_name']){
         if (mounted['display']['model_category_name'] in colorChart){
           color = colorChart[mounted['display']['model_category_name']]
         }
@@ -1205,12 +1201,12 @@
     allData["room"] = {}
     allData["room"]["room_name"] = "roomName";
     allData["camera"] = {
-        "camera_position_x": 4.629,
-        "camera_position_y": 1.800,
-        "camera_position_z": 2.703,
-        "camera_rotation_x": -2.916,
-        "camera_rotation_y": -0.828,
-        "camera_rotation_z": -2.974
+        "camera_position_x": 4.306,
+        "camera_position_y": 1.990,
+        "camera_position_z": 0.845,
+        "camera_rotation_x": -3.024,
+        "camera_rotation_y": -0.522,
+        "camera_rotation_z": -3.083
     };
     allData["scenery"] = fakeScenery(roomXDimension,roomYDimension);
     allData["racks"] = fakeRacks(rowMax,rackMax);
@@ -1459,7 +1455,7 @@
             "model_u_end_of_life": 0,
             "model_name": "fake",
             "model_rack_units": 1,
-            "support_group_name": "them",
+            "support_group_name": randomSupportGroup(),
             "support_group_manager_email": "fake@fake.com",
             "sys_class_name": "fake",
             "u_smdb_table": "fake",
@@ -1504,7 +1500,7 @@
             "model_u_end_of_life": 0,
             "model_name": "fake",
             "model_rack_units": 1,
-            "support_group_name": "them",
+            "support_group_name": randomSupportGroup(),
             "support_group_manager_email": "fake@fake.com",
             "sys_class_name": "fake",
             "u_smdb_table": "fake",
@@ -1549,7 +1545,7 @@
             "model_u_end_of_life": 0,
             "model_name": "fake",
             "model_rack_units": 1,
-            "support_group_name": "them",
+            "support_group_name": randomSupportGroup(),
             "support_group_manager_email": "fake@fake.com",
             "sys_class_name": "fake",
             "u_smdb_table": "fake",
@@ -1567,6 +1563,12 @@
     var environmentList = ["alpha","bravo","charlie","delta","echo","foxtrot"];
     var dice = Math.floor(Math.random() * 6);
     return environmentList[dice];
+  }
+
+  function randomSupportGroup(){
+    var supportGroupList = ["apple","banana","carrot"];
+    var dice = Math.floor(Math.random() * 3);
+    return supportGroupList[dice];
   }
 
 </script>
