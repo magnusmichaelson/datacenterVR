@@ -68,14 +68,14 @@
         <select id="rackFilter">
           <option value="all">All</option>
         </select>
-        <label for="mountedOverlay">Mounted :</label>
-        <select id="mountedOverlay">
+        <label for="mountOverlay">mount :</label>
+        <select id="mountOverlay">
           <option value="objectModelCategory">Model Category</option>
           <option value="default">Plain</option>
           <option value="objectModelEndOfLife">Model End of Life</option>
           <option value="objectLastAudit">u_last_audit_date - 2 year</option>
         </select>
-        <select id="mountedFilter">
+        <select id="mountFilter">
           <option value="all">All</option>
         </select>
         <button type="button" id="exportScene" disabled="true">Download Scene</button>
@@ -111,8 +111,8 @@
   var moveRight = false;
   var moveUp = false;
   var moveDown = false;
-  var mountedData = {};
-  var mountedColor = {};
+  var mountData = {};
+  var mountColor = {};
   var prevTime;
   var rackData = [];
   var rackColor = {};
@@ -121,7 +121,7 @@
   var roomName = '';
   var roomSysid;
   var scene;
-  var sceneryData = [];
+  var sceneData = [];
   var selectedCurrentName = "";
   var selectedPreviousName = "";
   var serverLink = this;
@@ -254,8 +254,8 @@
     var crosshair;
     document.getElementById('rackOverlay').addEventListener('change', rackDropDown, false);
     document.getElementById('rackFilter').addEventListener('change', rackDropDown, false);
-    document.getElementById('mountedOverlay').addEventListener('change', mountedDropDown, false);
-    document.getElementById('mountedFilter').addEventListener('change', mountedDropDown, false);
+    document.getElementById('mountOverlay').addEventListener('change', mountDropDown, false);
+    document.getElementById('mountFilter').addEventListener('change', mountDropDown, false);
     document.getElementById('exportScene').addEventListener('click', exportScene, false);
     document.getElementById("speed").addEventListener("change", function(){
       speed = document.getElementById("speed").value;
@@ -264,7 +264,7 @@
     document.addEventListener( 'keyup', onKeyUp, false );
     // fill dropdowns
     generateRackFilter()
-    generateMountedFilter();
+    generatemountFilter();
     // scene
     scene = new THREE.Scene();
     // light
@@ -291,10 +291,10 @@
     renderer = new THREE.WebGLRenderer({antialias:true, canvas:document.getElementById('my_canvas')});
     renderer.setClearColor( 0xf0f3f4 );
     generateBlocks(allData["racks"],"rack",false)
-    generateBlocks(allData["scenery"],"scene",false)
-    generateBlocks(allData["mounted"],"mounted",true)
+    generateBlocks(allData["scene"],"scene",false)
+    generateBlocks(allData["mount"],"mount",true)
     rackDropDown();
-    mountedDropDown();
+    mountDropDown();
     rendererResize();
   }
   /**
@@ -438,9 +438,9 @@
   }
   /**
    * @function applyColor
-   * @description apply the colors in mountedColor to the 3d blocks
+   * @description apply the colors in mountColor to the 3d blocks
    * @param {Array.<Object>} objectData - the 3d blocks
-   * @param {Object} mountedColor - the colors
+   * @param {Object} mountColor - the colors
    */
   function applyColor(inputData,inputColor){
     var red = 1;
@@ -480,18 +480,18 @@
     });
   }
   /**
-   * @function generateMountedFilter
+   * @function generatemountFilter
    * @description fill the support group dropdown
    */
-  function generateMountedFilter(){
-    var selectElement = document.getElementById('mountedFilter');
+  function generatemountFilter(){
+    var selectElement = document.getElementById('mountFilter');
     var optionElement;
     var supportGroupList = [];
-    var mounted = {};
-    Object.keys(allData["mounted"]).forEach(function(blockName){
-      mounted = allData["mounted"][blockName];
-      if (supportGroupList.indexOf(mounted['display']['support_group_name']) < 0){
-        supportGroupList.push(mounted['display']['support_group_name']);
+    var mount = {};
+    Object.keys(allData["mount"]).forEach(function(blockName){
+      mount = allData["mount"][blockName];
+      if (supportGroupList.indexOf(mount['display']['support_group_name']) < 0){
+        supportGroupList.push(mount['display']['support_group_name']);
       }
     });
     supportGroupList.sort();
@@ -538,13 +538,13 @@
     }
   }
   /**
-   * @function mountedDropDown
+   * @function mountDropDown
    * @description triggers overlays when dropdowns are changed
    */
-  function mountedDropDown(){
-    var overlayValue = document.getElementById('mountedOverlay').value;
+  function mountDropDown(){
+    var overlayValue = document.getElementById('mountOverlay').value;
     if (overlayValue == 'default'){
-      overlayMountedDefault();
+      overlaymountDefault();
     }
     if (overlayValue == 'objectModelCategory'){
       overlayObjectModelCategory();
@@ -760,25 +760,25 @@
    * @function overlayDefault
    * @description all blocks drawn white except collisions, which are red
    */
-  function overlayMountedDefault(){
+  function overlaymountDefault(){
     var color = [];
-    var mounted = {};
-    Object.keys(allData["mounted"]).forEach(function(blockName){
-      mounted = allData["mounted"][blockName];
+    var mount = {};
+    Object.keys(allData["mount"]).forEach(function(blockName){
+      mount = allData["mount"][blockName];
       color = [1,1,1];
-      if (mounted['display']['collision']){
+      if (mount['display']['collision']){
         color = [1, 0, 0];
       }
-      mountedColor[blockName] = color;
+      mountColor[blockName] = color;
     })
-    applyColor(allData["mounted"],mountedColor);
+    applyColor(allData["mount"],mountColor);
   }
   /**
    * @function overlayObjectModelCategory
    * @description colors objects according to their model category
    */
   function overlayObjectModelCategory(){
-    var supportGroupValue = document.getElementById('mountedFilter').value;
+    var supportGroupValue = document.getElementById('mountFilter').value;
     var color = [];
     // hue 40 sat 40 val 100/60
     var colorStorage = [1.0, 0.867, 0.6];
@@ -805,63 +805,63 @@
       "UPS": colorOther,
       "PDU": colorOther
     }
-    var mounted = {};
-    Object.keys(allData["mounted"]).forEach(function(blockName){
-      mounted = allData["mounted"][blockName];
+    var mount = {};
+    Object.keys(allData["mount"]).forEach(function(blockName){
+      mount = allData["mount"][blockName];
       color = [1,1,1];
-      if (supportGroupValue == 'all' || supportGroupValue == mounted["display"]['support_group_name']){
-        if (mounted['display']['model_category_name'] in colorChart){
-          color = colorChart[mounted['display']['model_category_name']]
+      if (supportGroupValue == 'all' || supportGroupValue == mount["display"]['support_group_name']){
+        if (mount['display']['model_category_name'] in colorChart){
+          color = colorChart[mount['display']['model_category_name']]
         }
-        if (!mounted['data']['ci_name']){
+        if (!mount['data']['ci_name']){
           color = [1, 0.5, 0]
         }
-        if (mounted['display']['collision']){
+        if (mount['display']['collision']){
           color = [1, 0, 0]
         }
       }
-      mountedColor[blockName] = color;
+      mountColor[blockName] = color;
     })
-    applyColor(allData["mounted"],mountedColor);
+    applyColor(allData["mount"],mountColor);
   }
   /**
    * @function overlayObjectModelEndOfLife
    * @description any models that are end of life are shown as red
    */
   function overlayObjectModelEndOfLife(){
-    var supportGroupValue = document.getElementById('mountedFilter').value;
+    var supportGroupValue = document.getElementById('mountFilter').value;
     var color = [];
     rackData.forEach(function(rack){
-      mountedColor[rack["name"]] = [1,1,1];
+      mountColor[rack["name"]] = [1,1,1];
     });
-    Object.keys(allData["mounted"]).forEach(function(blockName){
-      mounted = allData["mounted"][blockName];
+    Object.keys(allData["mount"]).forEach(function(blockName){
+      mount = allData["mount"][blockName];
       color = [1,1,1];
-      if (supportGroupValue == 'all' || supportGroupValue == mounted["display"]['support_group_name']){
-        if (mounted["display"]['model_u_end_of_life'] == '1'){
+      if (supportGroupValue == 'all' || supportGroupValue == mount["display"]['support_group_name']){
+        if (mount["display"]['model_u_end_of_life'] == '1'){
           color = [1, 0, 0];
         }
       }
-      mountedColor[blockName] = color;
+      mountColor[blockName] = color;
     })
-    applyColor(allData["mounted"],mountedColor);
+    applyColor(allData["mount"],mountColor);
   }
   /**
    * @function overlayObjectLastAudit
    * @description colors objects in a green to red spectrum by the date of their last audit
    */
   function overlayObjectLastAudit(){
-    var supportGroupValue = document.getElementById('mountedFilter').value;
+    var supportGroupValue = document.getElementById('mountFilter').value;
     var color = [];
     var now = Date.now();
     var lastAudit = 0
     // 2 yeasr * 365 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds;
     var milliseconds = 63072000000;
     rackData.forEach(function(rack){
-      mountedColor[rack["name"]] = [1,1,1];
+      mountColor[rack["name"]] = [1,1,1];
     });
-    Object.keys(allData["mounted"]).forEach(function(blockName){
-      block = allData["mounted"][blockName];
+    Object.keys(allData["mount"]).forEach(function(blockName){
+      block = allData["mount"][blockName];
       color = [1,1,1];
       if (supportGroupValue == 'all' || supportGroupValue == block['display']['support_group_name']){
         if (block['display']['u_last_audit_date']){
@@ -876,9 +876,9 @@
           color = [1, 0, 0];
         }
       }
-      mountedColor[blockName] = color;
+      mountColor[blockName] = color;
     })
-    applyColor(allData["mounted"],mountedColor);
+    applyColor(allData["mount"],mountColor);
   }
   /**
    * @function rendererResize
@@ -972,7 +972,7 @@
   }
   /**
    * @function exportScene
-   * @description downloads json containing anonymous 3d data and color of blocks that are not rack mounted objects
+   * @description downloads json containing anonymous 3d data and color of blocks that are not rack mount objects
    */
   function exportScene(){
     var jsonData;
@@ -980,21 +980,21 @@
     var encodedData;
     var download;
     var outputData = [];
-    Object.keys(allData["mounted"]).forEach(function(blockName){
-      block = allData["mounted"][blockName]["block"];
+    Object.keys(allData["mount"]).forEach(function(blockName){
+      block = allData["mount"][blockName]["block"];
       outputData.push({
         "name": "alm_hardware_" + block["sys_id"],
         "cmdb_ci_sys_id": block["ci_sys_id"],
-        "type": "mounted",
+        "type": "mount",
         "u_x_min": block['u_x_min'],
         "u_x_max": block['u_x_max'],
         "u_y_min": block['u_y_min'],
         "u_y_max": block['u_y_max'],
         "u_z_min": block['u_z_min'],
         "u_z_max": block['u_z_max'],
-        "u_red": mountedColor[blockName][0],
-        "u_green": mountedColor[blockName][1],
-        "u_blue": mountedColor[blockName][2]
+        "u_red": mountColor[blockName][0],
+        "u_green": mountColor[blockName][1],
+        "u_blue": mountColor[blockName][2]
       })
     });
     Object.keys(allData["racks"]).forEach(function(blockName){
@@ -1013,8 +1013,8 @@
         "u_blue": rack['u_blue']
       })
     });
-    Object.keys(allData["scenery"]).forEach(function(blockName){
-      block = allData["scenery"][blockName]["block"];
+    Object.keys(allData["scene"]).forEach(function(blockName){
+      block = allData["scene"][blockName]["block"];
       /*
 draw_lines: 1
 rgb_block_blue: 1
@@ -1094,15 +1094,15 @@ z_location: 1.0457500000000002
         selectedCurrentName = closest.object.name
         if (closest.object.userData.highlightable){
           //current block is highlightable
-          red = mountedColor[selectedCurrentName][0] * targetDarkness;
-          green = mountedColor[selectedCurrentName][1] * targetDarkness;
-          blue = mountedColor[selectedCurrentName][2] * targetDarkness;
+          red = mountColor[selectedCurrentName][0] * targetDarkness;
+          green = mountColor[selectedCurrentName][1] * targetDarkness;
+          blue = mountColor[selectedCurrentName][2] * targetDarkness;
           scene.getObjectByName(selectedCurrentName).material.color.setRGB(red, green, blue);
           if (selectedPreviousName != selectedCurrentName){
             if (selectedPreviousName){
-              red = mountedColor[selectedPreviousName][0];
-              green = mountedColor[selectedPreviousName][1];
-              blue = mountedColor[selectedPreviousName][2];
+              red = mountColor[selectedPreviousName][0];
+              green = mountColor[selectedPreviousName][1];
+              blue = mountColor[selectedPreviousName][2];
               scene.getObjectByName(selectedPreviousName).material.color.setRGB(red, green, blue);
             }
             selectedPreviousName = selectedCurrentName;
@@ -1111,9 +1111,9 @@ z_location: 1.0457500000000002
         } else {
           // current block is not highlightable
           if (selectedPreviousName){
-            red = mountedColor[selectedPreviousName][0];
-            green = mountedColor[selectedPreviousName][1];
-            blue = mountedColor[selectedPreviousName][2];
+            red = mountColor[selectedPreviousName][0];
+            green = mountColor[selectedPreviousName][1];
+            blue = mountColor[selectedPreviousName][2];
             scene.getObjectByName(selectedPreviousName).material.color.setRGB(red, green, blue);
             selectedPreviousName = '';
           }
@@ -1121,9 +1121,9 @@ z_location: 1.0457500000000002
       } else {
         // nothing found in line of sight
         if (selectedPreviousName){
-          red = mountedColor[selectedPreviousName][0];
-          green = mountedColor[selectedPreviousName][1];
-          blue = mountedColor[selectedPreviousName][2];
+          red = mountColor[selectedPreviousName][0];
+          green = mountColor[selectedPreviousName][1];
+          blue = mountColor[selectedPreviousName][2];
           scene.getObjectByName(selectedPreviousName).material.color.setRGB(red, green, blue);
           selectedPreviousName = '';
         }
@@ -1176,8 +1176,8 @@ z_location: 1.0457500000000002
     }
     if (selectedCurrentName){
       selectedBlock = scene.getObjectByName(selectedCurrentName);
-      if (selectedBlock.userData.blockType == "mounted"){
-        blockData = allData["mounted"][selectedCurrentName];
+      if (selectedBlock.userData.blockType == "mount"){
+        blockData = allData["mount"][selectedCurrentName];
         anchor = document.createElement('a');
         anchor.setAttribute('href',"/nav_to.do?uri=%2Falm_hardware.do%3Fsys_id%3D" + blockData["data"]["sys_id"]);
         anchor.innerText = selectedCurrentName;
@@ -1205,10 +1205,10 @@ z_location: 1.0457500000000002
         //lower.appendChild(preformatted);
       }
       if (selectedBlock.userData.blockType == "scene"){
-        blockData = allData["blocks"]["scenery_data"][selectedCurrentName];
+        blockData = allData["blocks"]["scene_data"][selectedCurrentName];
         anchor = document.createElement('a');
         anchor.setAttribute('href',"/nav_to.do?uri=%2Fu_dcse_vr_scene.do%3Fsys_id%3D" + blockData["config"]["sysid"]);
-        anchor.innerText = "Scenery";
+        anchor.innerText = "scene";
         lower.appendChild(anchor);
       }
     } else {
@@ -1232,15 +1232,15 @@ z_location: 1.0457500000000002
         "camera_rotation_y": -0.224,
         "camera_rotation_z": -2.752
     }; [5.672, 14.360, 2.274, -2.065, -0.224, -2.752]
-    allData["scenery"] = fakeScenery(roomXDimension,roomYDimension);
+    allData["scene"] = fakescene(roomXDimension,roomYDimension);
     allData["racks"] = fakeRacks(rowMax,rackMax);
-    allData["mounted"] = fakeMounted(allData["racks"]);
+    allData["mount"] = fakemount(allData["racks"]);
    return allData;
   }
 
-  function fakeScenery(roomXDimension,roomYDimension){
-    var scenery = {};
-    scenery["floor"] = {
+  function fakescene(roomXDimension,roomYDimension){
+    var scene = {};
+    scene["floor"] = {
       "block": {
         "draw_lines": 0,
         "rgb_block_red": 0.8,
@@ -1261,7 +1261,7 @@ z_location: 1.0457500000000002
         'tag': "building"
       }
     }
-    scenery["x_min_wall"] = {
+    scene["x_min_wall"] = {
       "block": {
         "draw_lines": 0,
         "rgb_block_red": 0.85,
@@ -1282,7 +1282,7 @@ z_location: 1.0457500000000002
         'tag': "building"
       }
     }
-    scenery["x_max_wall"] = {
+    scene["x_max_wall"] = {
       "block": {
         "draw_lines": 0,
         "rgb_block_red": 0.85,
@@ -1303,7 +1303,7 @@ z_location: 1.0457500000000002
         'tag': "building"
       }
     }
-    scenery["y_min_wall"] = {
+    scene["y_min_wall"] = {
       "block": {
         "draw_lines": 0,
         "rgb_block_red": 0.75,
@@ -1324,7 +1324,7 @@ z_location: 1.0457500000000002
         'tag': "building"
       }
     }
-    scenery["y_max_wall"] = {
+    scene["y_max_wall"] = {
       "block": {
         "draw_lines": 0,
         "rgb_block_red": 0.75,
@@ -1345,10 +1345,10 @@ z_location: 1.0457500000000002
         'tag': "building"
       }
     }
-    return scenery;
+    return scene;
   }
   
-  function fakeMounted(rackData){
+  function fakemount(rackData){
     var unitHeight = 0.0445;
     var xLocation = 0;
     var yLocation = 0;
@@ -1359,9 +1359,9 @@ z_location: 1.0457500000000002
     var zStart = 0;
     var rack = {};
     var zloop = 0;
-    var mountedName = "";
-    var mountedData = {};
-    var mountedCount = 0;
+    var mountName = "";
+    var mountData = {};
+    var mountCount = 0;
     var unitCount;
     var endOfLife;
     var auditDate;
@@ -1397,7 +1397,7 @@ z_location: 1.0457500000000002
         unitCount = (zloop * 2);
         zDimension = (unitHeight * 2) -0.002;
         zLocation = zStart + (unitCount * unitHeight) + unitHeight;
-        mountedName = "server_" + mountedCount;
+        mountName = "server_" + mountCount;
         if (Math.random() > 0.95){
           endOfLife = 1;
         } else {
@@ -1406,7 +1406,7 @@ z_location: 1.0457500000000002
         seconds = Math.random() * 5 * 365 * 24 * 60 * 60 * 1000;
         dateNow = new Date();
         auditDate = new Date(dateNow.getTime() - seconds);
-        mountedData[mountedName] = {
+        mountData[mountName] = {
           "block": {
             "draw_lines": 1,
             "rgb_block_red": 1.0,
@@ -1423,9 +1423,9 @@ z_location: 1.0457500000000002
             "z_dimension": zDimension
           },
           "data" : {
-            "ci_name": mountedName,
-            "ci_sys_id": mountedCount,
-            "sys_id": mountedCount
+            "ci_name": mountName,
+            "ci_sys_id": mountCount,
+            "sys_id": mountCount
           },
           "display": {
             "asset_tag": "fake",
@@ -1444,13 +1444,13 @@ z_location: 1.0457500000000002
             "serial_number": "fake"
           }
         }
-        mountedCount += 1;
+        mountCount += 1;
       }
       for (zloop = 0; zloop < 3; zloop++){
         unitCount = 21 + zloop;
         zDimension = unitHeight - 0.002;
         zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
-        mountedName = "network_" + mountedCount;
+        mountName = "network_" + mountCount;
         if (Math.random() > 0.95){
           endOfLife = 1;
         } else {
@@ -1459,7 +1459,7 @@ z_location: 1.0457500000000002
         seconds = Math.random() * 5 * 365 * 24 * 60 * 60 * 1000;
         dateNow = new Date();
         auditDate = new Date(dateNow.getTime() - seconds);
-        mountedData[mountedName] = {
+        mountData[mountName] = {
           "block": {
             "draw_lines": 1,
             "rgb_block_red": 1.0,
@@ -1476,9 +1476,9 @@ z_location: 1.0457500000000002
             "z_dimension": zDimension
           },
           "data" : {
-            "ci_name": mountedName,
-            "ci_sys_id": mountedCount,
-            "sys_id": mountedCount
+            "ci_name": mountName,
+            "ci_sys_id": mountCount,
+            "sys_id": mountCount
           },
           "display": {
             "asset_tag": "fake",
@@ -1497,19 +1497,19 @@ z_location: 1.0457500000000002
             "serial_number": "fake"
           }
         }
-        mountedCount += 1;
+        mountCount += 1;
       }
       for (zloop = 0; zloop < 6; zloop++){
         unitCount = 25 + zloop * 4;
         zDimension = (unitHeight * 4) - 0.002;
         zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 2);
-        mountedName = "server_" + mountedCount;
+        mountName = "server_" + mountCount;
         if (Math.random() > 0.95){
           endOfLife = 1;
         } else {
           endOfLife = 0;
         }
-        mountedData[mountedName] = {
+        mountData[mountName] = {
           "block": {
             "draw_lines": 1,
             "rgb_block_red": 1.0,
@@ -1526,9 +1526,9 @@ z_location: 1.0457500000000002
             "z_dimension": zDimension
           },
           "data" : {
-            "ci_name": mountedName,
-            "ci_sys_id": mountedCount,
-            "sys_id": mountedCount
+            "ci_name": mountName,
+            "ci_sys_id": mountCount,
+            "sys_id": mountCount
           },
           "display": {
             "asset_tag": "fake",
@@ -1547,10 +1547,10 @@ z_location: 1.0457500000000002
             "serial_number": "fake"
           }
         }
-        mountedCount += 1;
+        mountCount += 1;
       }
     })
-    return mountedData;
+    return mountData;
   }
 
   function randomEnvironment(){
