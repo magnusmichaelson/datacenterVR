@@ -1179,7 +1179,7 @@ z_location: 1.0457500000000002
       if (selectedBlock.userData.blockType == "mount"){
         blockData = allData["mount"][selectedCurrentName];
         anchor = document.createElement('a');
-        anchor.setAttribute('href',"/nav_to.do?uri=%2Falm_hardware.do%3Fsys_id%3D" + blockData["data"]["sys_id"]);
+        anchor.setAttribute('href',"/nav_to.do?uri=%2Falm_hardware.do%3Fsys_id%3D" + blockData["sys_id"]);
         anchor.innerText = selectedCurrentName;
         lower.appendChild(anchor);
         preformatted = document.createElement("PRE");
@@ -1193,7 +1193,7 @@ z_location: 1.0457500000000002
       if (selectedBlock.userData.blockType == "rack"){
         blockData = allData["racks"][selectedCurrentName];
         anchor = document.createElement('a');
-        anchor.setAttribute('href',"/nav_to.do?uri=%2Fsp%3Fid%3Ddcscapeng_rackview%26rackSysid%3D" + blockData["data"]["sys_id"]);
+        anchor.setAttribute('href',"/nav_to.do?uri=%2Fsp%3Fid%3Ddcscapeng_rackview%26rackSysid%3D" + blockData["sys_id"]);
         anchor.innerText = selectedCurrentName;
         lower.appendChild(anchor);
         preformatted = document.createElement("PRE");
@@ -1205,9 +1205,9 @@ z_location: 1.0457500000000002
         //lower.appendChild(preformatted);
       }
       if (selectedBlock.userData.blockType == "scene"){
-        blockData = allData["blocks"]["scene_data"][selectedCurrentName];
+        blockData = allData["scene"][selectedCurrentName];
         anchor = document.createElement('a');
-        anchor.setAttribute('href',"/nav_to.do?uri=%2Fu_dcse_vr_scene.do%3Fsys_id%3D" + blockData["config"]["sysid"]);
+        anchor.setAttribute('href',"/nav_to.do?uri=%2Fu_dcse_vr_scene.do%3Fsys_id%3D" + blockData["sysid"]);
         anchor.innerText = "scene";
         lower.appendChild(anchor);
       }
