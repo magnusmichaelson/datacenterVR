@@ -1066,10 +1066,10 @@ z_location: 1.0457500000000002
     var intersects;
     var red;
     var targetDarkness = 0.6;
+    var cameraPostion = new THREE.Vector3();
+    var cameraDirection = new THREE.Vector3();
     requestAnimationFrame( animate );
     if ( controlsEnabled ) {
-      var cameraPostion = new THREE.Vector3();
-      var cameraDirection = new THREE.Vector3();
       camera.getWorldPosition(cameraPostion);
       camera.getWorldDirection(cameraDirection);
       raycaster.set( cameraPostion, cameraDirection );
