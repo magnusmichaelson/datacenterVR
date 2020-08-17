@@ -67,7 +67,7 @@
         <select id="rackFilter">
           <option value="all">All</option>
         </select>
-        <label for="mountOverlay">mount :</label>
+        <label for="mountOverlay">Mounted :</label>
         <select id="mountOverlay">
           <option value="default">Plain</option>
           <option value="objectModelCategory">Model Category</option>
@@ -591,6 +591,7 @@
     var roomMaximum = powerData["room_maximum"];
     var shortMessage = "";
     var singleRackReport = [];
+    var tempColor = [];
     Object.keys(allData["racks"]).forEach(function(rackName){
       // power usage
       if (powerData["racks"].hasOwnProperty(rackName)){
@@ -676,21 +677,24 @@
     var rackEnvironmentValue = document.getElementById('rackFilter').value;
     var color = [];
     var rack = {};
+    var singleRackReport = [];
+    var tempColor = [];
     Object.keys(allData["racks"]).forEach(function(rackName){
       rack = allData["racks"][rackName];
-      color = [1,1,1]
+      singleRackReport = [1,1,1]
         if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rack["design"]["u_environment"]){
           if (rack['design']["u_max_alloc"] > 0){
             if (rack['design']["u_qty_alloc"] > 0){
-              color = spectrumGreenRed(rack['design']["u_qty_alloc"] / rack['design']["u_max_alloc"]);
+              tempColor = spectrumGreenRed(rack['design']["u_qty_alloc"] / rack['design']["u_max_alloc"]);
+              singleRackReport = [tempColor[0],tempColor[1],tempColor[2],rack['design']["u_qty_alloc"] +" / " + rack['design']["u_max_alloc"]];
             } else {
-              color = spectrumGreenRed(0);
+              singleRackReport = spectrumGreenRed(0);
             }
           } else {
-            color = [0.8,0.8,0.8];
+            singleRackReport = [0.8,0.8,0.8];
           }
         }
-      rackColor[rackName] = color;
+      rackColor[rackName] = singleRackReport;
     });
     applyColor(allData["racks"],rackColor);
   }
