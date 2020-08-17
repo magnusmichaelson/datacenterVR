@@ -50,7 +50,6 @@
   <body>
     <script src="./dependencies/three.min.js"></script>
     <script src="./dependencies/PointerLockControls.js"></script>
-    <script src="./blockData.js"></script>
     <div id = "main">
       <div id="top">
         <h2 id="roomName"></h2>
@@ -70,8 +69,8 @@
         </select>
         <label for="mountOverlay">mount :</label>
         <select id="mountOverlay">
-          <option value="objectModelCategory">Model Category</option>
           <option value="default">Plain</option>
+          <option value="objectModelCategory">Model Category</option>
           <option value="objectModelEndOfLife">Model End of Life</option>
           <option value="objectLastAudit">u_last_audit_date - 2 year</option>
         </select>
@@ -97,6 +96,25 @@
   console.log(allData);
   var powerData = fakePower(allData);
   console.log(powerData["racks"]);
+  // test data
+  powerData["rack_19_5"] = {
+    "average": 1,
+    "maximum": 1  
+  }
+  allData["racks"]["rack_19_5"]["design"] = {
+    "u_rack_state": "Landed",
+    "u_max_alloc": 10,
+    "u_qty_alloc": 12,
+    "u_environment": "no data",
+    "u_allocated_kw": 0,
+    "u_equip_kw_consume_design": 0,
+    "u_equip_design_kw": 0,
+    "u_facil_design_kw": 0
+  }
+
+
+
+
 
   var anchor;
   var camera;
@@ -133,6 +151,7 @@
   rendererResize()
   window.addEventListener( 'resize', rendererResize, false );
 	/*
+  // servicenow stuff
   if (roomSysid == null) {
     urlParamMissingWarning();
   } else {
@@ -515,9 +534,6 @@
     if (overlayValue == 'default'){
       overlayRackDefault();
     }
-    if (overlayValue == 'rackCapacity'){
-      overlayRackCapacity();
-    }
     if (overlayValue == 'PowerAverageConsume'){
       overlayRackPower('average','consume');
     }
@@ -536,25 +552,109 @@
     if (overlayValue == 'PowerMaximumFacility'){
       overlayRackPower('maximum','facility');
     }
+    if (overlayValue == 'rackCapacity'){
+      overlayRackCapacity();
+    }
   }
   /**
-   * @function mountDropDown
-   * @description triggers overlays when dropdowns are changed
+   * @function overlayRackPower
+   * @description pulls power data from the server and triggers visualisation
+   * @param {string} visualisationType - either average or maximum
    */
-  function mountDropDown(){
-    var overlayValue = document.getElementById('mountOverlay').value;
-    if (overlayValue == 'default'){
-      overlaymountDefault();
+  function overlayRackPower(averageOrMax,ratingType) {
+    if (Object.keys(powerData["racks"]).length > 0) {
+      powerRender(allData,powerData,averageOrMax,ratingType);
+    } else {
+      serverLink.data.roomName = roomName;
+      serverLink.data.getPower = true;
+      serverLink.server.update().then(function (d) {
+        serverLink.data.getPower = false;
+        powerData = serverLink.data.powerIqMax;
+        powerRender(allData,powerData,averageOrMax,ratingType);
+      });
     }
-    if (overlayValue == 'objectModelCategory'){
-      overlayObjectModelCategory();
-    }
-    if (overlayValue == 'objectModelEndOfLife'){
-      overlayObjectModelEndOfLife();
-    }
-    if (overlayValue == 'objectLastAudit'){
-      overlayObjectLastAudit();
-    }
+  }
+  /**
+   * @function powerRender
+   * @description colors all objects in a rack according to the racks power usage
+   * @param {Array.<Object>} rackData - data about the racks
+   * @param {Object} powerData - the power data
+   * @param {string} visualisationType - either average or maximum
+   */
+  function powerRender(allData,powerData,averageOrMax,ratingType){
+    var grey = 0.8;
+    var longMessage = "";
+    var powerDesign = 0;
+    var powerUsage = 0;
+    var rack = {};
+    var rackEnvironmentValue = document.getElementById('rackFilter').value;
+    var roomMaximum = powerData["room_maximum"];
+    var shortMessage = "";
+    var singleRackReport = [];
+    Object.keys(allData["racks"]).forEach(function(rackName){
+      // power usage
+      if (powerData["racks"].hasOwnProperty(rackName)){
+        if (averageOrMax == "average"){
+          powerUsage = powerData["racks"][rackName]["average"];
+        } else {
+          powerUsage = powerData["racks"][rackName]["maximum"];
+        }
+      } else {
+        powerUsage = "no data";
+      }
+      // power rating
+      if (allData["racks"][rackName]["design"].hasOwnProperty("u_equip_design_kw")){
+        if (ratingType == "equip"){
+          powerDesign = allData["racks"][rackName]["design"]["u_equip_design_kw"]
+        }
+        if (ratingType == "facility"){
+          powerDesign = allData["racks"][rackName]["design"]["u_facil_design_kw"]
+        }
+        if (ratingType == "consume"){
+          powerDesign = allData["racks"][rackName]["design"]["u_equip_kw_consume_design"]
+        }
+      } else {
+        powerDesign = "no data";
+      }
+      // default for unselected
+      singleRackReport = [1,1,1,"",""];
+      if (rackEnvironmentValue == 'all' || rackEnvironmentValue == allData["racks"][rackName]["design"]["u_environment"]){
+        if (powerDesign == "no data" && powerUsage == "no data"){
+          shortMessage = "";
+          longMessage = "Rack has no design data and no power data";
+          singleRackReport = [grey,grey,grey,shortMessage,longMessage];
+        }
+        if (powerDesign == "no data" && powerUsage != "no data"){
+          tempColor = spectrumBluePink(powerUsage / roomMaximum);
+          shortMessage = powerUsage.toFixed(2) + " / NA KW";
+          longMessage = "Rack has no design data, only power actuals";
+          singleRackReport = [tempColor[0],tempColor[1],tempColor[2],shortMessage,longMessage];
+        }
+        if (powerDesign == 0 && powerUsage == "no data"){
+          shortMessage = "";
+          longMessage = "Rack is unallocated";
+          singleRackReport = [grey,grey,grey,shortMessage,longMessage];
+        }
+        if (powerDesign == 0 && powerUsage != "no data"){
+          shortMessage = powerUsage.toFixed(2) + " / 0 KW";
+          longMessage = "Rack is unallocated, but is using power anyway";
+          singleRackReport = [1,0,0,shortMessage,longMessage];
+        }
+        if (powerDesign != "no data" && powerDesign > 0 && powerUsage == "no data"){
+          shortMessage = "NA / " + powerDesign + " KW";
+          longMessage = "Rack has design data, but no power data";
+          singleRackReport = [grey,grey,grey,shortMessage,longMessage];
+        }
+        if (powerDesign != "no data" && powerDesign > 0 && powerUsage != "no data"){
+          tempColor = spectrumGreenRed(powerUsage / powerDesign);
+          shortMessage = powerUsage.toFixed(2) + " / " + powerDesign + " KW";
+          longMessage = "Rack has design data and power actuals";
+          singleRackReport = [tempColor[0],tempColor[1],tempColor[2],shortMessage,longMessage];
+        }
+      }
+      rackColor[rackName] = singleRackReport;
+    });
+    applyColor(allData["racks"],rackColor);
   }
   /**
    * @function overlayRackDefault
@@ -594,167 +694,24 @@
     });
     applyColor(allData["racks"],rackColor);
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   /**
-   * @function overlayRackPower
-   * @description pulls power data from the server and triggers visualisation
-   * @param {string} visualisationType - either average or maximum
+   * @function mountDropDown
+   * @description triggers overlays when dropdowns are changed
    */
-  function overlayRackPower(averageOrMax,ratingType) {
-    if (Object.keys(powerData["racks"]).length > 0) {
-      powerRender(allData,powerData,averageOrMax,ratingType);
-    } else {
-      serverLink.data.roomName = roomName;
-      serverLink.data.getPower = true;
-      serverLink.server.update().then(function (d) {
-        serverLink.data.getPower = false;
-        powerData = serverLink.data.powerIqMax;
-        powerRender(allData,powerData,averageOrMax,ratingType);
-      });
+  function mountDropDown(){
+    var overlayValue = document.getElementById('mountOverlay').value;
+    if (overlayValue == 'default'){
+      overlaymountDefault();
     }
-  }
-  /**
-   * @function powerRender
-   * @description colors all objects in a rack according to the racks power usage
-   * @param {Array.<Object>} rackData - data about the racks
-   * @param {Object} powerData - the power data
-   * @param {string} visualisationType - either average or maximum
-   */
-  function powerRender(allData,powerData,averageOrMax,ratingType){
-    var rackEnvironmentValue = document.getElementById('rackFilter').value;
-    var color = [];
-    var rack = {};
-    var powerUsage = 0;
-    var powerRated = 0;
-    var roomMaximum = powerData["room_maximum"];
-    Object.keys(allData["racks"]).forEach(function(rackName){
-      // power usage
-      if (powerData["racks"].hasOwnProperty(rackName)){
-        if (averageOrMax == "average"){
-          powerUsage = powerData["racks"][rackName]["average"];
-        } else {
-          powerUsage = powerData["racks"][rackName]["maximum"];
-        }
-      } else {
-        powerUsage = "no data";
-      }
-      // power rating
-      if (allData["racks"][rackName]["design"].hasOwnProperty("u_equip_design_kw")){
-        if (ratingType == "equip"){
-          powerRated = allData["racks"][rackName]["design"]["u_equip_design_kw"]
-        }
-        if (ratingType == "facility"){
-          powerRated = allData["racks"][rackName]["design"]["u_facil_design_kw"]
-        }
-        if (ratingType == "consume"){
-          powerRated = allData["racks"][rackName]["design"]["u_equip_kw_consume_design"]
-        }
-      } else {
-        powerRated = "no data";
-      }
-      color = [1,1,1]
-      if (rackEnvironmentValue == 'all' || rackEnvironmentValue == allData["racks"][rackName]["design"]["u_environment"]){
-        if (powerRated == "no data"){
-          color = powerWithoutDesign(rackName,powerUsage,roomMaximum);
-        } else {
-          color = powerWithDesign(rackName,powerUsage,powerRated);
-        }
-      }
-      rackColor[rackName] = color;
-    });
-    applyColor(allData["racks"],rackColor);
-  }
-  /**
-   * @function xxxxxx
-   * @description xxxxxxxxx
-   * @param {string} xxxxx - xxxxx
-   * @param {boolean} xxxxx - xxxxx
-   * @param {number} xxxxx - xxxxx
-   * @param {Object} xxxxx - xxxxx
-   * @param {Array.<Object>} xxxxx - xxxxx
-   * @return {string} xxxxx - xxxxx
-   */
-  function powerWithoutDesign(rackName,powerUsage,roomMaximum){
-    var tempColor = [];
-    var color = [0,0,0];
-    if (powerUsage == "no data"){
-      color = [0.8,0.8,0.8,"Rack has no design data and no power data"];
-    } else {
-      tempColor = spectrumBluePink(powerUsage / roomMaximum);
-      color = [tempColor[0],tempColor[1],tempColor[2],"Rack has no design data, only power actuals"]
+    if (overlayValue == 'objectModelCategory'){
+      overlayObjectModelCategory();
     }
-    return color;
-  }
-  /**
-   * @function xxxxxx
-   * @description xxxxxxxxx
-   * @param {string} xxxxx - xxxxx
-   * @param {boolean} xxxxx - xxxxx
-   * @param {number} xxxxx - xxxxx
-   * @param {Object} xxxxx - xxxxx
-   * @param {Array.<Object>} xxxxx - xxxxx
-   * @return {string} xxxxx - xxxxx
-   */
-  function powerWithDesign(rackName,powerUsage,powerRated){
-    var color = [0,0,0];
-    if (powerRated == 0){
-      color = powerUnallocated(rackName,powerUsage,powerRated);
-    } else {
-      color = powerAllocated(rackName,powerUsage,powerRated);
+    if (overlayValue == 'objectModelEndOfLife'){
+      overlayObjectModelEndOfLife();
     }
-    return color;
-  }
-  /**
-   * @function xxxxxx
-   * @description xxxxxxxxx
-   * @param {string} xxxxx - xxxxx
-   * @param {boolean} xxxxx - xxxxx
-   * @param {number} xxxxx - xxxxx
-   * @param {Object} xxxxx - xxxxx
-   * @param {Array.<Object>} xxxxx - xxxxx
-   * @return {string} xxxxx - xxxxx
-   */
-  function powerUnallocated(rackName,powerUsage,powerRated){
-    var color = [0,0,0];
-    color = [0.8,0.8,0.8,"Rack is unallocated"];
-    if (powerUsage != "no data" && powerUsage > 0){
-      color = [1,0,0,"Rack is unallocated, but is using power anyway"];
+    if (overlayValue == 'objectLastAudit'){
+      overlayObjectLastAudit();
     }
-    return color;
-  }
-  /**
-   * @function xxxxxx
-   * @description xxxxxxxxx
-   * @param {string} xxxxx - xxxxx
-   * @param {boolean} xxxxx - xxxxx
-   * @param {number} xxxxx - xxxxx
-   * @param {Object} xxxxx - xxxxx
-   * @param {Array.<Object>} xxxxx - xxxxx
-   * @return {string} xxxxx - xxxxx
-   */
-  function powerAllocated(rackName,powerUsage,powerRated){
-    var tempColor = [];
-    var color = [0,0,0];
-    if (powerUsage != "no data"){
-      tempColor = spectrumGreenRed(powerUsage / powerRated);
-      color = [tempColor[0],tempColor[1],tempColor[2],"Rack has design data and power actuals"];
-    } else {
-      color = [0.8,0.8,0.8,"Rack has design data, but no power data"]
-    }
-    return color;
   }
   /**
    * @function overlayDefault
@@ -888,7 +845,7 @@
     var canvasWidth = window.innerWidth - 4;
     var canvasHeight = window.innerHeight - 4;
     var topHeight = 40;
-    var lowerHeight = 20;
+    var lowerHeight = 68;
     var centerHeight = canvasHeight - topHeight - lowerHeight;
     // top
     document.getElementById("top").style.position = 'absolute';
@@ -1196,7 +1153,21 @@ z_location: 1.0457500000000002
         anchor.setAttribute('href',"/nav_to.do?uri=%2Fsp%3Fid%3Ddcscapeng_rackview%26rackSysid%3D" + blockData["sys_id"]);
         anchor.innerText = selectedCurrentName;
         lower.appendChild(anchor);
-        preformatted = document.createElement("PRE");
+        console.log(rackColor[selectedCurrentName])
+        if (rackColor[selectedCurrentName].length > 3 && rackColor[selectedCurrentName][3] != ""){
+          linebreak = document.createElement("br");
+          lower.appendChild(linebreak);
+          textNode = document.createTextNode("     " + rackColor[selectedCurrentName][3]);
+          lower.appendChild(textNode);
+        }
+        if (rackColor[selectedCurrentName].length > 4 && rackColor[selectedCurrentName][4] != ""){
+          linebreak = document.createElement("br");
+          lower.appendChild(linebreak);
+          textNode = document.createTextNode("     " + rackColor[selectedCurrentName][4]);
+          lower.appendChild(textNode);
+        }
+        //preformatted = document.createElement("PRE");
+        //preformatted.appendChild(textNode);
         //linebreak = document.createElement("br");
         //textNode = document.createTextNode("Rack name: " + selectedCurrentName +"\n");
         //preformatted.appendChild(textNode);
@@ -1215,6 +1186,12 @@ z_location: 1.0457500000000002
       lower.innerHTML = "Room: " + allData["room"]["room_name"];
     }
   }
+
+  ///////////////////////////////////////////////////////////
+  //                                                       //
+  //  everything below this point is generating fake data  //
+  //                                                       //
+  ///////////////////////////////////////////////////////////
 
   function fakeAllData(){
     var allData = {};
