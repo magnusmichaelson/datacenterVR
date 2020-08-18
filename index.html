@@ -1173,12 +1173,13 @@ function rightMouseClick(event){
   ghost.appendChild(select)
   optionList.push(['Open Asset Record','openAssetRecord',false]);
   optionList.push(['Open CI Record','openCiRecord',false]);
-  optionList.push(['Request Smarthands Support','requestSmarthandsSupport',false]);
+  optionList.push(['Reboot Server','rebootServer',false]);
   optionList.push(['Request Provisioning','requestProvisioning',false]);
+  optionList.push(['Request Smarthands Support','requestSmarthandsSupport',false]);
+  optionList.push(['Reserve Space','reserveSpace',false]);
   optionList.push(['Run QA Test Suite','runQaTestSuite',false]);
   optionList.push(['Wipe Drive','wipeDrive',false]);
-  optionList.push(['Reserve Space','reserveSpace',false]);
-  optionList.push(['Reboot Server','rebootServer',false]);
+  optionList.push(['Cancel','cancel',false]);
   optionList.forEach(function(option){
     optionElement = document.createElement('option');
     optionElement.text = option[0];
