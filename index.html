@@ -1182,19 +1182,26 @@ function rightMouseClick(event){
 				button.type = 'button';
 				button.className = "btn-group";
         button.innerHTML = title;
-        // temporary, replace with real functions
-        button.addEventListener('click', onScreenMenu, false);
 				document.getElementById('ghost').appendChild(button);
   }
   addButton('Open Asset Record','openAssetRecord');
+  document.getElementById('openAssetRecord').addEventListener('click', onScreeMenuStop, false);
   addButton('Open CI Record','openCiRecord');
+  document.getElementById('openCiRecord').addEventListener('click', onScreeMenuStop, false);
   addButton('Reboot Server','rebootServer');
+  document.getElementById('rebootServer').addEventListener('click', onScreeMenuStop, false);
   addButton('Request Provisioning','requestProvisioning');
+  document.getElementById('requestProvisioning').addEventListener('click', onScreeMenuStop, false);
   addButton('Request Smarthands Support','requestSmarthandsSupport');
+  document.getElementById('requestSmarthandsSupport').addEventListener('click', onScreeMenuStop, false);
   addButton('Reserve Space','reserveSpace');
+  document.getElementById('reserveSpace').addEventListener('click', onScreeMenuStop, false);
   addButton('Run QA Test Suite','runQaTestSuite');
+  document.getElementById('runQaTestSuite').addEventListener('click', onScreeMenuStop, false);
   addButton('Wipe Drive','wipeDrive');
+  document.getElementById('wipeDrive').addEventListener('click', onScreeMenuStop, false);
   addButton('Cancel','cancel');
+  document.getElementById('cancel').addEventListener('click', onScreeMenuStop, false);
   onScreenMenuStart();
 }
 
