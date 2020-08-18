@@ -238,30 +238,14 @@
       moveUp = false;
       moveDown = false;
       prevTime = performance.now();
-      document.addEventListener( 'click', inspectHardware, false);
+      document.addEventListener( 'click', mouseClick, false);
       //document.addEventListener('mousewheel', mouseWheelZoom, false);
-      document.addEventListener('contextmenu', rightclick, false);
     } else {
-      document.removeEventListener( 'click', inspectHardware, false );
+      document.removeEventListener( 'click', mouseClick, false );
       //document.removeEventListener('mousewheel', mouseWheelZoom, false);
       controlsEnabled = false;
     }
   }
-  /**
-   * @function xxxxxx
-   * @description xxxxxxxxx
-   * @param {string} xxxxx - xxxxx
-   * @param {boolean} xxxxx - xxxxx
-   * @param {number} xxxxx - xxxxx
-   * @param {Object} xxxxx - xxxxx
-   * @param {Array.<Object>} xxxxx - xxxxx
-   * @return {string} xxxxx - xxxxx
-   */
-  function rightclick(){
-    console.log("right click")
-  }
-
-
   /**
    * @function generateScene
    * @description generate everything in the 3D scene
@@ -1121,10 +1105,184 @@ z_location: 1.0457500000000002
     renderer.render( scene, camera );
   }
   /**
-   * @function inspectHardware
+   * @function mouseClick
    * @description opens a page on the selected object
    */
-  function inspectHardware(event){
+  function mouseClick(event){
+    if (event.button == 0){
+      leftMouseClick(event);
+    }
+    if (event.button == 1){
+      middleMouseClick(event);
+    }
+    if (event.button == 2){
+      rightMouseClick(event);
+    }
+  }
+
+function middleMouseClick(event){
+  var blockData = {};
+  var anchor;
+  var linebreak;
+  var lower;
+  var preformatted;
+  var textNode;
+  lower = document.getElementById("lower");
+  while (lower.firstChild) {
+    lower.removeChild(lower.lastChild);
+  }
+  textNode = document.createTextNode("Middle mouse button clicked");
+  lower.appendChild(textNode);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function rightMouseClick(event){
+  var ghost;
+  var optionElement;
+  var optionList = [];
+  var select;
+  ghost = document.getElementById("ghost");
+  onScreenMenuStart();
+  select = document.createElement("select");
+  select.id = 'onScreenMenu'
+  ghost.appendChild(select)
+  optionList.push(['Open Asset Record','openAssetRecord',false]);
+  optionList.push(['Open CI Record','openCiRecord',false]);
+  optionList.push(['Request Smarthands Support','requestSmarthandsSupport',false]);
+  optionList.push(['Request Provisioning','requestProvisioning',false]);
+  optionList.push(['Run QA Test Suite','runQaTestSuite',false]);
+  optionList.push(['Wipe Drive','wipeDrive',false]);
+  optionList.push(['Reserve Space','reserveSpace',false]);
+  optionList.push(['Reboot Server','rebootServer',false]);
+  optionList.forEach(function(option){
+    optionElement = document.createElement('option');
+    optionElement.text = option[0];
+    optionElement.value = option[1];
+    optionElement.disabled = option[2];
+    select.appendChild(optionElement);
+  });
+  select.addEventListener('change', onScreenMenu, false);
+}
+
+function onScreenMenu(){
+  var linebreak;
+  var lower;
+  var textNode;
+  var onScreenMenuSelection = document.getElementById('onScreenMenu').value;
+  lower = document.getElementById("lower");
+  while (lower.firstChild) {
+    lower.removeChild(lower.lastChild);
+  }
+  if (onScreenMenuSelection == 'openAssetRecord'){
+    if (selectedCurrentName){
+      textNode = document.createTextNode("Open Asset Record - " + selectedCurrentName);
+      lower.appendChild(textNode);
+    }
+  }
+  if (onScreenMenuSelection == 'openCiRecord'){
+    if (selectedCurrentName){
+      textNode = document.createTextNode("Open CI Record - " + selectedCurrentName);
+      lower.appendChild(textNode);
+    }
+  }
+  if (onScreenMenuSelection == 'requestSmarthandsSupport'){
+    if (selectedCurrentName){
+      textNode = document.createTextNode("Request Smarthands Support - " + selectedCurrentName);
+      lower.appendChild(textNode);
+    }
+  }
+  if (onScreenMenuSelection == 'requestProvisioning'){
+    if (selectedCurrentName){
+      textNode = document.createTextNode("Request Provisioning - " + selectedCurrentName);
+      lower.appendChild(textNode);
+    }
+  }
+  if (onScreenMenuSelection == 'runQaTestSuite'){
+    if (selectedCurrentName){
+      textNode = document.createTextNode("Run QA Test Suite " + selectedCurrentName);
+      lower.appendChild(textNode);
+    }
+  }
+  if (onScreenMenuSelection == 'wipeDrive'){
+    if (selectedCurrentName){
+      textNode = document.createTextNode("Wipe Drive - " + selectedCurrentName);
+      lower.appendChild(textNode);
+    }
+  }
+  if (onScreenMenuSelection == 'reserveSpace'){
+    if (selectedCurrentName){
+      textNode = document.createTextNode("Reserve Space - " + selectedCurrentName);
+      lower.appendChild(textNode);
+    }
+  }
+  if (onScreenMenuSelection == 'rebootServer'){
+    if (selectedCurrentName){
+      textNode = document.createTextNode("Reboot Server - " + selectedCurrentName);
+      lower.appendChild(textNode);
+    }
+  }
+  onScreeMenuStop()
+}
+
+function onScreenMenuStart(){
+  document.exitPointerLock();
+  document.getElementById('ghost').removeEventListener( 'click', pointerLockRequest, false );
+}
+
+function onScreeMenuStop(){
+  var ghost;
+  console.log('test')
+  ghost = document.getElementById("ghost");
+  while (ghost.firstChild) {
+    ghost.removeChild(ghost.lastChild);
+  }
+  document.getElementById('ghost').addEventListener( 'click', pointerLockRequest, false );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function leftMouseClick(event){
     var blockData = {};
     var anchor;
     var linebreak;
@@ -1157,7 +1315,6 @@ z_location: 1.0457500000000002
         anchor.setAttribute('href',"/nav_to.do?uri=%2Fsp%3Fid%3Ddcscapeng_rackview%26rackSysid%3D" + blockData["sys_id"]);
         anchor.innerText = selectedCurrentName;
         lower.appendChild(anchor);
-        console.log(rackColor[selectedCurrentName])
         if (rackColor[selectedCurrentName].length > 3 && rackColor[selectedCurrentName][3] != ""){
           linebreak = document.createElement("br");
           lower.appendChild(linebreak);
