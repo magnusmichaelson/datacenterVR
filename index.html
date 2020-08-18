@@ -45,6 +45,15 @@
         color: rgb(0, 10, 95);
         text-decoration: none;
       }
+      .btn-group{
+        background-color: #4CAF50; /* Green background */
+        border: 1px solid green; /* Green border */
+        color: white; /* White text */
+        padding: 10px 24px; /* Some padding */
+        cursor: pointer; /* Pointer/hand icon */
+        width: 25%; /* Set a width if needed */
+        display: block; /* Make the buttons appear below each other */
+      }
     </style>
   </head>
   <body>
@@ -1166,86 +1175,36 @@ function rightMouseClick(event){
   var optionElement;
   var optionList = [];
   var select;
-  ghost = document.getElementById("ghost");
+  var button;
+  var addButton = function(title,id){
+				button = document.createElement("BUTTON");
+				button.id = id;
+				button.type = 'button';
+				button.className = "btn-group";
+        button.innerHTML = title;
+        // temporary, replace with real functions
+        button.addEventListener('click', onScreenMenu, false);
+				document.getElementById('ghost').appendChild(button);
+  }
+  addButton('Open Asset Record','openAssetRecord');
+  addButton('Open CI Record','openCiRecord');
+  addButton('Reboot Server','rebootServer');
+  addButton('Request Provisioning','requestProvisioning');
+  addButton('Request Smarthands Support','requestSmarthandsSupport');
+  addButton('Reserve Space','reserveSpace');
+  addButton('Run QA Test Suite','runQaTestSuite');
+  addButton('Wipe Drive','wipeDrive');
+  addButton('Cancel','cancel');
   onScreenMenuStart();
-  select = document.createElement("select");
-  select.id = 'onScreenMenu'
-  ghost.appendChild(select)
-  optionList.push(['Open Asset Record','openAssetRecord',false]);
-  optionList.push(['Open CI Record','openCiRecord',false]);
-  optionList.push(['Reboot Server','rebootServer',false]);
-  optionList.push(['Request Provisioning','requestProvisioning',false]);
-  optionList.push(['Request Smarthands Support','requestSmarthandsSupport',false]);
-  optionList.push(['Reserve Space','reserveSpace',false]);
-  optionList.push(['Run QA Test Suite','runQaTestSuite',false]);
-  optionList.push(['Wipe Drive','wipeDrive',false]);
-  optionList.push(['Cancel','cancel',false]);
-  optionList.forEach(function(option){
-    optionElement = document.createElement('option');
-    optionElement.text = option[0];
-    optionElement.value = option[1];
-    optionElement.disabled = option[2];
-    select.appendChild(optionElement);
-  });
-  select.addEventListener('change', onScreenMenu, false);
 }
 
 function onScreenMenu(){
   var linebreak;
   var lower;
   var textNode;
-  var onScreenMenuSelection = document.getElementById('onScreenMenu').value;
   lower = document.getElementById("lower");
   while (lower.firstChild) {
     lower.removeChild(lower.lastChild);
-  }
-  if (onScreenMenuSelection == 'openAssetRecord'){
-    if (selectedCurrentName){
-      textNode = document.createTextNode("Open Asset Record - " + selectedCurrentName);
-      lower.appendChild(textNode);
-    }
-  }
-  if (onScreenMenuSelection == 'openCiRecord'){
-    if (selectedCurrentName){
-      textNode = document.createTextNode("Open CI Record - " + selectedCurrentName);
-      lower.appendChild(textNode);
-    }
-  }
-  if (onScreenMenuSelection == 'requestSmarthandsSupport'){
-    if (selectedCurrentName){
-      textNode = document.createTextNode("Request Smarthands Support - " + selectedCurrentName);
-      lower.appendChild(textNode);
-    }
-  }
-  if (onScreenMenuSelection == 'requestProvisioning'){
-    if (selectedCurrentName){
-      textNode = document.createTextNode("Request Provisioning - " + selectedCurrentName);
-      lower.appendChild(textNode);
-    }
-  }
-  if (onScreenMenuSelection == 'runQaTestSuite'){
-    if (selectedCurrentName){
-      textNode = document.createTextNode("Run QA Test Suite " + selectedCurrentName);
-      lower.appendChild(textNode);
-    }
-  }
-  if (onScreenMenuSelection == 'wipeDrive'){
-    if (selectedCurrentName){
-      textNode = document.createTextNode("Wipe Drive - " + selectedCurrentName);
-      lower.appendChild(textNode);
-    }
-  }
-  if (onScreenMenuSelection == 'reserveSpace'){
-    if (selectedCurrentName){
-      textNode = document.createTextNode("Reserve Space - " + selectedCurrentName);
-      lower.appendChild(textNode);
-    }
-  }
-  if (onScreenMenuSelection == 'rebootServer'){
-    if (selectedCurrentName){
-      textNode = document.createTextNode("Reboot Server - " + selectedCurrentName);
-      lower.appendChild(textNode);
-    }
   }
   onScreeMenuStop()
 }
