@@ -1102,7 +1102,7 @@ z_location: 1.0457500000000002
           scene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
         }
         if (currentBlockType == "rack"){
-          scene.getObjectByName(selectedBlock).material.color.setRGB(0.9, 0.9, 0.9);
+          scene.getObjectByName(selectedBlock).material.color.setRGB(0.8, 0.8, 0.8);
         }
         if (currentBlockType == "empty"){
           scene.getObjectByName(selectedBlock).material.color.setRGB(0.3, 0.3, 0.3);
@@ -1228,7 +1228,7 @@ function rightMouseClick(event){
   }
   if (blockType == "rack"){
     addButton('Rack visualisation','rackVisual','btn-group-green');
-    document.getElementById('openCiRecord').addEventListener('click', onScreeMenuStop, false);
+    document.getElementById('rackVisual').addEventListener('click', onScreeMenuStop, false);
   } else {
     addButton('Rack visualisation','rackVisual','btn-group-grey');
   }
@@ -1533,28 +1533,28 @@ function onScreeMenuStop(){
     Object.keys(rackData).forEach(function(rackName){
       rack = rackData[rackName];
       if (rack["facing"] == 0){
-        xLocation = rack["block"]["x_location"] - (rack["block"]["x_dimension"] * 0.5) - 0.006;
+        xLocation = rack["block"]["x_location"] - (rack["block"]["x_dimension"] * 0.5) - 0.009;
         yLocation = rack["block"]["y_location"];
-        xDimension = 0.01;
+        xDimension = 0.016;
         yDimension = rack["block"]["y_dimension"] * 0.9;
       }
       if (rack["facing"] == 1){
         xLocation = rack["block"]["x_location"];
-        yLocation = rack["block"]["y_location"] + (rack["block"]["y_dimension"] * 0.5) + 0.006;
+        yLocation = rack["block"]["y_location"] + (rack["block"]["y_dimension"] * 0.5) + 0.009;
         xDimension = rack["block"]["x_dimension"] * 0.9;
-        yDimension = 0.01;
+        yDimension = 0.016;
       }
       if (rack["facing"] == 2){
-        xLocation = rack["block"]["x_location"] + (rack["block"]["x_dimension"] * 0.5) + 0.006;
+        xLocation = rack["block"]["x_location"] + (rack["block"]["x_dimension"] * 0.5) + 0.009;
         yLocation = rack["block"]["y_location"];
-        xDimension = 0.01;
+        xDimension = 0.016;
         yDimension = rack["block"]["y_dimension"] * 0.9;
       }
       if (rack["facing"] == 3){
         xLocation = rack["block"]["x_location"];
-        yLocation = rack["block"]["y_location"] - (rack["block"]["y_dimension"] * 0.5) - 0.006;
+        yLocation = rack["block"]["y_location"] - (rack["block"]["y_dimension"] * 0.5) - 0.009;
         xDimension = rack["block"]["x_dimension"] * 0.9;
-        yDimension = 0.01;
+        yDimension = 0.016;
       }
       zStart = rack["block"]["z_location"] - (rack["block"]["z_dimension"] * 0.5) + (unitHeight * 2);
       for (zloop = 0; zloop < 10; zloop++){
@@ -1722,28 +1722,28 @@ function onScreeMenuStop(){
     Object.keys(rackData).forEach(function(rackName){
       rack = rackData[rackName];
       if (rack["facing"] == 0){
-        xLocation = rack["block"]["x_location"] - (rack["block"]["x_dimension"] * 0.5) - 0.001;
+        xLocation = rack["block"]["x_location"] - (rack["block"]["x_dimension"] * 0.5) - 0.002;
         yLocation = rack["block"]["y_location"];
-        xDimension = 0.01;
+        xDimension = 0.002;
         yDimension = rack["block"]["y_dimension"] * 0.9;
       }
       if (rack["facing"] == 1){
         xLocation = rack["block"]["x_location"];
-        yLocation = rack["block"]["y_location"] + (rack["block"]["y_dimension"] * 0.5) + 0.001;
+        yLocation = rack["block"]["y_location"] + (rack["block"]["y_dimension"] * 0.5) + 0.002;
         xDimension = rack["block"]["x_dimension"] * 0.9;
-        yDimension = 0.01;
+        yDimension = 0.002;
       }
       if (rack["facing"] == 2){
-        xLocation = rack["block"]["x_location"] + (rack["block"]["x_dimension"] * 0.5) + 0.001;
+        xLocation = rack["block"]["x_location"] + (rack["block"]["x_dimension"] * 0.5) + 0.002;
         yLocation = rack["block"]["y_location"];
-        xDimension = 0.01;
+        xDimension = 0.002;
         yDimension = rack["block"]["y_dimension"] * 0.9;
       }
       if (rack["facing"] == 3){
         xLocation = rack["block"]["x_location"];
-        yLocation = rack["block"]["y_location"] - (rack["block"]["y_dimension"] * 0.5) - 0.001;
+        yLocation = rack["block"]["y_location"] - (rack["block"]["y_dimension"] * 0.5) - 0.002;
         xDimension = rack["block"]["x_dimension"] * 0.9;
-        yDimension = 0.01;
+        yDimension = 0.002;
       }
       zStart = rack["block"]["z_location"] - (rack["block"]["z_dimension"] * 0.5) + (unitHeight * 2);
       for (zloop = 0; zloop < 11; zloop++){
