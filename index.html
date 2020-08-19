@@ -1314,13 +1314,14 @@ function onScreeMenuStop(){
     var lower;
     var preformatted;
     var textNode;
+    var blockType = "";
     lower = document.getElementById("lower");
     while (lower.firstChild) {
       lower.removeChild(lower.lastChild);
     }
     if (selectedBlock){
-      selectedBlock = scene.getObjectByName(selectedBlock);
-      if (selectedBlock.userData.blockType == "mount"){
+    blockType = scene.getObjectByName(selectedBlock).userData.blockType;
+      if (blockType == "mount"){
         blockData = allData["mount"][selectedBlock];
         anchor = document.createElement('a');
         anchor.setAttribute('href',"/nav_to.do?uri=%2Falm_hardware.do%3Fsys_id%3D" + blockData["sys_id"]);
@@ -1334,7 +1335,7 @@ function onScreeMenuStop(){
         //preformatted.appendChild(textNode);
         //lower.appendChild(preformatted);
       }
-      if (selectedBlock.userData.blockType == "rack"){
+      if (blockType == "rack"){
         blockData = allData["racks"][selectedBlock];
         anchor = document.createElement('a');
         anchor.setAttribute('href',"/nav_to.do?uri=%2Fsp%3Fid%3Ddcscapeng_rackview%26rackSysid%3D" + blockData["sys_id"]);
@@ -1361,7 +1362,7 @@ function onScreeMenuStop(){
         //preformatted.appendChild(textNode);
         //lower.appendChild(preformatted);
       }
-      if (selectedBlock.userData.blockType == "scene"){
+      if (blockType == "scene"){
         blockData = allData["scene"][selectedBlock];
         anchor = document.createElement('a');
         anchor.setAttribute('href',"/nav_to.do?uri=%2Fu_dcse_vr_scene.do%3Fsys_id%3D" + blockData["sysid"]);
