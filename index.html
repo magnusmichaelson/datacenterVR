@@ -1075,19 +1075,21 @@ z_location: 1.0457500000000002
       if (closestDistance != -1){
         // check if the selected block has changed
         if (closest.object.name != selectedBlock){
-          // unhighlight previous object
-          previousBlockType = scene.getObjectByName(selectedBlock).userData.blockType;
-          if (previousBlockType == "mount"){
-            red = mountColor[selectedBlock][0];
-            green = mountColor[selectedBlock][1];
-            blue = mountColor[selectedBlock][2];
-            scene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
-          }
-          if (previousBlockType == "rack"){
-            scene.getObjectByName(selectedBlock).material.color.setRGB(1, 1, 1);
-          }
-          if (previousBlockType == "empty"){
-            scene.getObjectByName(selectedBlock).material.color.setRGB(0.5, 0.5, 0.5);
+          if (selectedBlock){
+            // unhighlight previous object
+            previousBlockType = scene.getObjectByName(selectedBlock).userData.blockType;
+            if (previousBlockType == "mount"){
+              red = mountColor[selectedBlock][0];
+              green = mountColor[selectedBlock][1];
+              blue = mountColor[selectedBlock][2];
+              scene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
+            }
+            if (previousBlockType == "rack"){
+              scene.getObjectByName(selectedBlock).material.color.setRGB(1, 1, 1);
+            }
+            if (previousBlockType == "empty"){
+              scene.getObjectByName(selectedBlock).material.color.setRGB(0.5, 0.5, 0.5);
+            }
           }
           selectedBlock = closest.object.name;
         }
