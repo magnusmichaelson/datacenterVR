@@ -1048,7 +1048,7 @@ z_location: 1.0457500000000002
     var green;
     var intersects;
     var red;
-    var targetDarkness = 0.6;
+    var targetDarkness = 0.8;
     var cameraPostion = new THREE.Vector3();
     var cameraDirection = new THREE.Vector3();
     requestAnimationFrame( animate );
@@ -1076,6 +1076,7 @@ z_location: 1.0457500000000002
         // check if the selected block has changed
         if (closest.object.name != selectedBlock){
           if (selectedBlock){
+            console.log(selectedBlock)
             // unhighlight previous object
             previousBlockType = scene.getObjectByName(selectedBlock).userData.blockType;
             if (previousBlockType == "mount"){
@@ -1085,7 +1086,10 @@ z_location: 1.0457500000000002
               scene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
             }
             if (previousBlockType == "rack"){
-              scene.getObjectByName(selectedBlock).material.color.setRGB(1, 1, 1);
+              red = rackColor[selectedBlock][0]
+              green = rackColor[selectedBlock][1]
+              blue = rackColor[selectedBlock][2]
+              scene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
             }
             if (previousBlockType == "empty"){
               scene.getObjectByName(selectedBlock).material.color.setRGB(0.5, 0.5, 0.5);
@@ -1102,7 +1106,10 @@ z_location: 1.0457500000000002
           scene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
         }
         if (currentBlockType == "rack"){
-          scene.getObjectByName(selectedBlock).material.color.setRGB(0.8, 0.8, 0.8);
+          red = rackColor[selectedBlock][0] * targetDarkness;
+          green = rackColor[selectedBlock][1] * targetDarkness;
+          blue = rackColor[selectedBlock][2] * targetDarkness;
+          scene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
         }
         if (currentBlockType == "empty"){
           scene.getObjectByName(selectedBlock).material.color.setRGB(0.3, 0.3, 0.3);
