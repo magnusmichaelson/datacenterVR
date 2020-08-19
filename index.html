@@ -314,6 +314,7 @@
     generateBlocks(allData["racks"],"rack",false)
     generateBlocks(allData["scene"],"scene",false)
     generateBlocks(allData["mount"],"mount",true)
+    generateBlocks(allData["empty"],"empty",false)
     rackDropDown();
     mountDropDown();
     rendererResize();
@@ -1193,7 +1194,7 @@ function rightMouseClick(event){
         button.innerHTML = title;
 				document.getElementById('ghost').appendChild(button);
   }
-  addButton('Open Asset Record','openAssetRecord');
+  addButton('Open Asset Record','openAssetRecord','btn-group-grey');
   document.getElementById('openAssetRecord').addEventListener('click', onScreeMenuStop, false);
   addButton('Open CI Record','openCiRecord','btn-group-grey');
   document.getElementById('openCiRecord').addEventListener('click', onScreeMenuStop, false);
@@ -1346,13 +1347,14 @@ function onScreeMenuStop(){
         "camera_rotation_y": -0.224,
         "camera_rotation_z": -2.752
     }; [5.672, 14.360, 2.274, -2.065, -0.224, -2.752]
-    allData["scene"] = fakescene(roomXDimension,roomYDimension);
+    allData["scene"] = fakeScene(roomXDimension,roomYDimension);
     allData["racks"] = fakeRacks(rowMax,rackMax);
-    allData["mount"] = fakemount(allData["racks"]);
+    allData["mount"] = fakeMount(allData["racks"]);
+    allData["empty"] = fakeEmpty(allData["racks"]);
    return allData;
   }
 
-  function fakescene(roomXDimension,roomYDimension){
+  function fakeScene(roomXDimension,roomYDimension){
     var scene = {};
     scene["floor"] = {
       "block": {
@@ -1452,7 +1454,7 @@ function onScreeMenuStop(){
     return scene;
   }
   
-  function fakemount(rackData){
+  function fakeMount(rackData){
     var unitHeight = 0.0445;
     var xLocation = 0;
     var yLocation = 0;
@@ -1595,7 +1597,7 @@ function onScreeMenuStop(){
         }
         mountCount += 1;
       }
-      for (zloop = 0; zloop < 6; zloop++){
+      for (zloop = 0; zloop < 3; zloop++){
         unitCount = 25 + zloop * 4;
         zDimension = (unitHeight * 4) - 0.002;
         zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 2);
@@ -1643,6 +1645,76 @@ function onScreeMenuStop(){
       }
     })
     return mountData;
+  }
+  
+  function fakeEmpty(rackData){
+    var unitHeight = 0.0445;
+    var xLocation = 0;
+    var yLocation = 0;
+    var zLocation = 0;
+    var xDimension = 0;
+    var yDimension = 0;
+    var zDimension = 0;
+    var zStart = 0;
+    var rack = {};
+    var zloop = 0;
+    var emptyCount = 0;
+    var emptyData = {};
+    var unitCount;
+    Object.keys(rackData).forEach(function(rackName){
+      rack = rackData[rackName];
+      if (rack["facing"] == 0){
+        xLocation = rack["block"]["x_location"] - (rack["block"]["x_dimension"] * 0.5) - 0.001;
+        yLocation = rack["block"]["y_location"];
+        xDimension = 0.01;
+        yDimension = rack["block"]["y_dimension"] * 0.9;
+      }
+      if (rack["facing"] == 1){
+        xLocation = rack["block"]["x_location"];
+        yLocation = rack["block"]["y_location"] + (rack["block"]["y_dimension"] * 0.5) + 0.001;
+        xDimension = rack["block"]["x_dimension"] * 0.9;
+        yDimension = 0.01;
+      }
+      if (rack["facing"] == 2){
+        xLocation = rack["block"]["x_location"] + (rack["block"]["x_dimension"] * 0.5) + 0.001;
+        yLocation = rack["block"]["y_location"];
+        xDimension = 0.01;
+        yDimension = rack["block"]["y_dimension"] * 0.9;
+      }
+      if (rack["facing"] == 3){
+        xLocation = rack["block"]["x_location"];
+        yLocation = rack["block"]["y_location"] - (rack["block"]["y_dimension"] * 0.5) - 0.001;
+        xDimension = rack["block"]["x_dimension"] * 0.9;
+        yDimension = 0.01;
+      }
+      zStart = rack["block"]["z_location"] - (rack["block"]["z_dimension"] * 0.5) + (unitHeight * 2);
+      for (zloop = 0; zloop < 13; zloop++){
+        unitCount = 37 + zloop;
+        zDimension = unitHeight - 0.006;
+        zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
+        emptyData[emptyCount] = {
+          "block": {
+            "draw_lines": 0,
+            "rgb_block_red": 0.5,
+            "rgb_block_green": 0.5,
+            "rgb_block_blue": 0.5,
+            "rgb_line_red": 0.0,
+            "rgb_line_green": 0.0,
+            "rgb_line_blue": 0.0,
+            "x_location": xLocation,
+            "y_location": yLocation,
+            "z_location": zLocation,
+            "x_dimension": xDimension,
+            "y_dimension": yDimension,
+            "z_dimension": zDimension
+          },
+          "rack_name": rackName,
+          "unit_height": unitCount
+        }
+        emptyCount += 1;
+      }
+    });
+    return emptyData;
   }
 
   function randomEnvironment(){
