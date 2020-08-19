@@ -158,7 +158,7 @@
   var roomSysid;
   var scene;
   var sceneData = [];
-  var selectedCurrentName = "";
+  var selectedBlock = "";
   var selectedPreviousName = "";
   var serverLink = this;
   var speed = 6;
@@ -1017,12 +1017,31 @@ z_location: 1.0457500000000002
     document.body.appendChild(download);
     download.click();
     document.body.removeChild(download);
+
+
+
+
+
+
+
+
+
+
+
   }
   /**
    * @function animate
    * @description the animation loop
    */
   function animate() {
+    var previousBlockType = "";
+    var currentBlockType = "";
+    var currentRed;
+    var currentGreen;
+    var currentBlue;
+    var previousRed;
+    var previousGreen;
+    var previousBlue;
     var blue;
     var closest;
     var closestDistance = -1;
@@ -1053,46 +1072,41 @@ z_location: 1.0457500000000002
           }
         }
       }
-      // highlighting
       if (closestDistance != -1){
-        selectedCurrentName = closest.object.name
-        if (closest.object.userData.highlightable){
-          //current block is highlightable
-          red = mountColor[selectedCurrentName][0] * targetDarkness;
-          green = mountColor[selectedCurrentName][1] * targetDarkness;
-          blue = mountColor[selectedCurrentName][2] * targetDarkness;
-          scene.getObjectByName(selectedCurrentName).material.color.setRGB(red, green, blue);
-          if (selectedPreviousName != selectedCurrentName){
-            if (selectedPreviousName){
-              red = mountColor[selectedPreviousName][0];
-              green = mountColor[selectedPreviousName][1];
-              blue = mountColor[selectedPreviousName][2];
-              scene.getObjectByName(selectedPreviousName).material.color.setRGB(red, green, blue);
-            }
-            selectedPreviousName = selectedCurrentName;
+        // check if the selected block has changed
+        if (closest.object.name != selectedBlock){
+          // unhighlight previous object
+          previousBlockType = scene.getObjectByName(selectedBlock).userData.blockType;
+          if (previousBlockType == "mount"){
+            red = mountColor[selectedBlock][0];
+            green = mountColor[selectedBlock][1];
+            blue = mountColor[selectedBlock][2];
+            scene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
           }
-
-        } else {
-          // current block is not highlightable
-          if (selectedPreviousName){
-            red = mountColor[selectedPreviousName][0];
-            green = mountColor[selectedPreviousName][1];
-            blue = mountColor[selectedPreviousName][2];
-            scene.getObjectByName(selectedPreviousName).material.color.setRGB(red, green, blue);
-            selectedPreviousName = '';
+          if (previousBlockType == "rack"){
+            scene.getObjectByName(selectedBlock).material.color.setRGB(1, 1, 1);
           }
+          if (previousBlockType == "empty"){
+            scene.getObjectByName(selectedBlock).material.color.setRGB(0.5, 0.5, 0.5);
+          }
+          selectedBlock = closest.object.name;
         }
-      } else {
-        // nothing found in line of sight
-        if (selectedPreviousName){
-          red = mountColor[selectedPreviousName][0];
-          green = mountColor[selectedPreviousName][1];
-          blue = mountColor[selectedPreviousName][2];
-          scene.getObjectByName(selectedPreviousName).material.color.setRGB(red, green, blue);
-          selectedPreviousName = '';
+        // highlight the selected block
+        currentBlockType = scene.getObjectByName(selectedBlock).userData.blockType;
+        if (currentBlockType == "mount"){
+          red = mountColor[selectedBlock][0] * targetDarkness;
+          green = mountColor[selectedBlock][1] * targetDarkness;
+          blue = mountColor[selectedBlock][2] * targetDarkness;
+          scene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
         }
-        selectedCurrentName = '';
+        if (currentBlockType == "rack"){
+          scene.getObjectByName(selectedBlock).material.color.setRGB(0.9, 0.9, 0.9);
+        }
+        if (currentBlockType == "empty"){
+          scene.getObjectByName(selectedBlock).material.color.setRGB(0.3, 0.3, 0.3);
+        }
       }
+      // movement
       var time = performance.now();
       var delta = ( time - prevTime );
       document.getElementById("fps").innerText = "FPS: " + Math.floor(1000 / delta);
@@ -1186,6 +1200,7 @@ function rightMouseClick(event){
   var optionList = [];
   var select;
   var button;
+  var blockType;
   var addButton = function(title,id,className){
 				button = document.createElement("BUTTON");
 				button.id = id;
@@ -1194,22 +1209,63 @@ function rightMouseClick(event){
         button.innerHTML = title;
 				document.getElementById('ghost').appendChild(button);
   }
-  addButton('Open Asset Record','openAssetRecord','btn-group-grey');
-  document.getElementById('openAssetRecord').addEventListener('click', onScreeMenuStop, false);
-  addButton('Open CI Record','openCiRecord','btn-group-grey');
-  document.getElementById('openCiRecord').addEventListener('click', onScreeMenuStop, false);
-  addButton('Reboot Server','rebootServer','btn-group-grey');
-  document.getElementById('rebootServer').addEventListener('click', onScreeMenuStop, false);
-  addButton('Request Provisioning','requestProvisioning','btn-group-grey');
-  document.getElementById('requestProvisioning').addEventListener('click', onScreeMenuStop, false);
-  addButton('Request Smarthands Support','requestSmarthandsSupport','btn-group-grey');
-  document.getElementById('requestSmarthandsSupport').addEventListener('click', onScreeMenuStop, false);
-  addButton('Reserve Space','reserveSpace','btn-group-grey');
-  document.getElementById('reserveSpace').addEventListener('click', onScreeMenuStop, false);
-  addButton('Run QA Test Suite','runQaTestSuite','btn-group-grey');
-  document.getElementById('runQaTestSuite').addEventListener('click', onScreeMenuStop, false);
-  addButton('Wipe Drive','wipeDrive','btn-group-grey');
-  document.getElementById('wipeDrive').addEventListener('click', onScreeMenuStop, false);
+  blockType = scene.getObjectByName(selectedBlock).userData.blockType;
+  console.log(blockType)
+
+  if (blockType == "mount"){
+    addButton('Open Asset Record','openAssetRecord','btn-group-green');
+    document.getElementById('openAssetRecord').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Open Asset Record','openAssetRecord','btn-group-grey');
+  }
+  if (blockType == "mount"){
+    addButton('Open CI Record','openCiRecord','btn-group-green');
+    document.getElementById('openCiRecord').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Open CI Record','openCiRecord','btn-group-grey');
+  }
+  if (blockType == "rack"){
+    addButton('Rack visualisation','rackVisual','btn-group-green');
+    document.getElementById('openCiRecord').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Rack visualisation','rackVisual','btn-group-grey');
+  }
+  if (blockType == "mount"){
+    addButton('Reboot Server','rebootServer','btn-group-green');
+    document.getElementById('rebootServer').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Reboot Server','rebootServer','btn-group-grey');
+  }
+  if (blockType == "mount"){
+    addButton('Request Provisioning','requestProvisioning','btn-group-green');
+    document.getElementById('requestProvisioning').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Request Provisioning','requestProvisioning','btn-group-grey');
+  }
+  if (blockType == "mount"){
+    addButton('Request Smarthands Support','requestSmarthandsSupport','btn-group-green');
+    document.getElementById('requestSmarthandsSupport').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Request Smarthands Support','requestSmarthandsSupport','btn-group-grey');
+  }
+  if (blockType == "empty"){
+    addButton('Reserve Space','reserveSpace','btn-group-green');
+    document.getElementById('reserveSpace').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Reserve Space','reserveSpace','btn-group-grey');
+  }
+  if (blockType == "mount"){
+    addButton('Run QA Test Suite','runQaTestSuite','btn-group-green');
+    document.getElementById('runQaTestSuite').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Run QA Test Suite','runQaTestSuite','btn-group-grey');
+  }
+  if (blockType == "mount"){
+    addButton('Wipe Drive','wipeDrive','btn-group-green');
+    document.getElementById('wipeDrive').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Wipe Drive','wipeDrive','btn-group-grey');
+  }
   addButton('Cancel','cancel','btn-group-green');
   document.getElementById('cancel').addEventListener('click', onScreeMenuStop, false);
   onScreenMenuStart();
@@ -1270,13 +1326,13 @@ function onScreeMenuStop(){
     while (lower.firstChild) {
       lower.removeChild(lower.lastChild);
     }
-    if (selectedCurrentName){
-      selectedBlock = scene.getObjectByName(selectedCurrentName);
+    if (selectedBlock){
+      selectedBlock = scene.getObjectByName(selectedBlock);
       if (selectedBlock.userData.blockType == "mount"){
-        blockData = allData["mount"][selectedCurrentName];
+        blockData = allData["mount"][selectedBlock];
         anchor = document.createElement('a');
         anchor.setAttribute('href',"/nav_to.do?uri=%2Falm_hardware.do%3Fsys_id%3D" + blockData["sys_id"]);
-        anchor.innerText = selectedCurrentName;
+        anchor.innerText = selectedBlock;
         lower.appendChild(anchor);
         preformatted = document.createElement("PRE");
         //linebreak = document.createElement("br");
@@ -1287,34 +1343,34 @@ function onScreeMenuStop(){
         //lower.appendChild(preformatted);
       }
       if (selectedBlock.userData.blockType == "rack"){
-        blockData = allData["racks"][selectedCurrentName];
+        blockData = allData["racks"][selectedBlock];
         anchor = document.createElement('a');
         anchor.setAttribute('href',"/nav_to.do?uri=%2Fsp%3Fid%3Ddcscapeng_rackview%26rackSysid%3D" + blockData["sys_id"]);
-        anchor.innerText = selectedCurrentName;
+        anchor.innerText = selectedBlock;
         lower.appendChild(anchor);
-        if (rackColor[selectedCurrentName].length > 3 && rackColor[selectedCurrentName][3] != ""){
+        if (rackColor[selectedBlock].length > 3 && rackColor[selectedBlock][3] != ""){
           linebreak = document.createElement("br");
           lower.appendChild(linebreak);
-          textNode = document.createTextNode("     " + rackColor[selectedCurrentName][3]);
+          textNode = document.createTextNode("     " + rackColor[selectedBlock][3]);
           lower.appendChild(textNode);
         }
-        if (rackColor[selectedCurrentName].length > 4 && rackColor[selectedCurrentName][4] != ""){
+        if (rackColor[selectedBlock].length > 4 && rackColor[selectedBlock][4] != ""){
           linebreak = document.createElement("br");
           lower.appendChild(linebreak);
-          textNode = document.createTextNode("     " + rackColor[selectedCurrentName][4]);
+          textNode = document.createTextNode("     " + rackColor[selectedBlock][4]);
           lower.appendChild(textNode);
         }
         //preformatted = document.createElement("PRE");
         //preformatted.appendChild(textNode);
         //linebreak = document.createElement("br");
-        //textNode = document.createTextNode("Rack name: " + selectedCurrentName +"\n");
+        //textNode = document.createTextNode("Rack name: " + selectedBlock +"\n");
         //preformatted.appendChild(textNode);
         //textNode = document.createTextNode(JSON.stringify(blockData["display"], null, 2));
         //preformatted.appendChild(textNode);
         //lower.appendChild(preformatted);
       }
       if (selectedBlock.userData.blockType == "scene"){
-        blockData = allData["scene"][selectedCurrentName];
+        blockData = allData["scene"][selectedBlock];
         anchor = document.createElement('a');
         anchor.setAttribute('href',"/nav_to.do?uri=%2Fu_dcse_vr_scene.do%3Fsys_id%3D" + blockData["sysid"]);
         anchor.innerText = "scene";
@@ -1549,7 +1605,7 @@ function onScreeMenuStop(){
         mountCount += 1;
       }
       for (zloop = 0; zloop < 3; zloop++){
-        unitCount = 21 + zloop;
+        unitCount = 20 + zloop;
         zDimension = unitHeight - 0.002;
         zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
         mountName = "network_" + mountCount;
@@ -1597,8 +1653,8 @@ function onScreeMenuStop(){
         }
         mountCount += 1;
       }
-      for (zloop = 0; zloop < 3; zloop++){
-        unitCount = 25 + zloop * 4;
+      for (zloop = 0; zloop < 4; zloop++){
+        unitCount = 23 + zloop * 4;
         zDimension = (unitHeight * 4) - 0.002;
         zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 2);
         mountName = "server_" + mountCount;
@@ -1688,19 +1744,19 @@ function onScreeMenuStop(){
         yDimension = 0.01;
       }
       zStart = rack["block"]["z_location"] - (rack["block"]["z_dimension"] * 0.5) + (unitHeight * 2);
-      for (zloop = 0; zloop < 13; zloop++){
-        unitCount = 37 + zloop;
-        zDimension = unitHeight - 0.006;
+      for (zloop = 0; zloop < 11; zloop++){
+        unitCount = 39 + zloop;
+        zDimension = unitHeight;
         zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
         emptyData[emptyCount] = {
           "block": {
-            "draw_lines": 0,
+            "draw_lines": 1,
             "rgb_block_red": 0.5,
             "rgb_block_green": 0.5,
             "rgb_block_blue": 0.5,
-            "rgb_line_red": 0.0,
-            "rgb_line_green": 0.0,
-            "rgb_line_blue": 0.0,
+            "rgb_line_red": 1.0,
+            "rgb_line_green": 1.0,
+            "rgb_line_blue": 1.0,
             "x_location": xLocation,
             "y_location": yLocation,
             "z_location": zLocation,
