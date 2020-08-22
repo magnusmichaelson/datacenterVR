@@ -1,0 +1,56 @@
+[
+  {
+    "block": {
+      "draw_lines": "0",
+      "rgb_block_blue": "0.000",
+      "rgb_block_green": "0.000",
+      "rgb_block_red": "1.000",
+      "rgb_line_blue": 0.5,
+      "rgb_line_green": 0.5,
+      "rgb_line_red": 0.5,
+      "x_dimension": "2.000",
+      "x_location": "1.000",
+      "y_dimension": "2.000",
+      "y_location": "1.000",
+      "z_dimension": "2.000",
+      "z_location": "1.000"
+    },
+    "name": "red_block"
+  },
+  {
+    "block": {
+      "draw_lines": "0",
+      "rgb_block_blue": "0.000",
+      "rgb_block_green": "1.000",
+      "rgb_block_red": "0.000",
+      "rgb_line_blue": 0.5,
+      "rgb_line_green": 0.5,
+      "rgb_line_red": 0.5,
+      "x_dimension": "2.000",
+      "x_location": "4.000",
+      "y_dimension": "2.000",
+      "y_location": "1.000",
+      "z_dimension": "2.000",
+      "z_location": "1.000"
+    },
+    "name": "green_block"
+  },
+  {
+    "block": {
+      "draw_lines": "0",
+      "rgb_block_blue": "1.000",
+      "rgb_block_green": "0.000",
+      "rgb_block_red": "0.000",
+      "rgb_line_blue": 0.5,
+      "rgb_line_green": 0.5,
+      "rgb_line_red": 0.5,
+      "x_dimension": "2.000",
+      "x_location": "7.000",
+      "y_dimension": "2.000",
+      "y_location": "1.000",
+      "z_dimension": "2.000",
+      "z_location": "1.000"
+    },
+    "name": "blue_block"
+  }
+]
