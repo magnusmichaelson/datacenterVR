@@ -26,6 +26,9 @@
         width: 100%;
         height: 100%;
       }
+      #ghost {
+        overflow-y: auto;
+      }
       .stack-top{
         z-index: 9;
       }
@@ -75,8 +78,6 @@
         <select id="rackOverlay">
           <option value="default">Plain</option>
           <option value="rackCapacity">Capacity</option>
-          <option value="PowerAverage" >Power Average</option>
-          <option value="PowerMaximum" >Power Maximum</option>
         </select>
         <select id="rackFilter">
           <option value="all">All</option>
@@ -125,11 +126,6 @@
     "u_equip_design_kw": 0,
     "u_facil_design_kw": 0
   }
-
-
-
-
-
   var anchor;
   var camera;
   var cameraData = [];
@@ -174,7 +170,6 @@
       serverLink.data.generatingRoom = false;
       allData = serverLink.data.allData;
 			*/
-		
       anchor = document.createElement('a');
       titleText = document.createTextNode(allData["room"]["room_name"]);
       anchor.appendChild(titleText);
@@ -520,10 +515,6 @@
       selectElement.add(optionElement);
     });
   }
-
-
-
-
   /**
    * @function rackDropDown
    * @description triggers overlays when dropdowns are changed
@@ -533,11 +524,8 @@
     if (overlayValue == 'default'){
       overlayRackDefault();
     }
-    if (overlayValue == 'PowerAverage'){
-      overlayRackPower('average','consume');
-    }
-    if (overlayValue == 'PowerMaximum'){
-      overlayRackPower('maximum','consume');
+    if (overlayValue == 'Power'){
+      overlayRackPower();
     }
     if (overlayValue == 'rackCapacity'){
       overlayRackCapacity();
@@ -548,16 +536,16 @@
    * @description pulls power data from the server and triggers visualisation
    * @param {string} visualisationType - either average or maximum
    */
-  function overlayRackPower(averageOrMax,ratingType) {
+  function overlayRackPower() {
     if (Object.keys(powerData["racks"]).length > 0) {
-      powerRender(allData,powerData,averageOrMax,ratingType);
+      powerRender(allData,powerData);
     } else {
       serverLink.data.roomName = roomName;
       serverLink.data.getPower = true;
       serverLink.server.update().then(function (d) {
         serverLink.data.getPower = false;
         powerData = serverLink.data.powerIqMax;
-        powerRender(allData,powerData,averageOrMax,ratingType);
+        powerRender(allData,powerData);
       });
     }
   }
@@ -568,7 +556,7 @@
    * @param {Object} powerData - the power data
    * @param {string} visualisationType - either average or maximum
    */
-  function powerRender(allData,powerData,averageOrMax,ratingType){
+  function powerRender(allData,powerData){
     var grey = 0.8;
     var longMessage = "";
     var powerDesign = 0;
