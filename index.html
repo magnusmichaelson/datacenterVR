@@ -92,7 +92,7 @@
         <select id="mountFilter">
           <option value="all">All</option>
         </select>
-        <button type="button" id="exportScene" disabled="true">Download Scene</button>
+        <button type="button" id="exportScene" disabled="false">Download Scene</button>
         <label for="speed">Speed :</label>
         <input type="number" id="speed" value="6" min="1" step="1" />
         <p id="fps"></p>
@@ -103,7 +103,7 @@
       </div>
     </div>
     <script>
-//function main(spUtil){
+  //function main(spUtil){
   //var allData = {};
 
 
@@ -395,7 +395,7 @@
    * @function onKeyUp
    * @description  associate actions with key releases
    */
-   function onKeyUp(event){
+  function onKeyUp(event){
     switch(event.keyCode){
       case 38: // up
       case 87: // w
@@ -1006,17 +1006,6 @@ z_location: 1.0457500000000002
     document.body.appendChild(download);
     download.click();
     document.body.removeChild(download);
-
-
-
-
-
-
-
-
-
-
-
   }
   /**
    * @function animate
@@ -1149,169 +1138,179 @@ z_location: 1.0457500000000002
       rightMouseClick(event);
     }
   }
-
-function middleMouseClick(event){
-  var blockData = {};
-  var anchor;
-  var linebreak;
-  var lower;
-  var preformatted;
-  var textNode;
-  lower = document.getElementById("lower");
-  while (lower.firstChild) {
-    lower.removeChild(lower.lastChild);
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function middleMouseClick(event){
+    var blockData = {};
+    var anchor;
+    var linebreak;
+    var lower;
+    var preformatted;
+    var textNode;
+    lower = document.getElementById("lower");
+    while (lower.firstChild) {
+      lower.removeChild(lower.lastChild);
+    }
+    textNode = document.createTextNode("Middle mouse button clicked");
+    lower.appendChild(textNode);
   }
-  textNode = document.createTextNode("Middle mouse button clicked");
-  lower.appendChild(textNode);
-}
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function rightMouseClick(event){
+    var ghost;
+    var optionElement;
+    var optionList = [];
+    var select;
+    var button;
+    var blockType;
+    var addButton = function(title,id,className){
+          button = document.createElement("BUTTON");
+          button.id = id;
+          button.type = 'button';
+          button.className = className;
+          button.innerHTML = title;
+          document.getElementById('ghost').appendChild(button);
+    }
+    blockType = scene.getObjectByName(selectedBlock).userData.blockType;
+    console.log(blockType)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function rightMouseClick(event){
-  var ghost;
-  var optionElement;
-  var optionList = [];
-  var select;
-  var button;
-  var blockType;
-  var addButton = function(title,id,className){
-				button = document.createElement("BUTTON");
-				button.id = id;
-				button.type = 'button';
-				button.className = className;
-        button.innerHTML = title;
-				document.getElementById('ghost').appendChild(button);
+    if (blockType == "mount"){
+      addButton('Open Asset Record','openAssetRecord','btn-group-green');
+      document.getElementById('openAssetRecord').addEventListener('click', onScreeMenuStop, false);
+    } else {
+      addButton('Open Asset Record','openAssetRecord','btn-group-grey');
+    }
+    if (blockType == "mount"){
+      addButton('Open CI Record','openCiRecord','btn-group-green');
+      document.getElementById('openCiRecord').addEventListener('click', onScreeMenuStop, false);
+    } else {
+      addButton('Open CI Record','openCiRecord','btn-group-grey');
+    }
+    if (blockType == "rack"){
+      addButton('Rack visualisation','rackVisual','btn-group-green');
+      document.getElementById('rackVisual').addEventListener('click', onScreeMenuStop, false);
+    } else {
+      addButton('Rack visualisation','rackVisual','btn-group-grey');
+    }
+    if (blockType == "mount"){
+      addButton('Reboot Server','rebootServer','btn-group-green');
+      document.getElementById('rebootServer').addEventListener('click', onScreeMenuStop, false);
+    } else {
+      addButton('Reboot Server','rebootServer','btn-group-grey');
+    }
+    if (blockType == "mount"){
+      addButton('Request Provisioning','requestProvisioning','btn-group-green');
+      document.getElementById('requestProvisioning').addEventListener('click', onScreeMenuStop, false);
+    } else {
+      addButton('Request Provisioning','requestProvisioning','btn-group-grey');
+    }
+    if (blockType == "mount"){
+      addButton('Request Smarthands Support','requestSmarthandsSupport','btn-group-green');
+      document.getElementById('requestSmarthandsSupport').addEventListener('click', onScreeMenuStop, false);
+    } else {
+      addButton('Request Smarthands Support','requestSmarthandsSupport','btn-group-grey');
+    }
+    if (blockType == "empty"){
+      addButton('Reserve Space','reserveSpace','btn-group-green');
+      document.getElementById('reserveSpace').addEventListener('click', onScreeMenuStop, false);
+    } else {
+      addButton('Reserve Space','reserveSpace','btn-group-grey');
+    }
+    if (blockType == "mount"){
+      addButton('Run QA Test Suite','runQaTestSuite','btn-group-green');
+      document.getElementById('runQaTestSuite').addEventListener('click', onScreeMenuStop, false);
+    } else {
+      addButton('Run QA Test Suite','runQaTestSuite','btn-group-grey');
+    }
+    if (blockType == "mount"){
+      addButton('Wipe Drive','wipeDrive','btn-group-green');
+      document.getElementById('wipeDrive').addEventListener('click', onScreeMenuStop, false);
+    } else {
+      addButton('Wipe Drive','wipeDrive','btn-group-grey');
+    }
+    addButton('Cancel','cancel','btn-group-green');
+    document.getElementById('cancel').addEventListener('click', onScreeMenuStop, false);
+    onScreenMenuStart();
   }
-  blockType = scene.getObjectByName(selectedBlock).userData.blockType;
-  console.log(blockType)
-
-  if (blockType == "mount"){
-    addButton('Open Asset Record','openAssetRecord','btn-group-green');
-    document.getElementById('openAssetRecord').addEventListener('click', onScreeMenuStop, false);
-  } else {
-    addButton('Open Asset Record','openAssetRecord','btn-group-grey');
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function onScreenMenu(){
+    var linebreak;
+    var lower;
+    var textNode;
+    lower = document.getElementById("lower");
+    while (lower.firstChild) {
+      lower.removeChild(lower.lastChild);
+    }
+    onScreeMenuStop()
   }
-  if (blockType == "mount"){
-    addButton('Open CI Record','openCiRecord','btn-group-green');
-    document.getElementById('openCiRecord').addEventListener('click', onScreeMenuStop, false);
-  } else {
-    addButton('Open CI Record','openCiRecord','btn-group-grey');
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function onScreenMenuStart(){
+    document.exitPointerLock();
+    document.getElementById('ghost').removeEventListener( 'click', pointerLockRequest, false );
   }
-  if (blockType == "rack"){
-    addButton('Rack visualisation','rackVisual','btn-group-green');
-    document.getElementById('rackVisual').addEventListener('click', onScreeMenuStop, false);
-  } else {
-    addButton('Rack visualisation','rackVisual','btn-group-grey');
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
+  function onScreeMenuStop(){
+    var ghost;
+    console.log('test')
+    ghost = document.getElementById("ghost");
+    while (ghost.firstChild) {
+      ghost.removeChild(ghost.lastChild);
+    }
+    document.getElementById('ghost').addEventListener( 'click', pointerLockRequest, false );
   }
-  if (blockType == "mount"){
-    addButton('Reboot Server','rebootServer','btn-group-green');
-    document.getElementById('rebootServer').addEventListener('click', onScreeMenuStop, false);
-  } else {
-    addButton('Reboot Server','rebootServer','btn-group-grey');
-  }
-  if (blockType == "mount"){
-    addButton('Request Provisioning','requestProvisioning','btn-group-green');
-    document.getElementById('requestProvisioning').addEventListener('click', onScreeMenuStop, false);
-  } else {
-    addButton('Request Provisioning','requestProvisioning','btn-group-grey');
-  }
-  if (blockType == "mount"){
-    addButton('Request Smarthands Support','requestSmarthandsSupport','btn-group-green');
-    document.getElementById('requestSmarthandsSupport').addEventListener('click', onScreeMenuStop, false);
-  } else {
-    addButton('Request Smarthands Support','requestSmarthandsSupport','btn-group-grey');
-  }
-  if (blockType == "empty"){
-    addButton('Reserve Space','reserveSpace','btn-group-green');
-    document.getElementById('reserveSpace').addEventListener('click', onScreeMenuStop, false);
-  } else {
-    addButton('Reserve Space','reserveSpace','btn-group-grey');
-  }
-  if (blockType == "mount"){
-    addButton('Run QA Test Suite','runQaTestSuite','btn-group-green');
-    document.getElementById('runQaTestSuite').addEventListener('click', onScreeMenuStop, false);
-  } else {
-    addButton('Run QA Test Suite','runQaTestSuite','btn-group-grey');
-  }
-  if (blockType == "mount"){
-    addButton('Wipe Drive','wipeDrive','btn-group-green');
-    document.getElementById('wipeDrive').addEventListener('click', onScreeMenuStop, false);
-  } else {
-    addButton('Wipe Drive','wipeDrive','btn-group-grey');
-  }
-  addButton('Cancel','cancel','btn-group-green');
-  document.getElementById('cancel').addEventListener('click', onScreeMenuStop, false);
-  onScreenMenuStart();
-}
-
-function onScreenMenu(){
-  var linebreak;
-  var lower;
-  var textNode;
-  lower = document.getElementById("lower");
-  while (lower.firstChild) {
-    lower.removeChild(lower.lastChild);
-  }
-  onScreeMenuStop()
-}
-
-function onScreenMenuStart(){
-  document.exitPointerLock();
-  document.getElementById('ghost').removeEventListener( 'click', pointerLockRequest, false );
-}
-
-function onScreeMenuStop(){
-  var ghost;
-  console.log('test')
-  ghost = document.getElementById("ghost");
-  while (ghost.firstChild) {
-    ghost.removeChild(ghost.lastChild);
-  }
-  document.getElementById('ghost').addEventListener( 'click', pointerLockRequest, false );
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  /**
+   * @function xxxxxx
+   * @description xxxxxxxxx
+   * @param {string} xxxxx - xxxxx
+   * @param {boolean} xxxxx - xxxxx
+   * @param {number} xxxxx - xxxxx
+   * @param {Object} xxxxx - xxxxx
+   * @param {Array.<Object>} xxxxx - xxxxx
+   * @return {string} xxxxx - xxxxx
+   */
   function leftMouseClick(event){
     var blockData = {};
     var anchor;
