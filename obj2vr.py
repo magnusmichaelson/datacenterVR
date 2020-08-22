@@ -69,10 +69,6 @@ with open(inputObjFile) as fp:
             zmax = z
         if (line.startswith('usemtl')):
           material = line.rstrip("\n").split(' ')[1]
-          red = materials[material]["red"]
-          green = materials[material]["green"]
-          blue = materials[material]["blue"]
-
           blocklist.append({
             "name": name,
             "block": {
@@ -82,9 +78,9 @@ with open(inputObjFile) as fp:
               "x_dimension": '%.3f' % (xmax - xmin),
               "y_dimension": '%.3f' % (ymax - ymin),
               "z_dimension": '%.3f' % (zmax - zmin),
-              "rgb_block_red": '%.3f' % red,
-              "rgb_block_green": '%.3f' % green,
-              "rgb_block_blue": '%.3f' % blue,
+              "rgb_block_red": '%.3f' % materials[material]["red"],
+              "rgb_block_green": '%.3f' % materials[material]["green"],
+              "rgb_block_blue": '%.3f' % materials[material]["blue"],
               "draw_lines": 1,
               "rgb_line_red": 0.5,
               "rgb_line_green": 0.5,
@@ -94,26 +90,4 @@ with open(inputObjFile) as fp:
           reading = False
         line = fp.readline()
     line = fp.readline()
-
-
 print(json.dumps(blocklist, indent=2, sort_keys=True))
-
-#with open( outputJsonFile, 'w' ) as jsonfile:
-#  jsonfile.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-#  jsonfile.write('<unload>\n')
-#  for thing in blocklist:
-#    jsonfile.write('<u_dcse_vr_scene action="INSERT_OR_UPDATE">\n')
-#    jsonfile.write('<u_room_name>' + roomName + '</u_room_name>\n')
-#    jsonfile.write('<u_lines>' + drawLines + '</u_lines>\n')
-#    jsonfile.write('<u_x_min>' + str(thing["u_x_min"]) + '</u_x_min>\n')
-#    jsonfile.write('<u_x_max>' + str(thing["u_x_max"]) + '</u_x_max>\n')
-#    jsonfile.write('<u_y_min>' + str(thing["u_y_min"]) + '</u_y_min>\n')
-#    jsonfile.write('<u_y_max>' + str(thing["u_y_max"]) + '</u_y_max>\n')
-#    jsonfile.write('<u_z_min>' + str(thing["u_z_min"]) + '</u_z_min>\n')
-#    jsonfile.write('<u_z_max>' + str(thing["u_z_max"]) + '</u_z_max>\n')
-#    jsonfile.write('<u_red>' + str(thing["u_red"]) + '</u_red>\n')
-#    jsonfile.write('<u_green>' + str(thing["u_green"]) + '</u_green>\n')
-#    jsonfile.write('<u_blue>' + str(thing["u_blue"]) + '</u_blue>\n')
-#    jsonfile.write('<u_tag>' + str(thing["u_tag"]) + '</u_tag>\n')
-#    jsonfile.write('</u_dcse_vr_scene>\n')
-#  jsonfile.write('</unload>\n')
