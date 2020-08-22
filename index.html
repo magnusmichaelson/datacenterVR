@@ -998,6 +998,28 @@
         }
       })
     });
+    Object.keys(allData["empty"]).forEach(function(blockName){
+      block = allData["empty"][blockName]["block"];
+      outputData.push({
+        "name": "empty_" + allData["empty"][blockName]["name"],
+        "type": "empty",
+        "block": {
+          "x_location": block['x_location'],
+          "y_location": block['y_location'],
+          "z_location": block['z_location'],
+          "x_dimension": block['x_dimension'],
+          "y_dimension": block['y_dimension'],
+          "z_dimension": block['z_dimension'],
+          "rgb_block_red": block['rgb_block_red'],
+          "rgb_block_green": block['rgb_block_green'],
+          "rgb_block_blue": block['rgb_block_blue'],
+          "draw_lines": block['draw_lines'],
+          "rgb_line_red": block['rgb_line_red'],
+          "rgb_line_green": block['rgb_line_green'],
+          "rgb_line_blue": block['rgb_line_blue']
+        }
+      })
+    });
     jsonData = JSON.stringify(outputData, null, 2);
     filename = allData["room"]["room_name"] + '.json';
     encodedData = 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonData);
@@ -1762,6 +1784,7 @@
             "y_dimension": yDimension,
             "z_dimension": zDimension
           },
+          "name": rackName + "_" + unitCount,
           "rack_name": rackName,
           "unit_height": unitCount
         }
