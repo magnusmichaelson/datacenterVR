@@ -91,13 +91,6 @@
         </select>
         <select id="mountFilter">
           <option value="all">All</option>
-        </select>
-        <select id="downloadBlocks">
-          <option value="scene">Scene</option>
-          <option value="racks">Racks</option>
-          <option value="mount">Mounted objects</option>
-          <option value="empty">Blanking plates</option>
-        </select>
         <label for="speed">Speed :</label>
         <input type="number" id="speed" value="6" min="1" step="1" />
         <p id="fps"></p>
@@ -927,115 +920,6 @@
     return [red,green,blue];
   }
   /**
-   * @function exportScene
-   * @description downloads json containing anonymous 3d data and color of blocks that are not rack mount objects
-   */
-  function exportScene(){
-    var jsonData;
-    var filename;
-    var encodedData;
-    var download;
-    var outputData = [];
-    Object.keys(allData["mount"]).forEach(function(blockName){
-      block = allData["mount"][blockName]["block"];
-      outputData.push({
-        "name": "alm_hardware_" + allData["mount"][blockName]["sys_id"],
-        "type": "mount",
-        "ci_sys_id": allData["mount"][blockName]["ci_sys_id"],
-        "block": {
-          "x_location": block['x_location'],
-          "y_location": block['y_location'],
-          "z_location": block['z_location'],
-          "x_dimension": block['x_dimension'],
-          "y_dimension": block['y_dimension'],
-          "z_dimension": block['z_dimension'],
-          "rgb_block_red": mountColor[blockName][0],
-          "rgb_block_green": mountColor[blockName][1],
-          "rgb_block_blue": mountColor[blockName][2],
-          "draw_lines": block['draw_lines'],
-          "rgb_line_red": block['rgb_line_red'],
-          "rgb_line_green": block['rgb_line_green'],
-          "rgb_line_blue": block['rgb_line_blue']
-        }
-      })
-    });
-    Object.keys(allData["racks"]).forEach(function(blockName){
-      block = allData["racks"][blockName]["block"];
-      outputData.push({
-        "name": "cmdb_ci_rack_" + allData["racks"][blockName]["sys_id"],
-        "type": "rack",
-        "block": {
-          "x_location": block['x_location'],
-          "y_location": block['y_location'],
-          "z_location": block['z_location'],
-          "x_dimension": block['x_dimension'],
-          "y_dimension": block['y_dimension'],
-          "z_dimension": block['z_dimension'],
-          "rgb_block_red": rackColor[blockName][0],
-          "rgb_block_green": rackColor[blockName][1],
-          "rgb_block_blue": rackColor[blockName][2],
-          "draw_lines": block['draw_lines'],
-          "rgb_line_red": block['rgb_line_red'],
-          "rgb_line_green": block['rgb_line_green'],
-          "rgb_line_blue": block['rgb_line_blue']
-        }
-      })
-    });
-    Object.keys(allData["scene"]).forEach(function(blockName){
-      block = allData["scene"][blockName]["block"];
-      outputData.push({
-        "name": "u_dcse_vr_scene_" + allData["scene"][blockName]["sys_id"],
-        "type": "scene",
-        "block": {
-          "x_location": block['x_location'],
-          "y_location": block['y_location'],
-          "z_location": block['z_location'],
-          "x_dimension": block['x_dimension'],
-          "y_dimension": block['y_dimension'],
-          "z_dimension": block['z_dimension'],
-          "rgb_block_red": block['rgb_block_red'],
-          "rgb_block_green": block['rgb_block_green'],
-          "rgb_block_blue": block['rgb_block_blue'],
-          "draw_lines": block['draw_lines'],
-          "rgb_line_red": block['rgb_line_red'],
-          "rgb_line_green": block['rgb_line_green'],
-          "rgb_line_blue": block['rgb_line_blue']
-        }
-      })
-    });
-    Object.keys(allData["empty"]).forEach(function(blockName){
-      block = allData["empty"][blockName]["block"];
-      outputData.push({
-        "name": "empty_" + allData["empty"][blockName]["name"],
-        "type": "empty",
-        "block": {
-          "x_location": block['x_location'],
-          "y_location": block['y_location'],
-          "z_location": block['z_location'],
-          "x_dimension": block['x_dimension'],
-          "y_dimension": block['y_dimension'],
-          "z_dimension": block['z_dimension'],
-          "rgb_block_red": block['rgb_block_red'],
-          "rgb_block_green": block['rgb_block_green'],
-          "rgb_block_blue": block['rgb_block_blue'],
-          "draw_lines": block['draw_lines'],
-          "rgb_line_red": block['rgb_line_red'],
-          "rgb_line_green": block['rgb_line_green'],
-          "rgb_line_blue": block['rgb_line_blue']
-        }
-      })
-    });
-    jsonData = JSON.stringify(outputData, null, 2);
-    filename = allData["room"]["room_name"] + '.json';
-    encodedData = 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonData);
-    download = document.createElement('a');
-    download.setAttribute('href', encodedData );
-    download.setAttribute('download', filename);
-    document.body.appendChild(download);
-    download.click();
-    document.body.removeChild(download);
-  }
-  /**
    * @function animate
    * @description the animation loop
    */
@@ -1272,10 +1156,82 @@
     } else {
       addButton('Wipe Drive','wipeDrive','btn-group-grey');
     }
+    // block download
+    addButton('Download blocks','downloadBlocks','btn-group-green');
+    document.getElementById('downloadBlocks').addEventListener('click', subMenuDownloadBlocks, false);
+    // cancel
     addButton('Cancel','cancel','btn-group-green');
     document.getElementById('cancel').addEventListener('click', onScreeMenuStop, false);
     onScreenMenuStart();
   }
+
+  function subMenuDownloadBlocks(){
+
+    console.log("foooooo")
+    var ghost;
+    // clear main menu
+    ghost = document.getElementById("ghost");
+    while (ghost.firstChild) {
+      ghost.removeChild(ghost.lastChild);
+    }
+    var addButton = function(title,id,className){
+          button = document.createElement("BUTTON");
+          button.id = id;
+          button.type = 'button';
+          button.className = className;
+          button.innerHTML = title;
+          document.getElementById('ghost').appendChild(button);
+    }
+    addButton('Download scene blocks','downloadSceneBlocks','btn-group-green');
+    document.getElementById('downloadSceneBlocks').addEventListener('click', function(){
+      exportBlocks(allData["scene"],"scene");
+      onScreeMenuStop();
+    }, false);
+    addButton('Download rack blocks','downloadRackBlocks','btn-group-green');
+    document.getElementById('downloadRackBlocks').addEventListener('click', function(){
+      exportBlocks(allData["racks"],"racks");
+      onScreeMenuStop();
+    }, false);
+  }
+  /**
+   * @function exportScene
+   * @description downloads json containing anonymous 3d data and color of blocks that are not rack mount objects
+   */
+  function exportBlocks(input, blockType){
+    var jsonData;
+    var filename;
+    var encodedData;
+    var download;
+    var output = {};
+    Object.keys(input).forEach(function(blockName){
+      block = input[blockName]["block"];
+      output[blockName] = {
+        "x_location": block['x_location'].toFixed(3),
+        "y_location": block['y_location'].toFixed(3),
+        "z_location": block['z_location'].toFixed(3),
+        "x_dimension": block['x_dimension'].toFixed(3),
+        "y_dimension": block['y_dimension'].toFixed(3),
+        "z_dimension": block['z_dimension'].toFixed(3),
+        "rgb_block_red": block['rgb_block_red'].toFixed(3),
+        "rgb_block_green": block['rgb_block_green'].toFixed(3),
+        "rgb_block_blue": block['rgb_block_blue'].toFixed(3),
+        "draw_lines": block['draw_lines'],
+        "rgb_line_red": block['rgb_line_red'].toFixed(3),
+        "rgb_line_green": block['rgb_line_green'].toFixed(3),
+        "rgb_line_blue": block['rgb_line_blue'].toFixed(3)
+      }
+    });
+    jsonData = JSON.stringify(output, null, 2);
+    filename = allData["room"]["room_name"] + '_' + blockType + '.json';
+    encodedData = 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonData);
+    download = document.createElement('a');
+    download.setAttribute('href', encodedData );
+    download.setAttribute('download', filename);
+    document.body.appendChild(download);
+    download.click();
+    document.body.removeChild(download);
+  }
+
   /**
    * @function xxxxxx
    * @description xxxxxxxxx

@@ -14,16 +14,15 @@ with open(input_json_file, 'r') as json_data:
   with open( filename_obj, 'w' ) as obj:
     vert=0
     face=0
-    for block in data:
-      name = block['name']
-      x_min = float(block["block"]['x_location']) - (float(block["block"]['x_dimension']) * 0.5)
-      x_max = float(block["block"]['x_location']) + (float(block["block"]['x_dimension']) * 0.5)
-      y_min = float(block["block"]['y_location']) - (float(block["block"]['y_dimension']) * 0.5)
-      y_max = float(block["block"]['y_location']) + (float(block["block"]['y_dimension']) * 0.5)
-      z_min = float(block["block"]['z_location']) - (float(block["block"]['z_dimension']) * 0.5)
-      z_max = float(block["block"]['z_location']) + (float(block["block"]['z_dimension']) * 0.5)
+    for block_name in data:
+      x_min = float(data[block_name]['x_location']) - (float(data[block_name]['x_dimension']) * 0.5)
+      x_max = float(data[block_name]['x_location']) + (float(data[block_name]['x_dimension']) * 0.5)
+      y_min = float(data[block_name]['y_location']) - (float(data[block_name]['y_dimension']) * 0.5)
+      y_max = float(data[block_name]['y_location']) + (float(data[block_name]['y_dimension']) * 0.5)
+      z_min = float(data[block_name]['z_location']) - (float(data[block_name]['z_dimension']) * 0.5)
+      z_max = float(data[block_name]['z_location']) + (float(data[block_name]['z_dimension']) * 0.5)
       # output to obj file
-      obj.write("o {}\n".format(name))
+      obj.write("o {}\n".format(block_name))
       obj.write("v {} {} {}\n".format(x_max, z_max, -y_max))
       obj.write("v {} {} {}\n".format(x_max, z_min, -y_max))
       obj.write("v {} {} {}\n".format(x_max, z_max, -y_min))
@@ -32,7 +31,7 @@ with open(input_json_file, 'r') as json_data:
       obj.write("v {} {} {}\n".format(x_min, z_min, -y_max))
       obj.write("v {} {} {}\n".format(x_min, z_max, -y_min))
       obj.write("v {} {} {}\n".format(x_min, z_min, -y_min))
-      obj.write("usemtl {}\n".format(name))
+      obj.write("usemtl {}\n".format(block_name))
       obj.write("s off\n")
       obj.write("f {} {} {} {}\n".format((vert+1), (vert+5), (vert+7), (vert+3)))
       obj.write("f {} {} {} {}\n".format((vert+4), (vert+3), (vert+7), (vert+8)))
@@ -44,12 +43,11 @@ with open(input_json_file, 'r') as json_data:
       vert = vert + 8
   # export mtl data
   with open( filename_mtl, 'w' ) as mtl:
-    for block in data:
-      name = block['name']
-      red = block["block"]['rgb_block_red']
-      green = block["block"]['rgb_block_green']
-      blue = block["block"]['rgb_block_blue']
-      mtl.write("newmtl {}\n".format(name))
+    for block_name in data:
+      red = float(data[block_name]['rgb_block_red'])
+      green = float(data[block_name]['rgb_block_green'])
+      blue = float(data[block_name]['rgb_block_blue'])
+      mtl.write("newmtl {}\n".format(block_name))
       mtl.write("Ns 96.078431\n")
       mtl.write("Ka 1.000000 1.000000 1.000000\n")
       mtl.write("Kd {} {} {}\n".format(red, green, blue))
