@@ -1431,102 +1431,331 @@
   }
 
   function fakeScene(roomXDimension,roomYDimension){
-    var scene = {};
-    scene["floor"] = {
-      "block": {
-        "draw_lines": 0,
-        "rgb_block_red": 0.8,
-        "rgb_block_green": 0.8,
-        "rgb_block_blue": 0.8,
-        "rgb_line_red": 0.0,
-        "rgb_line_green": 0.0,
-        "rgb_line_blue": 0.0,
-        "x_location": roomXDimension * 0.5,
-        "y_location": roomYDimension * 0.5,
-        "z_location": -0.1,
-        "x_dimension": roomXDimension,
-        "y_dimension": roomYDimension,
-        "z_dimension": 0.2
+    var scene =     [
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.600",
+          "rgb_block_green": "0.600",
+          "rgb_block_red": "0.600",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "7.684",
+          "x_location": "10.419",
+          "y_dimension": "0.100",
+          "y_location": "-0.050",
+          "z_dimension": "7.100",
+          "z_location": "3.450"
+        },
+        "name": "scene_0",
+        "type": "scene"
       },
-      'sys_id': 0,
-      'tag': "building"
-    }
-    scene["x_min_wall"] = {
-      "block": {
-        "draw_lines": 0,
-        "rgb_block_red": 0.85,
-        "rgb_block_green": 0.85,
-        "rgb_block_blue": 0.85,
-        "rgb_line_red": 0.0,
-        "rgb_line_green": 0.0,
-        "rgb_line_blue": 0.0,
-        "x_location": -0.1,
-        "y_location": roomYDimension * 0.5,
-        "z_location": 1.5,
-        "x_dimension": 0.2,
-        "y_dimension": roomYDimension,
-        "z_dimension": 3
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.700",
+          "rgb_block_green": "0.700",
+          "rgb_block_red": "0.700",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "1.500",
+          "x_location": "0.750",
+          "y_dimension": "2.200",
+          "y_location": "10.615",
+          "z_dimension": "0.100",
+          "z_location": "3.150"
+        },
+        "name": "scene_1",
+        "type": "scene"
       },
-      'sys_id': 1,
-      'tag': "building"
-    }
-    scene["x_max_wall"] = {
-      "block": {
-        "draw_lines": 0,
-        "rgb_block_red": 0.85,
-        "rgb_block_green": 0.85,
-        "rgb_block_blue": 0.85,
-        "rgb_line_red": 0.0,
-        "rgb_line_green": 0.0,
-        "rgb_line_blue": 0.0,
-        "x_location": roomXDimension + 0.1,
-        "y_location": roomYDimension * 0.5,
-        "z_location": 1.5,
-        "x_dimension": 0.2,
-        "y_dimension": roomYDimension,
-        "z_dimension": 3
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.600",
+          "rgb_block_green": "0.600",
+          "rgb_block_red": "0.600",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "6.577",
+          "x_location": "3.288",
+          "y_dimension": "0.100",
+          "y_location": "9.465",
+          "z_dimension": "7.100",
+          "z_location": "3.450"
+        },
+        "name": "scene_2",
+        "type": "scene"
       },
-      'sys_id': 2,
-      'tag': "building"
-    }
-    scene["y_min_wall"] = {
-      "block": {
-        "draw_lines": 0,
-        "rgb_block_red": 0.75,
-        "rgb_block_green": 0.75,
-        "rgb_block_blue": 0.75,
-        "rgb_line_red": 0.0,
-        "rgb_line_green": 0.0,
-        "rgb_line_blue": 0.0,
-        "x_location": roomXDimension * 0.5,
-        "y_location": -0.1,
-        "z_location": 1.5,
-        "x_dimension": roomXDimension,
-        "y_dimension": 0.2,
-        "z_dimension": 3
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.600",
+          "rgb_block_green": "0.600",
+          "rgb_block_red": "0.600",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "16.847",
+          "x_location": "8.424",
+          "y_dimension": "0.100",
+          "y_location": "16.897",
+          "z_dimension": "7.100",
+          "z_location": "3.450"
+        },
+        "name": "scene_3",
+        "type": "scene"
       },
-      'sys_id': 3,
-      'tag': "building"
-    }
-    scene["y_max_wall"] = {
-      "block": {
-        "draw_lines": 0,
-        "rgb_block_red": 0.75,
-        "rgb_block_green": 0.75,
-        "rgb_block_blue": 0.75,
-        "rgb_line_red": 0.0,
-        "rgb_line_green": 0.0,
-        "rgb_line_blue": 0.0,
-        "x_location": roomXDimension * 0.5,
-        "y_location": roomYDimension + 0.1,
-        "z_location": 1.5,
-        "x_dimension": roomXDimension,
-        "y_dimension": 0.2,
-        "z_dimension": 3
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.800",
+          "rgb_block_green": "0.800",
+          "rgb_block_red": "0.800",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "0.100",
+          "x_location": "6.527",
+          "y_dimension": "7.354",
+          "y_location": "3.677",
+          "z_dimension": "7.000",
+          "z_location": "3.500"
+        },
+        "name": "scene_4",
+        "type": "scene"
       },
-      'sys_id': 4,
-      'tag': "building"
-    }
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.800",
+          "rgb_block_green": "0.800",
+          "rgb_block_red": "0.800",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "0.100",
+          "x_location": "-0.050",
+          "y_dimension": "7.532",
+          "y_location": "13.181",
+          "z_dimension": "7.100",
+          "z_location": "3.450"
+        },
+        "name": "scene_5",
+        "type": "scene"
+      },
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.800",
+          "rgb_block_green": "0.800",
+          "rgb_block_red": "0.800",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "0.100",
+          "x_location": "16.797",
+          "y_dimension": "16.947",
+          "y_location": "8.373",
+          "z_dimension": "7.100",
+          "z_location": "3.450"
+        },
+        "name": "scene_6",
+        "type": "scene"
+      },
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.700",
+          "rgb_block_green": "0.700",
+          "rgb_block_red": "0.700",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "6.577",
+          "x_location": "3.288",
+          "y_dimension": "7.332",
+          "y_location": "13.181",
+          "z_dimension": "0.100",
+          "z_location": "-0.050"
+        },
+        "name": "scene_7",
+        "type": "scene"
+      },
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.700",
+          "rgb_block_green": "0.700",
+          "rgb_block_red": "0.700",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "6.577",
+          "x_location": "3.288",
+          "y_dimension": "5.132",
+          "y_location": "14.281",
+          "z_dimension": "0.100",
+          "z_location": "3.150"
+        },
+        "name": "scene_8",
+        "type": "scene"
+      },
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.600",
+          "rgb_block_green": "0.600",
+          "rgb_block_red": "0.600",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "0.972",
+          "x_location": "14.747",
+          "y_dimension": "0.100",
+          "y_location": "-0.050",
+          "z_dimension": "5.100",
+          "z_location": "4.450"
+        },
+        "name": "scene_9",
+        "type": "scene"
+      },
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.700",
+          "rgb_block_green": "0.700",
+          "rgb_block_red": "0.700",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "10.170",
+          "x_location": "11.662",
+          "y_dimension": "16.847",
+          "y_location": "8.424",
+          "z_dimension": "0.100",
+          "z_location": "-0.050"
+        },
+        "name": "scene_10",
+        "type": "scene"
+      },
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.700",
+          "rgb_block_green": "0.700",
+          "rgb_block_red": "0.700",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "6.577",
+          "x_location": "3.288",
+          "y_dimension": "7.332",
+          "y_location": "13.181",
+          "z_dimension": "0.100",
+          "z_location": "6.950"
+        },
+        "name": "scene_11",
+        "type": "scene"
+      },
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.800",
+          "rgb_block_green": "0.800",
+          "rgb_block_red": "0.800",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "0.100",
+          "x_location": "6.527",
+          "y_dimension": "1.674",
+          "y_location": "8.191",
+          "z_dimension": "5.100",
+          "z_location": "4.450"
+        },
+        "name": "scene_12",
+        "type": "scene"
+      },
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.600",
+          "rgb_block_green": "0.600",
+          "rgb_block_red": "0.600",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "1.514",
+          "x_location": "15.990",
+          "y_dimension": "0.100",
+          "y_location": "-0.050",
+          "z_dimension": "7.100",
+          "z_location": "3.450"
+        },
+        "name": "scene_13",
+        "type": "scene"
+      },
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.700",
+          "rgb_block_green": "0.700",
+          "rgb_block_red": "0.700",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "10.170",
+          "x_location": "11.662",
+          "y_dimension": "16.847",
+          "y_location": "8.424",
+          "z_dimension": "0.100",
+          "z_location": "6.950"
+        },
+        "name": "scene_14",
+        "type": "scene"
+      },
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.800",
+          "rgb_block_green": "0.800",
+          "rgb_block_red": "0.800",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "0.100",
+          "x_location": "6.527",
+          "y_dimension": "0.387",
+          "y_location": "9.221",
+          "z_dimension": "7.100",
+          "z_location": "3.450"
+        },
+        "name": "scene_15",
+        "type": "scene"
+      },
+      {
+        "block": {
+          "draw_lines": "0",
+          "rgb_block_blue": "0.700",
+          "rgb_block_green": "0.700",
+          "rgb_block_red": "0.700",
+          "rgb_line_blue": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_red": 0.5,
+          "x_dimension": "10.170",
+          "x_location": "11.662",
+          "y_dimension": "16.847",
+          "y_location": "8.424",
+          "z_dimension": "0.100",
+          "z_location": "3.150"
+        },
+        "name": "scene_16",
+        "type": "scene"
+      }
+    ];
     return scene;
   }
   
