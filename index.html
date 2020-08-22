@@ -211,8 +211,6 @@
     download.click();
     document.body.removeChild(download);
   }
-
-
   /**
    * @function urlParamMissingWarning
    * @description gives an explanation of how a rack sys_id needs to given as a url parameter
@@ -601,7 +599,7 @@
           singleRackReport = [grey,grey,grey,shortMessage,longMessage];
         }
         if (powerDesign == "no data" && powerUsage != "no data"){
-          tempColor = spectrumBluePink(powerUsage / roomMaximum);
+          tempColor = spectrumBluePink(powerUsage, roomMaximum);
           shortMessage = powerUsage.toFixed(2) + " / NA KW";
           longMessage = "Rack has no design data, only power actuals";
           singleRackReport = [tempColor[0],tempColor[1],tempColor[2],shortMessage,longMessage];
@@ -622,7 +620,7 @@
           singleRackReport = [grey,grey,grey,shortMessage,longMessage];
         }
         if (powerDesign != "no data" && powerDesign > 0 && powerUsage != "no data"){
-          tempColor = spectrumGreenRed(powerUsage / powerDesign);
+          tempColor = spectrumGreenRed(powerUsage, powerDesign);
           shortMessage = powerUsage.toFixed(2) + " / " + powerDesign + " KW";
           longMessage = "Rack has design data and power actuals";
           singleRackReport = [tempColor[0],tempColor[1],tempColor[2],shortMessage,longMessage];
@@ -660,10 +658,10 @@
         if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rack["design"]["u_environment"]){
           if (rack['design']["u_max_alloc"] > 0){
             if (rack['design']["u_qty_alloc"] > 0){
-              tempColor = spectrumGreenRed(rack['design']["u_qty_alloc"] / rack['design']["u_max_alloc"]);
+              tempColor = spectrumGreenRed(rack['design']["u_qty_alloc"], rack['design']["u_max_alloc"]);
               singleRackReport = [tempColor[0],tempColor[1],tempColor[2],rack['design']["u_qty_alloc"] +" / " + rack['design']["u_max_alloc"]];
             } else {
-              singleRackReport = spectrumGreenRed(0);
+              singleRackReport = spectrumGreenRed(0,1);
             }
           } else {
             singleRackReport = [0.8,0.8,0.8];
@@ -802,9 +800,9 @@
       if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
         if (block['u_last_audit_date']){
           lastAudit = Date.parse(block['u_last_audit_date']);
-          color = spectrumGreenRed((now - lastAudit) / milliseconds);
+          color = spectrumGreenRed((now - lastAudit), milliseconds);
         } else {
-          color = spectrumGreenRed(1);
+          color = spectrumGreenRed(1,1);
         }
       }
       if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
@@ -863,11 +861,22 @@
    * @description take a number and returns color data from green to red
    * @param {number} decimal - the number to be converted into color
    */
-  function spectrumGreenRed(decimal) {
+  function spectrumGreenRed(numerator,denominator) {
+    var decimal = 0;
     var saturation = 0.3;
     var red;
     var green;
     var blue;
+    decimal = numerator / denominator;
+    if (denominator == 0){
+      decimal = 1;
+    }
+    if (decimal < 0.0) {
+      decimal = 0.0;
+    }
+    if (decimal > 1.0) {
+      decimal = 1.0;
+    }
     // green to yellow
     if (decimal < 0.5) {
       red = (1 - saturation) + (decimal / 0.5 * saturation);
@@ -893,13 +902,21 @@
    * @description take a number and returns color data from blue to pink
    * @param {number} decimal - the number to be converted into color
    */
-  function spectrumBluePink(decimal) {
+  function spectrumBluePink(numerator,denominator) {
+    var decimal = 0;
     var saturation = 0.3;
     var red;
     var green;
     var blue;
+    decimal = numerator / denominator;
+    if (denominator == 0){
+      decimal = 1;
+    }
     if (decimal < 0.0) {
       decimal = 0.0;
+    }
+    if (decimal > 1.0) {
+      decimal = 1.0;
     }
     red = (1 - saturation) + (decimal * saturation);
     green = (1 - saturation);
