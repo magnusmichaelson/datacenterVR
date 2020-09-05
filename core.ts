@@ -201,7 +201,7 @@
     threeCamera.add(threeCrosshair);
     // raycaster
     // @ts-ignore
-    raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 100 );
+    threeRaycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 100 );
     // renderer
     // @ts-ignore
     threeRenderer = new THREE.WebGLRenderer({antialias:true, canvas:document.getElementById('my_canvas')});
@@ -232,8 +232,8 @@
     var gameXDimension = 0;
     var gameYDimension = 0;
     var gameZDimension = 0;
-    var threeMaterial;
-    var mesh;
+    var threeMaterial: any;
+    var threeMesh: any;
     var line;
     Object.keys(inputData).forEach(function(blockName){
       block = inputData[blockName]["block"];
@@ -250,14 +250,14 @@
       threeMaterial = new THREE.MeshStandardMaterial();
       threeMaterial.color.setRGB(block['rgb_block_red'],block['rgb_block_green'],block['rgb_block_blue']);
       // @ts-ignore
-      mesh = new THREE.Mesh(geometry,material);
-      mesh.position.x = gameXLocation;
-      mesh.position.y = gameYLocation;
-      mesh.position.z = gameZLocation;
-      mesh.name = blockName;
-      mesh.userData.blockType = blockType;
-      mesh.userData.highlightable = highlightable;
-      threeScene.add(mesh);
+      threeMesh = new THREE.Mesh(threeGeometry,threeMaterial);
+      threeMesh.position.x = gameXLocation;
+      threeMesh.position.y = gameYLocation;
+      threeMesh.position.z = gameZLocation;
+      threeMesh.name = blockName;
+      threeMesh.userData.blockType = blockType;
+      threeMesh.userData.highlightable = highlightable;
+      threeScene.add(threeMesh);
       if (block["draw_lines"] == 1){
         // @ts-ignore
         edges = new THREE.EdgesGeometry( threeGeometry );
@@ -266,7 +266,7 @@
         threeMaterial.color.setRGB(block['rgb_line_red'],block['rgb_line_green'],block['rgb_line_blue']);
         // @ts-ignore
         line = new THREE.LineSegments(edges, threeMaterial);
-        mesh.add(line);
+        threeMesh.add(line);
       }
     });
   }
