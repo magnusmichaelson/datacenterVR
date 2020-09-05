@@ -31,8 +31,6 @@
   var mountColor: object = {};
   var prevTime: number;
   var rackColor: object = {};
-  var raycaster: any;
-  var renderer: any;
   var roomName: string = '';
   var roomSysid: string;
   var selectedBlock: string = "";
@@ -42,10 +40,12 @@
   var speedBoost: boolean = false;
   var threeCamera: any;
   var threeControls: any;
+  var threeRaycaster: any;
+  var threeRenderer: any;
   var threeScene: any;
-  var titleText: Text;
   // @ts-ignore
-  var velocity: any = new THREE.Vector3();
+  var threeVelocity: any = new THREE.Vector3();
+  var titleText: Text;
   //roomSysid = serverLink.data.roomSysid;
   rendererResize()
   window.addEventListener( 'resize', rendererResize, false );
@@ -204,8 +204,8 @@
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 100 );
     // renderer
     // @ts-ignore
-    renderer = new THREE.WebGLRenderer({antialias:true, canvas:document.getElementById('my_canvas')});
-    renderer.setClearColor( 0xf0f3f4 );
+    threeRenderer = new THREE.WebGLRenderer({antialias:true, canvas:document.getElementById('my_canvas')});
+    threeRenderer.setClearColor( 0xf0f3f4 );
     generateBlocks(allData["racks"],"rack",false)
     generateBlocks(allData["scene"],"scene",false)
     generateBlocks(allData["mount"],"mount",true)
@@ -768,7 +768,7 @@
     if (threeCamera){
       threeCamera.aspect = canvasWidth / centerHeight;
       threeCamera.updateProjectionMatrix();
-      renderer.setSize( canvasWidth, centerHeight );
+      threeRenderer.setSize( canvasWidth, centerHeight );
     }
   }
   /**
@@ -845,12 +845,6 @@
   function animate() {
     var previousBlockType = "";
     var currentBlockType = "";
-    var currentRed;
-    var currentGreen;
-    var currentBlue;
-    var previousRed;
-    var previousGreen;
-    var previousBlue;
     var blue;
     var closest;
     var closestDistance = -1;
@@ -859,15 +853,15 @@
     var red;
     var targetDarkness = 0.8;
     // @ts-ignore
-    var cameraPostion = new THREE.Vector3();
+    var threeCameraPostion = new THREE.Vector3();
     // @ts-ignore
-    var cameraDirection = new THREE.Vector3();
+    var threeCameraDirection = new THREE.Vector3();
     requestAnimationFrame( animate );
     if ( controlsEnabled ) {
-      threeCamera.getWorldPosition(cameraPostion);
-      threeCamera.getWorldDirection(cameraDirection);
-      raycaster.set( cameraPostion, cameraDirection );
-      var intersects = raycaster.intersectObjects(threeScene.children);
+      threeCamera.getWorldPosition(threeCameraPostion);
+      threeCamera.getWorldDirection(threeCameraDirection);
+      threeRaycaster.set( threeCameraPostion, threeCameraDirection );
+      var intersects = threeRaycaster.intersectObjects(threeScene.children);
       if (intersects.length > 0){
         for ( var i = 0; i < intersects.length; i++ ) {
           if (intersects[i].object.type == 'Mesh'){
@@ -934,14 +928,14 @@
       } else {
         delta = delta / 1000;
       }
-      velocity.x = 0;
-      velocity.z = 0;
-      if ( moveForward ) velocity.z = -speed * delta;
-      if ( moveBackward ) velocity.z = speed * delta;
-      if ( moveLeft ) velocity.x = -speed * delta;
-      if ( moveRight ) velocity.x = speed * delta;
-      threeControls.getObject().translateX( velocity.x);
-      threeControls.getObject().translateZ( velocity.z);
+      threeVelocity.x = 0;
+      threeVelocity.z = 0;
+      if ( moveForward ) threeVelocity.z = -speed * delta;
+      if ( moveBackward ) threeVelocity.z = speed * delta;
+      if ( moveLeft ) threeVelocity.x = -speed * delta;
+      if ( moveRight ) threeVelocity.x = speed * delta;
+      threeControls.getObject().translateX( threeVelocity.x);
+      threeControls.getObject().translateZ( threeVelocity.z);
       if (moveDown){
         threeControls.getObject().position.y -= (speed * delta);
       }
@@ -954,7 +948,7 @@
       }
       prevTime = time;
     }
-    renderer.render(threeScene,threeCamera);
+    threeRenderer.render(threeScene,threeCamera);
   }
   /**
    * @function mouseClick
