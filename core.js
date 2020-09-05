@@ -1,5 +1,6 @@
 // @ts-ignore
 var allData = fakeAllData();
+console.log(allData);
 // @ts-ignore
 var powerData = fakePower(allData);
 // test data
@@ -438,7 +439,6 @@ function generatemountFilter() {
 function rackDropDown() {
     var overlayElement = document.getElementById('rackOverlay');
     var overlayValue = overlayElement.value;
-    console.log(overlayValue);
     if (overlayValue == 'default') {
         overlayRackDefault();
     }
@@ -552,7 +552,6 @@ function powerRender(allData, powerData) {
         rackColor[rackName] = singleRackReport;
     });
     applyColor(allData["racks"], rackColor);
-    console.log(rackColor);
 }
 /**
  * @function overlayRackDefault
@@ -564,7 +563,6 @@ function overlayRackDefault() {
         rackColor[rackName] = [1, 1, 1];
     });
     applyColor(allData["racks"], rackColor);
-    console.log(rackColor);
 }
 /**
  * @function overlayRackCapacity
@@ -1026,7 +1024,6 @@ function rightMouseClick(event) {
         document.getElementById('ghost').appendChild(button);
     };
     blockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
-    console.log(blockType);
     if (blockType == "mount") {
         addButton('Open Asset Record', 'openAssetRecord', 'btn-group-green');
         document.getElementById('openAssetRecord').addEventListener('click', onScreeMenuStop, false);

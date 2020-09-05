@@ -435,7 +435,6 @@
   function rackDropDown(){
     var overlayElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('rackOverlay');
     var overlayValue: string = overlayElement.value;
-    console.log(overlayValue)
     if (overlayValue == 'default'){
       overlayRackDefault();
     }
@@ -545,7 +544,6 @@
       rackColor[rackName] = singleRackReport;
     });
     applyColor(allData["racks"],rackColor);
-    console.log(rackColor)
   }
   /**
    * @function overlayRackDefault
@@ -557,7 +555,6 @@
       rackColor[rackName] = [1,1,1];
     });
     applyColor(allData["racks"],rackColor);
-    console.log(rackColor)
   }
 
   /**
@@ -1012,8 +1009,6 @@
           document.getElementById('ghost').appendChild(button);
     }
     blockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
-    console.log(blockType)
-
     if (blockType == "mount"){
       addButton('Open Asset Record','openAssetRecord','btn-group-green');
       document.getElementById('openAssetRecord').addEventListener('click', onScreeMenuStop, false);

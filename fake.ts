@@ -1,9 +1,11 @@
 function fakeAllData(){
   var allData: Object = {};
-  var rowMax: number = 6;
   var rackMax: number = 20;
-  var roomXDimension: number = 8 + (rackMax * 0.6);
-  var roomYDimension: number = 8 + (((rowMax * 2) -1) * 1.2);
+  var roomXDimension: number;
+  var roomYDimension: number;
+  var rowMax: number = 6;
+  roomXDimension = 8 + (rackMax * 0.6);
+  roomYDimension = 8 + (((rowMax * 2) -1) * 1.2);
   allData["room"] = {}
   allData["room"]["room_name"] = "roomName";
   allData["camera"] = {
@@ -122,25 +124,25 @@ function fakeScene(roomXDimension,roomYDimension){
 }
 
 function fakeMount(rackData){
-  var unitHeight: number = 0.0445;
-  var xLocation: number = 0;
-  var yLocation: number = 0;
-  var zLocation: number = 0;
-  var xDimension: number = 0;
-  var yDimension: number = 0;
-  var zDimension: number = 0;
-  var zStart: number = 0;
-  var rack: Object = {};
-  var zloop: number = 0;
-  var mountName: string = "";
-  var mountData: Object = {};
-  var mountCount: number = 0;
-  var unitCount: number;
-  var endOfLife: number;
-  var seconds: number;
   var dateNow: Date;
-  var auditDate: Date;
-  var fakedates: Array<string> = ['2018-07-25 04:21:00','2019-01-25 04:21:00','2019-07-25 04:21:00','2020-01-25 04:21:00','2020-07-25 04:21:00']
+  var endOfLife: number;
+  var fakedates: Array<string>;
+  var mountCount: number = 0;
+  var mountData: Object = {};
+  var mountName: string = "";
+  var rack: Object = {};
+  var seconds: number;
+  var unitCount: number;
+  var unitHeight: number = 0.0445;
+  var xDimension: number = 0;
+  var xLocation: number = 0;
+  var yDimension: number = 0;
+  var yLocation: number = 0;
+  var zDimension: number = 0;
+  var zLocation: number = 0;
+  var zLoop: number;
+  var zStart: number = 0;
+  fakedates = ['2018-07-25 04:21:00','2019-01-25 04:21:00','2019-07-25 04:21:00','2020-01-25 04:21:00','2020-07-25 04:21:00'];
   Object.keys(rackData).forEach(function(rackName){
     rack = rackData[rackName];
     if (rack["facing"] == 0){
@@ -168,8 +170,8 @@ function fakeMount(rackData){
       yDimension = 0.016;
     }
     zStart = rack["block"]["z_location"] - (rack["block"]["z_dimension"] * 0.5) + (unitHeight * 2);
-    for (zloop = 0; zloop < 10; zloop++){
-      unitCount = (zloop * 2);
+    for (zLoop = 0; zLoop < 10; zLoop++){
+      unitCount = (zLoop * 2);
       zDimension = (unitHeight * 2) -0.002;
       zLocation = zStart + (unitCount * unitHeight) + unitHeight;
       mountName = "server_" + mountCount;
@@ -180,7 +182,6 @@ function fakeMount(rackData){
       }
       seconds = Math.random() * 5 * 365 * 24 * 60 * 60 * 1000;
       dateNow = new Date();
-      auditDate = new Date(dateNow.getTime() - seconds);
       mountData[mountName] = {
         "block": {
           "draw_lines": 1,
@@ -217,8 +218,8 @@ function fakeMount(rackData){
       }
       mountCount += 1;
     }
-    for (zloop = 0; zloop < 3; zloop++){
-      unitCount = 20 + zloop;
+    for (zLoop = 0; zLoop < 3; zLoop++){
+      unitCount = 20 + zLoop;
       zDimension = unitHeight - 0.002;
       zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
       mountName = "network_" + mountCount;
@@ -229,7 +230,6 @@ function fakeMount(rackData){
       }
       seconds = Math.random() * 5 * 365 * 24 * 60 * 60 * 1000;
       dateNow = new Date();
-      auditDate = new Date(dateNow.getTime() - seconds);
       mountData[mountName] = {
         "block": {
           "draw_lines": 1,
@@ -266,8 +266,8 @@ function fakeMount(rackData){
       }
       mountCount += 1;
     }
-    for (zloop = 0; zloop < 4; zloop++){
-      unitCount = 23 + zloop * 4;
+    for (zLoop = 0; zLoop < 4; zLoop++){
+      unitCount = 23 + zLoop * 4;
       zDimension = (unitHeight * 4) - 0.002;
       zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 2);
       mountName = "server_" + mountCount;
@@ -317,19 +317,19 @@ function fakeMount(rackData){
 }
 
 function fakeEmpty(rackData){
-  var unitHeight: number = 0.0445;
-  var xLocation: number = 0;
-  var yLocation: number = 0;
-  var zLocation: number = 0;
-  var xDimension: number = 0;
-  var yDimension: number = 0;
-  var zDimension: number = 0;
-  var zStart: number = 0;
-  var rack: Object = {};
-  var zloop: number = 0;
   var emptyCount: number = 0;
   var emptyData: Object = {};
+  var rack: Object = {};
   var unitCount: number;
+  var unitHeight: number = 0.0445;
+  var xDimension: number = 0;
+  var xLocation: number = 0;
+  var yDimension: number = 0;
+  var yLocation: number = 0;
+  var zDimension: number = 0;
+  var zLocation: number = 0;
+  var zLoop: number = 0;
+  var zStart: number = 0;
   Object.keys(rackData).forEach(function(rackName){
     rack = rackData[rackName];
     if (rack["facing"] == 0){
@@ -357,8 +357,8 @@ function fakeEmpty(rackData){
       yDimension = 0.002;
     }
     zStart = rack["block"]["z_location"] - (rack["block"]["z_dimension"] * 0.5) + (unitHeight * 2);
-    for (zloop = 0; zloop < 11; zloop++){
-      unitCount = 39 + zloop;
+    for (zLoop = 0; zLoop < 11; zLoop++){
+      unitCount = 39 + zLoop;
       zDimension = unitHeight;
       zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
       emptyData[emptyCount] = {
@@ -388,14 +388,14 @@ function fakeEmpty(rackData){
 }
 
 function randomEnvironment(){
-  var environmentList: Array<string> = ["environment1","environment2","environment3","environment4","environment5","environment6"];
   var dice: number = Math.floor(Math.random() * 6);
+  var environmentList: Array<string> = ["environment1","environment2","environment3","environment4","environment5","environment6"];
   return environmentList[dice];
 }
 
 function randomSupportGroup(){
-  var supportGroupList: Array<string> = ["team1","team2","team3"];
   var dice: number = Math.floor(Math.random() * 3);
+  var supportGroupList: Array<string> = ["team1","team2","team3"];
   return supportGroupList[dice];
 }
 
@@ -425,14 +425,13 @@ function fakePower(allData){
 }
 
 function fakeRacks(rowMax,rackMax){
+  var design: object = {};
   var facing: number = 0;
   var rackCount: number = 0;
   var rackData: object = {};
   var rackName: string;
   var xloop: number;
   var yloop: number;
-  var dice: number;
-  var design: object = {}
   for (yloop = 0; yloop < rowMax; yloop++){
     for (xloop = 0; xloop < rackMax; xloop++){
       if (yloop % 2 == 0){
@@ -441,7 +440,6 @@ function fakeRacks(rowMax,rackMax){
         facing = 3;
       }
       rackName = "rack_" + xloop + "_" + yloop;
-      dice = Math.random();
       design = {
         "u_rack_state": "Landed",
         "u_max_alloc": 10,
