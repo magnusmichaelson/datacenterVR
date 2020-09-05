@@ -1,7 +1,7 @@
   // @ts-ignore
-  var allData = fakeAllData();
+  var allData: object = fakeAllData();
   // @ts-ignore
-  var powerData = fakePower(allData);
+  var powerData: object = fakePower(allData);
   // test data
   powerData["rack_19_5"] = {
     "average": 1,
@@ -152,9 +152,10 @@
   function generateScene(){
     var speedElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('speed');
     // event listeners
-    var threeGeometry: any;
-    var threeMaterial: any;
     var threeCrosshair: any;
+    var threeGeometry: any;
+    var threeLight: any;
+    var threeMaterial: any;
     document.getElementById('rackOverlay').addEventListener('change', rackDropDown, false);
     document.getElementById('rackFilter').addEventListener('change', rackDropDown, false);
     document.getElementById('mountOverlay').addEventListener('change', mountDropDown, false);
@@ -173,8 +174,8 @@
     threeScene = new THREE.Scene();
     // light
     // @ts-ignore
-    var light = new THREE.AmbientLight(0xffffff);
-    threeScene.add( light );
+    threeLight = new THREE.AmbientLight(0xffffff);
+    threeScene.add(threeLight);
     // camera
     // @ts-ignore
     threeCamera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.01, 1000 );
@@ -707,7 +708,7 @@
     var supportGroupElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
     var supportGroupValue: string = supportGroupElement.value;
     var color: Array<number> = [];
-    var now = Date.now();
+    var now: number = Date.now();
     var lastAudit: number = 0
     var block: object;
     // 2 yeasr * 365 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds;
@@ -858,9 +859,9 @@
     var time: number
     var red: number;
     // @ts-ignore
-    var threeCameraPostion = new THREE.Vector3();
+    var threeCameraPostion: any = new THREE.Vector3();
     // @ts-ignore
-    var threeCameraDirection = new THREE.Vector3();
+    var threeCameraDirection: any = new THREE.Vector3();
     requestAnimationFrame( animate );
     if ( controlsEnabled ) {
       threeCamera.getWorldPosition(threeCameraPostion);
@@ -868,7 +869,7 @@
       threeRaycaster.set( threeCameraPostion, threeCameraDirection );
       threeIntersects = threeRaycaster.intersectObjects(threeScene.children);
       if (threeIntersects.length > 0){
-        for ( var i = 0; i < threeIntersects.length; i++ ) {
+        for ( var i: number = 0; i < threeIntersects.length; i++ ) {
           if (threeIntersects[i].object.type == 'Mesh'){
             if (closestDistance == -1){
               closestDistance = threeIntersects[i].distance;
@@ -1001,12 +1002,11 @@
    * @return {string} xxxxx - xxxxx
    */
   function rightMouseClick(event){
-    var button;
-    var blockType;
-    var addButton = function(title,id,className){
+    var button: HTMLElement;
+    var blockType: string;
+    var addButton: any = function(title,id,className){
           button = document.createElement("BUTTON");
           button.id = id;
-          button.type = 'button';
           button.className = className;
           button.innerHTML = title;
           document.getElementById('ghost').appendChild(button);
@@ -1078,18 +1078,16 @@
   }
 
   function subMenuDownloadBlocks(){
-    var button;
-    console.log("foooooo")
-    var ghost;
+    var button: HTMLElement;
+    var ghost: HTMLElement;
     // clear main menu
     ghost = document.getElementById("ghost");
     while (ghost.firstChild) {
       ghost.removeChild(ghost.lastChild);
     }
-    var addButton = function(title,id,className){
+    var addButton: any = function(title,id,className){
           button = document.createElement("BUTTON");
           button.id = id;
-          button.type = 'button';
           button.className = className;
           button.innerHTML = title;
           document.getElementById('ghost').appendChild(button);
@@ -1144,27 +1142,6 @@
     download.click();
     document.body.removeChild(download);
   }
-
-  /**
-   * @function xxxxxx
-   * @description xxxxxxxxx
-   * @param {string} xxxxx - xxxxx
-   * @param {boolean} xxxxx - xxxxx
-   * @param {number} xxxxx - xxxxx
-   * @param {Object} xxxxx - xxxxx
-   * @param {Array.<Object>} xxxxx - xxxxx
-   * @return {string} xxxxx - xxxxx
-   */
-  function onScreenMenu(){
-    var linebreak;
-    var lower;
-    var textNode;
-    lower = document.getElementById("lower");
-    while (lower.firstChild) {
-      lower.removeChild(lower.lastChild);
-    }
-    onScreeMenuStop()
-  }
   /**
    * @function xxxxxx
    * @description xxxxxxxxx
@@ -1190,8 +1167,7 @@
    * @return {string} xxxxx - xxxxx
    */
   function onScreeMenuStop(){
-    var ghost;
-    console.log('test')
+    var ghost: HTMLElement;
     ghost = document.getElementById("ghost");
     while (ghost.firstChild) {
       ghost.removeChild(ghost.lastChild);
@@ -1209,12 +1185,12 @@
    * @return {string} xxxxx - xxxxx
    */
   function leftMouseClick(event){
-    var blockData = {};
-    var anchor;
-    var linebreak;
-    var lower;
-    var textNode;
-    var blockType = "";
+    var blockData: object = {};
+    var anchor: HTMLElement;
+    var linebreak: HTMLElement;
+    var lower: HTMLElement;
+    var textNode: Text;
+    var blockType: string = "";
     lower = document.getElementById("lower");
     while (lower.firstChild) {
       lower.removeChild(lower.lastChild);
@@ -1227,13 +1203,6 @@
         anchor.setAttribute('href',"/nav_to.do?uri=%2Falm_hardware.do%3Fsys_id%3D" + blockData["sys_id"]);
         anchor.innerText = selectedBlock;
         lower.appendChild(anchor);
-        //preformatted = document.createElement("PRE");
-        //linebreak = document.createElement("br");
-        //textNode = document.createTextNode("Name: " + blockData["data"]["ci_name"] +"\n");
-        //preformatted.appendChild(textNode);
-        //textNode = document.createTextNode(JSON.stringify(blockData["display"], null, 2));
-        //preformatted.appendChild(textNode);
-        //lower.appendChild(preformatted);
       }
       if (blockType == "rack"){
         blockData = allData["racks"][selectedBlock];
@@ -1253,14 +1222,6 @@
           textNode = document.createTextNode("     " + rackColor[selectedBlock][4]);
           lower.appendChild(textNode);
         }
-        //preformatted = document.createElement("PRE");
-        //preformatted.appendChild(textNode);
-        //linebreak = document.createElement("br");
-        //textNode = document.createTextNode("Rack name: " + selectedBlock +"\n");
-        //preformatted.appendChild(textNode);
-        //textNode = document.createTextNode(JSON.stringify(blockData["display"], null, 2));
-        //preformatted.appendChild(textNode);
-        //lower.appendChild(preformatted);
       }
       if (blockType == "scene"){
         blockData = allData["scene"][selectedBlock];
