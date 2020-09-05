@@ -225,16 +225,16 @@
    * @return {string} xxxxx - xxxxx
    */
   function generateBlocks(inputData,blockType,highlightable){
-    var block = {};
-    var gameXLocation = 0;
-    var gameYLocation = 0;
-    var gameZLocation = 0;
-    var gameXDimension = 0;
-    var gameYDimension = 0;
-    var gameZDimension = 0;
+    var block: object = {};
+    var gameXLocation: number = 0;
+    var gameYLocation: number = 0;
+    var gameZLocation: number = 0;
+    var gameXDimension: number = 0;
+    var gameYDimension: number = 0;
+    var gameZDimension: number = 0;
     var threeMaterial: any;
     var threeMesh: any;
-    var line;
+    var threeLine: any;
     Object.keys(inputData).forEach(function(blockName){
       block = inputData[blockName]["block"];
       // translate from blender xyz to game xyz
@@ -265,8 +265,8 @@
         threeMaterial = new THREE.LineBasicMaterial();
         threeMaterial.color.setRGB(block['rgb_line_red'],block['rgb_line_green'],block['rgb_line_blue']);
         // @ts-ignore
-        line = new THREE.LineSegments(edges, threeMaterial);
-        threeMesh.add(line);
+        threeLine = new THREE.LineSegments(edges, threeMaterial);
+        threeMesh.add(threeLine);
       }
     });
   }
@@ -350,13 +350,13 @@
    * @return {string} xxxxx - xxxxx
    */
   function cameraPosRot(){
-    var lower = document.getElementById("lower");
-    var camXPos = threeControls.getObject().position.x.toFixed(3);
-    var camYPos = threeControls.getObject().position.y.toFixed(3);
-    var camZPos = threeControls.getObject().position.z.toFixed(3);
-    var camXRot = threeCamera.rotation.x.toFixed(3);
-    var camYRot = threeCamera.rotation.y.toFixed(3);
-    var camZRot = threeCamera.rotation.z.toFixed(3);
+    var lower: HTMLElement = document.getElementById("lower");
+    var camXPos: number = threeControls.getObject().position.x.toFixed(3);
+    var camYPos: number = threeControls.getObject().position.y.toFixed(3);
+    var camZPos: number = threeControls.getObject().position.z.toFixed(3);
+    var camXRot: number = threeCamera.rotation.x.toFixed(3);
+    var camYRot: number = threeCamera.rotation.y.toFixed(3);
+    var camZRot: number = threeCamera.rotation.z.toFixed(3);
     while (lower.firstChild) {
       lower.removeChild(lower.lastChild);
     }
@@ -369,17 +369,17 @@
    * @param {Object} mountColor - the colors
    */
   function applyColor(inputData,inputColor){
-    var red = 1;
-    var green = 1;
-    var blue = 1;
-    var target;
+    var red: number = 1;
+    var green: number = 1;
+    var blue: number = 1;
+    var threeTarget: any;
     Object.keys(inputData).forEach(function(blockName){
       if (inputColor.hasOwnProperty(blockName)){
         red = inputColor[blockName][0];
         green = inputColor[blockName][1];
         blue = inputColor[blockName][2];
-        target = threeScene.getObjectByName(blockName);
-        target.material.color.setRGB(red,green,blue);
+        threeTarget = threeScene.getObjectByName(blockName);
+        threeTarget.material.color.setRGB(red,green,blue);
       }
     })
   }
@@ -389,8 +389,8 @@
    */
   function generateRackFilter(){
     var rackEnvironmentElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('rackFilter');
-    var optionElement;
-    var rackEnvironmentList = [];
+    var optionElement: HTMLOptionElement;
+    var rackEnvironmentList: Array<string> = [];
     Object.keys(allData["racks"]).forEach(function(rackName){
       if (rackEnvironmentList.indexOf(allData["racks"][rackName]["design"]['u_environment']) < 0){
         rackEnvironmentList.push(allData["racks"][rackName]["design"]['u_environment']);
@@ -410,9 +410,9 @@
    */
   function generatemountFilter(){
     var mountFilterElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
-    var optionElement;
-    var supportGroupList = [];
-    var mount = {};
+    var optionElement: HTMLOptionElement;
+    var supportGroupList: Array<string> = [];
+    var mount: object = {};
     Object.keys(allData["mount"]).forEach(function(blockName){
       mount = allData["mount"][blockName];
       if (supportGroupList.indexOf(mount['support_group_name']) < 0){
@@ -432,8 +432,9 @@
    * @description triggers overlays when dropdowns are changed
    */
   function rackDropDown(){
-    var overlayElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountOverlay');
-    var overlayValue = overlayElement.value;
+    var overlayElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('rackOverlay');
+    var overlayValue: string = overlayElement.value;
+    console.log(overlayValue)
     if (overlayValue == 'default'){
       overlayRackDefault();
     }
@@ -468,17 +469,17 @@
    */
   function powerRender(allData,powerData){
     var rackEnvironmentElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('rackFilter');
-    var rackEnvironmentValue = rackEnvironmentElement.value;
-    var grey = 0.8;
-    var longMessage = "";
-    var powerDesign = 0;
-    var powerUsage = 0;
-    var averageOrMax;
-    var ratingType;
-    var roomMaximum = powerData["room_maximum"];
-    var shortMessage = "";
-    var singleRackReport = [];
-    var tempColor = [];
+    var rackEnvironmentValue: string = rackEnvironmentElement.value;
+    var grey: number = 0.8;
+    var longMessage: string = "";
+    var powerDesign: number = 0;
+    var powerUsage: number = 0;
+    var averageOrMax: string;
+    var ratingType: string;
+    var roomMaximum: number = powerData["room_maximum"];
+    var shortMessage: string = "";
+    var singleRackReport: Array<any> = [];
+    var tempColor: Array<number> = [];
     Object.keys(allData["racks"]).forEach(function(rackName){
       // power usage
       if (powerData["racks"].hasOwnProperty(rackName)){
@@ -543,17 +544,19 @@
       rackColor[rackName] = singleRackReport;
     });
     applyColor(allData["racks"],rackColor);
+    console.log(rackColor)
   }
   /**
    * @function overlayRackDefault
    * @description all blocks drawn white except collisions, which are red
    */
   function overlayRackDefault(){
-    var color = [];
+    var color: Array<number> = [];
     Object.keys(allData["racks"]).forEach(function(rackName){
       rackColor[rackName] = [1,1,1];
     });
     applyColor(allData["racks"],rackColor);
+    console.log(rackColor)
   }
 
   /**
@@ -562,11 +565,11 @@
    */
   function overlayRackCapacity(){
     var rackEnvironmentElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('rackFilter');
-    var rackEnvironmentValue = rackEnvironmentElement.value;
-    var color = [];
-    var rack = {};
-    var singleRackReport = [];
-    var tempColor = [];
+    var rackEnvironmentValue: string = rackEnvironmentElement.value;
+    var color: Array<number> = [];
+    var rack: object = {};
+    var singleRackReport: Array<any> = [];
+    var tempColor: Array<number> = [];
     Object.keys(allData["racks"]).forEach(function(rackName){
       rack = allData["racks"][rackName];
       singleRackReport = [1,1,1]
@@ -592,7 +595,7 @@
    */
   function mountDropDown(){
     var overlayElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountOverlay');
-    var overlayValue = overlayElement.value;
+    var overlayValue: string = overlayElement.value;
     if (overlayValue == 'default'){
       overlaymountDefault();
     }
@@ -611,8 +614,8 @@
    * @description all blocks drawn white except collisions, which are red
    */
   function overlaymountDefault(){
-    var color = [];
-    var mount = {};
+    var color: Array<number> = [];
+    var mount: object = {};
     Object.keys(allData["mount"]).forEach(function(blockName){
       mount = allData["mount"][blockName];
       color = [1,1,1];
@@ -629,17 +632,17 @@
    */
   function overlayObjectModelCategory(){
     var supportGroupElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
-    var supportGroupValue = supportGroupElement.value;
-    var color = [];
+    var supportGroupValue: string = supportGroupElement.value;
+    var color: Array<number> = [];
     // hue 40 sat 40 val 100/60
-    var colorStorage = [1.0, 0.867, 0.6];
+    var colorStorage: Array<number> = [1.0, 0.867, 0.6];
     // hue 120 sat 40 val 100/60
-    var colorNetwork = [0.6, 1.0, 0.6];
+    var colorNetwork: Array<number> = [0.6, 1.0, 0.6];
     // hue 200 sat 40 val 100/60
-    var colorServer = [0.6, 0.867, 1.0];
+    var colorServer: Array<number> = [0.6, 0.867, 1.0];
     // hue 280 sat 40 val 100/60
-    var colorOther = [0.867, 0.6, 1.0];
-    var colorChart = {
+    var colorOther: Array<number> = [0.867, 0.6, 1.0];
+    var colorChart: object = {
       "IP Firewall": colorNetwork,
       "IP Router": colorNetwork,
       "IP Switch": colorNetwork,
@@ -656,7 +659,7 @@
       "UPS": colorOther,
       "PDU": colorOther
     }
-    var mount = {};
+    var mount: object = {};
     Object.keys(allData["mount"]).forEach(function(blockName){
       mount = allData["mount"][blockName];
       color = [1,1,1];
@@ -681,9 +684,9 @@
    */
   function overlayObjectModelEndOfLife(){
     var supportGroupElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
-    var supportGroupValue = supportGroupElement.value;
-    var color = [];
-    var mount;
+    var supportGroupValue: string = supportGroupElement.value;
+    var color: Array<number> = [];
+    var mount: object;
     Object.keys(allData["mount"]).forEach(function(blockName){
       mount = allData["mount"][blockName];
       color = [1,1,1];
@@ -702,13 +705,13 @@
    */
   function overlayObjectLastAudit(){
     var supportGroupElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
-    var supportGroupValue = supportGroupElement.value;
-    var color = [];
+    var supportGroupValue: string = supportGroupElement.value;
+    var color: Array<number> = [];
     var now = Date.now();
-    var lastAudit = 0
-    var block;
+    var lastAudit: number = 0
+    var block: object;
     // 2 yeasr * 365 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds;
-    var milliseconds = 63072000000;
+    var milliseconds: number = 63072000000;
     Object.keys(allData["mount"]).forEach(function(blockName){
       block = allData["mount"][blockName];
       color = [1,1,1];
@@ -734,11 +737,11 @@
    * @description resizes the renderer when the page is resized
    */
   function rendererResize(){
-    var canvasWidth = window.innerWidth - 4;
-    var canvasHeight = window.innerHeight - 4;
-    var topHeight = 40;
-    var lowerHeight = 68;
-    var centerHeight = canvasHeight - topHeight - lowerHeight;
+    var canvasWidth: number = window.innerWidth - 4;
+    var canvasHeight: number = window.innerHeight - 4;
+    var topHeight: number = 40;
+    var lowerHeight: number = 68;
+    var centerHeight: number = canvasHeight - topHeight - lowerHeight;
     // top
     document.getElementById("top").style.position = 'absolute';
     document.getElementById("top").style.left = "0px";
@@ -777,11 +780,11 @@
    * @param {number} decimal - the number to be converted into color
    */
   function spectrumGreenRed(numerator,denominator) {
-    var decimal = 0;
-    var saturation = 0.3;
-    var red;
-    var green;
-    var blue;
+    var decimal: number = 0;
+    var saturation: number = 0.3;
+    var red: number;
+    var green: number;
+    var blue: number;
     decimal = numerator / denominator;
     if (denominator == 0){
       decimal = 1;
@@ -818,11 +821,11 @@
    * @param {number} decimal - the number to be converted into color
    */
   function spectrumBluePink(numerator,denominator) {
-    var decimal = 0;
-    var saturation = 0.3;
-    var red;
-    var green;
-    var blue;
+    var decimal: number = 0;
+    var saturation: number = 0.3;
+    var red: number;
+    var green: number;
+    var blue: number;
     decimal = numerator / denominator;
     if (denominator == 0){
       decimal = 1;
@@ -843,15 +846,17 @@
    * @description the animation loop
    */
   function animate() {
-    var previousBlockType = "";
-    var currentBlockType = "";
-    var blue;
-    var closest;
-    var closestDistance = -1;
-    var green;
-    var intersects;
-    var red;
-    var targetDarkness = 0.8;
+    var blue: number;
+    var closestDistance: number = -1;
+    var currentBlockType: string = "";
+    var delta: number;
+    var green: number;
+    var previousBlockType: string = "";
+    var targetDarkness: number = 0.8;
+    var threeClosest: any;
+    var threeIntersects: Array<any>;
+    var time: number
+    var red: number;
     // @ts-ignore
     var threeCameraPostion = new THREE.Vector3();
     // @ts-ignore
@@ -861,17 +866,17 @@
       threeCamera.getWorldPosition(threeCameraPostion);
       threeCamera.getWorldDirection(threeCameraDirection);
       threeRaycaster.set( threeCameraPostion, threeCameraDirection );
-      var intersects = threeRaycaster.intersectObjects(threeScene.children);
-      if (intersects.length > 0){
-        for ( var i = 0; i < intersects.length; i++ ) {
-          if (intersects[i].object.type == 'Mesh'){
+      threeIntersects = threeRaycaster.intersectObjects(threeScene.children);
+      if (threeIntersects.length > 0){
+        for ( var i = 0; i < threeIntersects.length; i++ ) {
+          if (threeIntersects[i].object.type == 'Mesh'){
             if (closestDistance == -1){
-              closestDistance = intersects[i].distance;
-              closest = intersects[i];
+              closestDistance = threeIntersects[i].distance;
+              threeClosest = threeIntersects[i];
             } else {
-              if (intersects[i].distance < closestDistance){
-                closestDistance = intersects[i].distance;
-                closest = intersects[i];
+              if (threeIntersects[i].distance < closestDistance){
+                closestDistance = threeIntersects[i].distance;
+                threeClosest = threeIntersects[i];
               }
             }
           }
@@ -879,7 +884,7 @@
       }
       if (closestDistance != -1){
         // check if the selected block has changed
-        if (closest.object.name != selectedBlock){
+        if (threeClosest.object.name != selectedBlock){
           if (selectedBlock){
             // unhighlight previous object
             previousBlockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
@@ -899,7 +904,7 @@
               threeScene.getObjectByName(selectedBlock).material.color.setRGB(0.5, 0.5, 0.5);
             }
           }
-          selectedBlock = closest.object.name;
+          selectedBlock = threeClosest.object.name;
         }
         // highlight the selected block
         currentBlockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
@@ -920,8 +925,8 @@
         }
       }
       // movement
-      var time = performance.now();
-      var delta = ( time - prevTime );
+      time = performance.now();
+      delta = ( time - prevTime );
       document.getElementById("fps").innerText = "FPS: " + Math.floor(1000 / delta);
       if (speedBoost){
         delta = delta * 5 / 1000;
@@ -976,12 +981,8 @@
    * @return {string} xxxxx - xxxxx
    */
   function middleMouseClick(event){
-    var blockData = {};
-    var anchor;
-    var linebreak;
-    var lower;
-    var preformatted;
-    var textNode;
+    var lower: HTMLElement;
+    var textNode: Text;
     lower = document.getElementById("lower");
     while (lower.firstChild) {
       lower.removeChild(lower.lastChild);
@@ -1000,10 +1001,6 @@
    * @return {string} xxxxx - xxxxx
    */
   function rightMouseClick(event){
-    var ghost;
-    var optionElement;
-    var optionList = [];
-    var select;
     var button;
     var blockType;
     var addButton = function(title,id,className){
@@ -1113,12 +1110,12 @@
    * @description downloads json containing anonymous 3d data and color of blocks that are not rack mount objects
    */
   function exportBlocks(input, blockType){
-    var jsonData;
-    var filename;
-    var encodedData;
-    var download;
-    var output = {};
-    var block = {};
+    var jsonData: string;
+    var filename: string;
+    var encodedData: string;
+    var download: HTMLElement;
+    var output: object = {};
+    var block: object = {};
     Object.keys(input).forEach(function(blockName){
       block = input[blockName]["block"];
       output[blockName] = {
@@ -1216,7 +1213,6 @@
     var anchor;
     var linebreak;
     var lower;
-    var preformatted;
     var textNode;
     var blockType = "";
     lower = document.getElementById("lower");
@@ -1231,7 +1227,7 @@
         anchor.setAttribute('href',"/nav_to.do?uri=%2Falm_hardware.do%3Fsys_id%3D" + blockData["sys_id"]);
         anchor.innerText = selectedBlock;
         lower.appendChild(anchor);
-        preformatted = document.createElement("PRE");
+        //preformatted = document.createElement("PRE");
         //linebreak = document.createElement("br");
         //textNode = document.createTextNode("Name: " + blockData["data"]["ci_name"] +"\n");
         //preformatted.appendChild(textNode);
