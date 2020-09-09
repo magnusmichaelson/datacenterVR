@@ -634,12 +634,10 @@
    */
   function overlayRackDefault(){
     var color: Array<number> = [];
-    /*
-    Object.keys(allData["racks"]).forEach(function(rackName){
+    Object.keys(rackData).forEach(function(rackName){
       rackColor[rackName] = [1,1,1];
     });
-    */
-    //applyColor(allData["racks"],rackColor);
+    applyColor(rackData,rackColor);
   }
 
   /**

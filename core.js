@@ -609,12 +609,10 @@ function powerRender(allData: Object, powerData: Object){
  */
 function overlayRackDefault() {
     var color = [];
-    /*
-    Object.keys(allData["racks"]).forEach(function(rackName){
-      rackColor[rackName] = [1,1,1];
+    Object.keys(rackData).forEach(function (rackName) {
+        rackColor[rackName] = [1, 1, 1];
     });
-    */
-    //applyColor(allData["racks"],rackColor);
+    applyColor(rackData, rackColor);
 }
 /**
  * @function overlayRackCapacity
