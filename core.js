@@ -1,27 +1,74 @@
+"use strict";
+var cameraData = {
+    "camera_position_x": 5.672,
+    "camera_position_y": 14.360,
+    "camera_position_z": 2.274,
+    "camera_rotation_x": -2.065,
+    "camera_rotation_y": -0.224,
+    "camera_rotation_z": -2.752
+};
+var rackMax = 20;
+var rowMax = 6;
+var roomXDimension = 8 + (rackMax * 0.6);
+var roomYDimension = 8 + (((rowMax * 2) - 1) * 1.2);
+var rackBlocks = {};
+var rackData = fakeRacks(rowMax, rackMax);
+var sceneBlocks = fakeScene(roomXDimension, roomYDimension);
+/*
+allData["racks"] = fakeRacks(rowMax,rackMax);
+allData["mount"] = fakeMount(allData["racks"]);
+allData["empty"] = fakeEmpty(allData["racks"]);
+*/
+//const rackData: Record
+/*
+  var rowMax: number = 6;
+  roomXDimension = 8 + (rackMax * 0.6);
+  roomYDimension = 8 + (((rowMax * 2) -1) * 1.2);
+  allData["room"] = {}
+  allData["room"]["room_name"] = "roomName";
+  allData["camera"] = {
+      "camera_position_x": 5.672,
+      "camera_position_y": 14.360,
+      "camera_position_z": 2.274,
+      "camera_rotation_x": -2.065,
+      "camera_rotation_y": -0.224,
+      "camera_rotation_z": -2.752
+  }; [5.672, 14.360, 2.274, -2.065, -0.224, -2.752]
+  allData["scene"] = fakeScene(roomXDimension,roomYDimension);
+  allData["racks"] = fakeRacks(rowMax,rackMax);
+  allData["mount"] = fakeMount(allData["racks"]);
+  allData["empty"] = fakeEmpty(allData["racks"]);
+*/
+//const allData: Record<string, string> = fakeAllData;
+//const allData: Array<{[index: string]: string}
+//var allData: object = fakeAllData();
 // @ts-ignore
-var allData = fakeAllData();
-console.log(allData);
-// @ts-ignore
-var powerData = fakePower(allData);
+//var powerData: object = fakePower(allData);
 // test data
+/*
 powerData["rack_19_5"] = {
-    "average": 1,
-    "maximum": 1
-};
+  "average": 1,
+  "maximum": 1
+}
+*/
+/*
 allData["racks"]["rack_19_5"]["design"] = {
-    "u_rack_state": "Landed",
-    "u_max_alloc": 10,
-    "u_qty_alloc": 12,
-    "u_environment": -1,
-    "u_allocated_kw": 0,
-    "u_equip_kw_consume_design": 0,
-    "u_equip_design_kw": 0,
-    "u_facil_design_kw": 0
-};
+  "u_rack_state": "Landed",
+  "u_max_alloc": 10,
+  "u_qty_alloc": 12,
+  "u_environment": -1,
+  "u_allocated_kw": 0,
+  "u_equip_kw_consume_design": 0,
+  "u_equip_design_kw": 0,
+  "u_facil_design_kw": 0
+}
+*/
 var anchor;
 var controlsEnabled = false;
 var element = document.body;
+var ghostDiv;
 var havePointerLock;
+var htmlElement;
 var moveForward = false;
 var moveBackward = false;
 var moveLeft = false;
@@ -32,8 +79,9 @@ var mountData = {};
 var mountColor = {};
 var prevTime;
 var rackColor = {};
-var roomName = '';
-var roomSysid;
+var roomNameElement;
+var roomName = "roomName";
+var roomSysid = "abcde";
 var selectedBlock = "";
 var selectedPreviousName = "";
 var serverLink = this;
@@ -60,17 +108,23 @@ if (roomSysid == null) {
     serverLink.data.generatingRoom = false;
     allData = serverLink.data.allData;
     */
-anchor = document.createElement('a');
-titleText = document.createTextNode(allData["room"]["room_name"]);
-anchor.appendChild(titleText);
-anchor.href = "/nav_to.do?uri=%2Fcmdb_ci_computer_room.do%3Fsys_id%3D" + roomSysid;
-document.getElementById('roomName').appendChild(anchor);
+roomNameElement = document.getElementById('roomName');
+if (roomNameElement) {
+    anchor = document.createElement('a');
+    titleText = document.createTextNode(roomName);
+    anchor.appendChild(titleText);
+    anchor.href = "/nav_to.do?uri=%2Fcmdb_ci_computer_room.do%3Fsys_id%3D" + roomSysid;
+    roomNameElement.appendChild(anchor);
+}
 havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 if (havePointerLock) {
     document.addEventListener('pointerlockchange', pointerlockchange, false);
     document.addEventListener('mozpointerlockchange', pointerlockchange, false);
     document.addEventListener('webkitpointerlockchange', pointerlockchange, false);
-    document.getElementById('ghost').addEventListener('click', pointerLockRequest, false);
+    ghostDiv = document.getElementById('ghost');
+    if (ghostDiv) {
+        ghostDiv.addEventListener('click', pointerLockRequest, false);
+    }
 }
 else {
     console.log('Your browser doesn\'t seem to support Pointer Lock API');
@@ -79,29 +133,6 @@ generateScene();
 animate();
 //});
 //}
-/**
- * @function xxxxxx
- * @description xxxxxxxxx
- * @param {string} xxxxx - xxxxx
- * @param {boolean} xxxxx - xxxxx
- * @param {number} xxxxx - xxxxx
- * @param {Object} xxxxx - xxxxx
- * @param {Array.<Object>} xxxxx - xxxxx
- * @return {string} xxxxx - xxxxx
- */
-function download(data, filename) {
-    var jsonData;
-    var encodedData;
-    var download;
-    jsonData = JSON.stringify(data, null, null).replace(/(\r\n|\n|\r)/gm, "");
-    encodedData = 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonData);
-    download = document.createElement('a');
-    download.setAttribute('href', encodedData);
-    download.setAttribute('download', filename);
-    document.body.appendChild(download);
-    download.click();
-    document.body.removeChild(download);
-}
 /**
  * @function urlParamMissingWarning
  * @description gives an explanation of how a rack sys_id needs to given as a url parameter
@@ -159,14 +190,29 @@ function generateScene() {
     var threeGeometry;
     var threeLight;
     var threeMaterial;
-    document.getElementById('rackOverlay').addEventListener('change', rackDropDown, false);
-    document.getElementById('rackFilter').addEventListener('change', rackDropDown, false);
-    document.getElementById('mountOverlay').addEventListener('change', mountDropDown, false);
-    document.getElementById('mountFilter').addEventListener('change', mountDropDown, false);
+    htmlElement = document.getElementById('rackOverlay');
+    if (htmlElement) {
+        htmlElement.addEventListener('change', rackDropDown, false);
+    }
+    htmlElement = document.getElementById('rackFilter');
+    if (htmlElement) {
+        htmlElement.addEventListener('change', rackDropDown, false);
+    }
+    htmlElement = document.getElementById('mountOverlay');
+    if (htmlElement) {
+        htmlElement.addEventListener('change', mountDropDown, false);
+    }
+    htmlElement = document.getElementById('mountFilter');
+    if (htmlElement) {
+        htmlElement.addEventListener('change', mountDropDown, false);
+    }
+    htmlElement = document.getElementById("speed");
+    if (htmlElement) {
+        htmlElement.addEventListener("change", function () {
+            speed = parseFloat(speedElement.value);
+        }, false);
+    }
     //document.getElementById('exportScene').addEventListener('click', exportScene, false);
-    document.getElementById("speed").addEventListener("change", function () {
-        speed = parseFloat(speedElement.value);
-    }, false);
     document.addEventListener('keydown', onKeyDown, false);
     document.addEventListener('keyup', onKeyUp, false);
     // fill dropdowns
@@ -184,8 +230,8 @@ function generateScene() {
     threeCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
     // @ts-ignore
     threeControls = new THREE.PointerLockControls(threeCamera, document.body);
-    threeControls.getObject().position.set(allData["camera"]["camera_position_x"], allData["camera"]["camera_position_y"], allData["camera"]["camera_position_z"]);
-    threeControls.getObject().rotation.set(allData["camera"]["camera_rotation_x"], allData["camera"]["camera_rotation_y"], allData["camera"]["camera_rotation_z"]);
+    threeControls.getObject().position.set(cameraData["camera_position_x"], cameraData["camera_position_y"], cameraData["camera_position_z"]);
+    threeControls.getObject().rotation.set(cameraData["camera_rotation_x"], cameraData["camera_rotation_y"], cameraData["camera_rotation_z"]);
     threeScene.add(threeCamera);
     // threeCrosshair
     // @ts-ignore
@@ -210,10 +256,10 @@ function generateScene() {
     // @ts-ignore
     threeRenderer = new THREE.WebGLRenderer({ antialias: true, canvas: document.getElementById('my_canvas') });
     threeRenderer.setClearColor(0xf0f3f4);
-    generateBlocks(allData["racks"], "rack", false);
-    generateBlocks(allData["scene"], "scene", false);
-    generateBlocks(allData["mount"], "mount", true);
-    generateBlocks(allData["empty"], "empty", false);
+    generateBlocks(rackBlocks, "rack", false);
+    //generateBlocks(allData["scene"],"scene",false)
+    //generateBlocks(allData["mount"],"mount",true)
+    //generateBlocks(allData["empty"],"empty",false)
     rackDropDown();
     mountDropDown();
     rendererResize();
@@ -229,30 +275,30 @@ function generateScene() {
  * @return {string} xxxxx - xxxxx
  */
 function generateBlocks(inputData, blockType, highlightable) {
-    var block = {};
     var gameXLocation = 0;
     var gameYLocation = 0;
     var gameZLocation = 0;
     var gameXDimension = 0;
     var gameYDimension = 0;
     var gameZDimension = 0;
+    var threeEdges;
+    var threeGeometry;
     var threeMaterial;
     var threeMesh;
     var threeLine;
     Object.keys(inputData).forEach(function (blockName) {
-        block = inputData[blockName]["block"];
         // translate from blender xyz to game xyz
-        gameXLocation = block['y_location'];
-        gameYLocation = block['z_location'];
-        gameZLocation = block['x_location'];
-        gameXDimension = block['y_dimension'];
-        gameYDimension = block['z_dimension'];
-        gameZDimension = block['x_dimension'];
+        gameXLocation = parseFloat(inputData[blockName]['y_location']);
+        gameYLocation = parseFloat(inputData[blockName]['z_location']);
+        gameZLocation = parseFloat(inputData[blockName]['x_location']);
+        gameXDimension = parseFloat(inputData[blockName]['y_dimension']);
+        gameYDimension = parseFloat(inputData[blockName]['z_dimension']);
+        gameZDimension = parseFloat(inputData[blockName]['x_dimension']);
         // @ts-ignore
         threeGeometry = new THREE.BoxGeometry(gameXDimension, gameYDimension, gameZDimension);
         // @ts-ignore
         threeMaterial = new THREE.MeshStandardMaterial();
-        threeMaterial.color.setRGB(block['rgb_block_red'], block['rgb_block_green'], block['rgb_block_blue']);
+        threeMaterial.color.setRGB(inputData[blockName]['rgb_block_red'], inputData[blockName]['rgb_block_green'], inputData[blockName]['rgb_block_blue']);
         // @ts-ignore
         threeMesh = new THREE.Mesh(threeGeometry, threeMaterial);
         threeMesh.position.x = gameXLocation;
@@ -262,14 +308,14 @@ function generateBlocks(inputData, blockType, highlightable) {
         threeMesh.userData.blockType = blockType;
         threeMesh.userData.highlightable = highlightable;
         threeScene.add(threeMesh);
-        if (block["draw_lines"] == 1) {
+        if (inputData[blockName]["draw_lines"] == 1) {
             // @ts-ignore
-            edges = new THREE.EdgesGeometry(threeGeometry);
+            threeEdges = new THREE.EdgesGeometry(threeGeometry);
             // @ts-ignore
             threeMaterial = new THREE.LineBasicMaterial();
-            threeMaterial.color.setRGB(block['rgb_line_red'], block['rgb_line_green'], block['rgb_line_blue']);
+            threeMaterial.color.setRGB(inputData[blockName]['rgb_line_red'], inputData[blockName]['rgb_line_green'], inputData[blockName]['rgb_line_blue']);
             // @ts-ignore
-            threeLine = new THREE.LineSegments(edges, threeMaterial);
+            threeLine = new THREE.LineSegments(threeEdges, threeMaterial);
             threeMesh.add(threeLine);
         }
     });
@@ -356,16 +402,18 @@ function onKeyUp(event) {
  */
 function cameraPosRot() {
     var lower = document.getElementById("lower");
-    var camXPos = threeControls.getObject().position.x.toFixed(3);
-    var camYPos = threeControls.getObject().position.y.toFixed(3);
-    var camZPos = threeControls.getObject().position.z.toFixed(3);
-    var camXRot = threeCamera.rotation.x.toFixed(3);
-    var camYRot = threeCamera.rotation.y.toFixed(3);
-    var camZRot = threeCamera.rotation.z.toFixed(3);
-    while (lower.firstChild) {
-        lower.removeChild(lower.lastChild);
+    if (lower) {
+        var camXPos = threeControls.getObject().position.x.toFixed(3);
+        var camYPos = threeControls.getObject().position.y.toFixed(3);
+        var camZPos = threeControls.getObject().position.z.toFixed(3);
+        var camXRot = threeCamera.rotation.x.toFixed(3);
+        var camYRot = threeCamera.rotation.y.toFixed(3);
+        var camZRot = threeCamera.rotation.z.toFixed(3);
+        while (lower.firstChild) {
+            lower.removeChild(lower.firstChild);
+        }
+        lower.innerText = "Camera: [" + camXPos + ", " + camYPos + ", " + camZPos + ", " + camXRot + ", " + camYRot + ", " + camZRot + "]";
     }
-    lower.innerText = "Camera: [" + camXPos + ", " + camYPos + ", " + camZPos + ", " + camXRot + ", " + camYRot + ", " + camZRot + "]";
 }
 /**
  * @function applyColor
@@ -396,11 +444,13 @@ function generateRackFilter() {
     var rackEnvironmentElement = document.getElementById('rackFilter');
     var optionElement;
     var rackEnvironmentList = [];
-    Object.keys(allData["racks"]).forEach(function (rackName) {
-        if (rackEnvironmentList.indexOf(allData["racks"][rackName]["design"]['u_environment']) < 0) {
-            rackEnvironmentList.push(allData["racks"][rackName]["design"]['u_environment']);
-        }
+    /*
+    Object.keys(allData["racks"]).forEach(function(rackName){
+      if (rackEnvironmentList.indexOf(allData["racks"][rackName]["design"]['u_environment']) < 0){
+        rackEnvironmentList.push(allData["racks"][rackName]["design"]['u_environment']);
+      }
     });
+    */
     rackEnvironmentList.sort();
     rackEnvironmentList.forEach(function (group) {
         optionElement = document.createElement('option');
@@ -418,12 +468,14 @@ function generatemountFilter() {
     var optionElement;
     var supportGroupList = [];
     var mount = {};
-    Object.keys(allData["mount"]).forEach(function (blockName) {
-        mount = allData["mount"][blockName];
-        if (supportGroupList.indexOf(mount['support_group_name']) < 0) {
-            supportGroupList.push(mount['support_group_name']);
-        }
+    /*
+    Object.keys(allData["mount"]).forEach(function(blockName){
+      mount = allData["mount"][blockName];
+      if (supportGroupList.indexOf(mount['support_group_name']) < 0){
+        supportGroupList.push(mount['support_group_name']);
+      }
     });
+    */
     supportGroupList.sort();
     supportGroupList.forEach(function (group) {
         optionElement = document.createElement('option');
@@ -455,114 +507,114 @@ function rackDropDown() {
  * @param {string} visualisationType - either average or maximum
  */
 function overlayRackPower() {
-    if (Object.keys(powerData["racks"]).length > 0) {
-        powerRender(allData, powerData);
-    }
-    else {
-        serverLink.data.roomName = roomName;
-        serverLink.data.getPower = true;
-        serverLink.server.update().then(function (d) {
-            serverLink.data.getPower = false;
-            powerData = serverLink.data.powerIqMax;
-            powerRender(allData, powerData);
-        });
-    }
+    //if (Object.keys(powerData["racks"]).length > 0) {
+    //powerRender(allData,powerData);
+    //} else {
+    //serverLink.data.roomName = roomName;
+    //serverLink.data.getPower = true;
+    //serverLink.server.update().then(function (d) {
+    //serverLink.data.getPower = false;
+    //powerData = serverLink.data.powerIqMax;
+    //powerRender(allData,powerData);
+    //});
+    //}
 }
 /**
  * @function powerRender
  * @description colors all objects in a rack according to the racks power usage
  */
-function powerRender(allData, powerData) {
-    var rackEnvironmentElement = document.getElementById('rackFilter');
-    var rackEnvironmentValue = rackEnvironmentElement.value;
-    var grey = 0.8;
-    var longMessage = "";
-    var powerDesign = 0;
-    var powerUsage = 0;
-    var averageOrMax;
-    var ratingType;
-    var roomMaximum = powerData["room_maximum"];
-    var shortMessage = "";
-    var singleRackReport = [];
-    var tempColor = [];
-    Object.keys(allData["racks"]).forEach(function (rackName) {
-        // power usage
-        if (powerData["racks"].hasOwnProperty(rackName)) {
-            if (averageOrMax == "average") {
-                powerUsage = powerData["racks"][rackName]["average"];
-            }
-            else {
-                powerUsage = powerData["racks"][rackName]["maximum"];
-            }
-        }
-        else {
-            powerUsage = -1;
-        }
-        // power rating
-        if (allData["racks"][rackName]["design"].hasOwnProperty("u_equip_design_kw")) {
-            if (ratingType == "equip") {
-                powerDesign = allData["racks"][rackName]["design"]["u_equip_design_kw"];
-            }
-            if (ratingType == "facility") {
-                powerDesign = allData["racks"][rackName]["design"]["u_facil_design_kw"];
-            }
-            if (ratingType == "consume") {
-                powerDesign = allData["racks"][rackName]["design"]["u_equip_kw_consume_design"];
-            }
-        }
-        else {
-            powerDesign = -1;
-        }
-        // default for unselected
-        singleRackReport = [1, 1, 1, "", ""];
-        if (rackEnvironmentValue == 'all' || rackEnvironmentValue == allData["racks"][rackName]["design"]["u_environment"]) {
-            if (powerDesign == -1 && powerUsage == -1) {
-                shortMessage = "";
-                longMessage = "Rack has no design data and no power data";
-                singleRackReport = [grey, grey, grey, shortMessage, longMessage];
-            }
-            if (powerDesign == -1 && powerUsage != -1) {
-                tempColor = spectrumBluePink(powerUsage, roomMaximum);
-                shortMessage = powerUsage.toFixed(2) + " / NA KW";
-                longMessage = "Rack has no design data, only power actuals";
-                singleRackReport = [tempColor[0], tempColor[1], tempColor[2], shortMessage, longMessage];
-            }
-            if (powerDesign == 0 && powerUsage == -1) {
-                shortMessage = "";
-                longMessage = "Rack is unallocated";
-                singleRackReport = [grey, grey, grey, shortMessage, longMessage];
-            }
-            if (powerDesign == 0 && powerUsage != -1) {
-                shortMessage = powerUsage.toFixed(2) + " / 0 KW";
-                longMessage = "Rack is unallocated, but is using power anyway";
-                singleRackReport = [1, 0, 0, shortMessage, longMessage];
-            }
-            if (powerDesign != -1 && powerDesign > 0 && powerUsage == -1) {
-                shortMessage = "NA / " + powerDesign + " KW";
-                longMessage = "Rack has design data, but no power data";
-                singleRackReport = [grey, grey, grey, shortMessage, longMessage];
-            }
-            if (powerDesign != -1 && powerDesign > 0 && powerUsage != -1) {
-                tempColor = spectrumGreenRed(powerUsage, powerDesign);
-                shortMessage = powerUsage.toFixed(2) + " / " + powerDesign + " KW";
-                longMessage = "Rack has design data and power actuals";
-                singleRackReport = [tempColor[0], tempColor[1], tempColor[2], shortMessage, longMessage];
-            }
-        }
-        rackColor[rackName] = singleRackReport;
-    });
-    applyColor(allData["racks"], rackColor);
+/*
+function powerRender(allData: Object, powerData: Object){
+  var rackEnvironmentElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('rackFilter');
+  var rackEnvironmentValue: string = rackEnvironmentElement.value;
+  var grey: number = 0.8;
+  var longMessage: string = "";
+  var powerDesign: number = 0;
+  var powerUsage: number = 0;
+  var averageOrMax: string;
+  var ratingType: string;
+  var roomMaximum: number = powerData["room_maximum"];
+  var shortMessage: string = "";
+  var singleRackReport: Array<any> = [];
+  var tempColor: Array<number> = [];
+  Object.keys(allData["racks"]).forEach(function(rackName){
+    // power usage
+    if (powerData["racks"].hasOwnProperty(rackName)){
+      if (averageOrMax == "average"){
+        powerUsage = powerData["racks"][rackName]["average"];
+      } else {
+        powerUsage = powerData["racks"][rackName]["maximum"];
+      }
+    } else {
+      powerUsage = -1;
+    }
+    // power rating
+    if (allData["racks"][rackName]["design"].hasOwnProperty("u_equip_design_kw")){
+      if (ratingType == "equip"){
+        powerDesign = allData["racks"][rackName]["design"]["u_equip_design_kw"]
+      }
+      if (ratingType == "facility"){
+        powerDesign = allData["racks"][rackName]["design"]["u_facil_design_kw"]
+      }
+      if (ratingType == "consume"){
+        powerDesign = allData["racks"][rackName]["design"]["u_equip_kw_consume_design"]
+      }
+    } else {
+      powerDesign = -1;
+    }
+    // default for unselected
+    singleRackReport = [1,1,1,"",""];
+    if (rackEnvironmentValue == 'all' || rackEnvironmentValue == allData["racks"][rackName]["design"]["u_environment"]){
+      if (powerDesign == -1 && powerUsage == -1){
+        shortMessage = "";
+        longMessage = "Rack has no design data and no power data";
+        singleRackReport = [grey,grey,grey,shortMessage,longMessage];
+      }
+      if (powerDesign == -1 && powerUsage != -1){
+        tempColor = spectrumBluePink(powerUsage, roomMaximum);
+        shortMessage = powerUsage.toFixed(2) + " / NA KW";
+        longMessage = "Rack has no design data, only power actuals";
+        singleRackReport = [tempColor[0],tempColor[1],tempColor[2],shortMessage,longMessage];
+      }
+      if (powerDesign == 0 && powerUsage == -1){
+        shortMessage = "";
+        longMessage = "Rack is unallocated";
+        singleRackReport = [grey,grey,grey,shortMessage,longMessage];
+      }
+      if (powerDesign == 0 && powerUsage != -1){
+        shortMessage = powerUsage.toFixed(2) + " / 0 KW";
+        longMessage = "Rack is unallocated, but is using power anyway";
+        singleRackReport = [1,0,0,shortMessage,longMessage];
+      }
+      if (powerDesign != -1 && powerDesign > 0 && powerUsage == -1){
+        shortMessage = "NA / " + powerDesign + " KW";
+        longMessage = "Rack has design data, but no power data";
+        singleRackReport = [grey,grey,grey,shortMessage,longMessage];
+      }
+      if (powerDesign != -1 && powerDesign > 0 && powerUsage != -1){
+        tempColor = spectrumGreenRed(powerUsage, powerDesign);
+        shortMessage = powerUsage.toFixed(2) + " / " + powerDesign + " KW";
+        longMessage = "Rack has design data and power actuals";
+        singleRackReport = [tempColor[0],tempColor[1],tempColor[2],shortMessage,longMessage];
+      }
+    }
+    rackColor[rackName] = singleRackReport;
+  });
+  //applyColor(allData["racks"],rackColor);
 }
+*/
 /**
  * @function overlayRackDefault
  * @description all blocks drawn white except collisions, which are red
  */
 function overlayRackDefault() {
     var color = [];
-    Object.keys(allData["racks"]).forEach(function (rackName) {
-        rackColor[rackName] = [1, 1, 1];
+    /*
+    Object.keys(allData["racks"]).forEach(function(rackName){
+      rackColor[rackName] = [1,1,1];
     });
-    applyColor(allData["racks"], rackColor);
+    */
+    //applyColor(allData["racks"],rackColor);
 }
 /**
  * @function overlayRackCapacity
@@ -575,26 +627,26 @@ function overlayRackCapacity() {
     var rack = {};
     var singleRackReport = [];
     var tempColor = [];
-    Object.keys(allData["racks"]).forEach(function (rackName) {
-        rack = allData["racks"][rackName];
-        singleRackReport = [1, 1, 1];
-        if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rack["design"]["u_environment"]) {
-            if (rack['design']["u_max_alloc"] > 0) {
-                if (rack['design']["u_qty_alloc"] > 0) {
-                    tempColor = spectrumGreenRed(rack['design']["u_qty_alloc"], rack['design']["u_max_alloc"]);
-                    singleRackReport = [tempColor[0], tempColor[1], tempColor[2], rack['design']["u_qty_alloc"] + " / " + rack['design']["u_max_alloc"]];
-                }
-                else {
-                    singleRackReport = spectrumGreenRed(0, 1);
-                }
+    /*
+    Object.keys(allData["racks"]).forEach(function(rackName){
+      rack = allData["racks"][rackName];
+      singleRackReport = [1,1,1]
+        if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rack["design"]["u_environment"]){
+          if (rack['design']["u_max_alloc"] > 0){
+            if (rack['design']["u_qty_alloc"] > 0){
+              tempColor = spectrumGreenRed(rack['design']["u_qty_alloc"], rack['design']["u_max_alloc"]);
+              singleRackReport = [tempColor[0],tempColor[1],tempColor[2],rack['design']["u_qty_alloc"] +" / " + rack['design']["u_max_alloc"]];
+            } else {
+              singleRackReport = spectrumGreenRed(0,1);
             }
-            else {
-                singleRackReport = [0.8, 0.8, 0.8];
-            }
+          } else {
+            singleRackReport = [0.8,0.8,0.8];
+          }
         }
-        rackColor[rackName] = singleRackReport;
+      rackColor[rackName] = singleRackReport;
     });
-    applyColor(allData["racks"], rackColor);
+    */
+    //applyColor(allData["racks"],rackColor);
 }
 /**
  * @function mountDropDown
@@ -604,16 +656,16 @@ function mountDropDown() {
     var overlayElement = document.getElementById('mountOverlay');
     var overlayValue = overlayElement.value;
     if (overlayValue == 'default') {
-        overlaymountDefault();
+        //overlaymountDefault();
     }
     if (overlayValue == 'objectModelCategory') {
-        overlayObjectModelCategory();
+        //overlayObjectModelCategory();
     }
     if (overlayValue == 'objectModelEndOfLife') {
-        overlayObjectModelEndOfLife();
+        //overlayObjectModelEndOfLife();
     }
     if (overlayValue == 'objectLastAudit') {
-        overlayObjectLastAudit();
+        //overlayObjectLastAudit();
     }
 }
 /**
@@ -623,15 +675,17 @@ function mountDropDown() {
 function overlaymountDefault() {
     var color = [];
     var mount = {};
-    Object.keys(allData["mount"]).forEach(function (blockName) {
-        mount = allData["mount"][blockName];
-        color = [1, 1, 1];
-        if (mount['collision']) {
-            color = [1, 0, 0];
-        }
-        mountColor[blockName] = color;
-    });
-    applyColor(allData["mount"], mountColor);
+    /*
+    Object.keys(allData["mount"]).forEach(function(blockName){
+      mount = allData["mount"][blockName];
+      color = [1,1,1];
+      if (mount['collision']){
+        color = [1, 0, 0];
+      }
+      mountColor[blockName] = color;
+    })
+    */
+    //applyColor(allData["mount"],mountColor);
 }
 /**
  * @function overlayObjectModelCategory
@@ -667,114 +721,131 @@ function overlayObjectModelCategory() {
         "PDU": colorOther
     };
     var mount = {};
-    Object.keys(allData["mount"]).forEach(function (blockName) {
-        mount = allData["mount"][blockName];
-        color = [1, 1, 1];
-        if (supportGroupValue == 'all' || supportGroupValue == mount['support_group_name']) {
-            if (mount['model_category_name'] in colorChart) {
-                color = colorChart[mount['model_category_name']];
-            }
-            if (!mount['ci_name']) {
-                color = [1, 0.5, 0];
-            }
-            if (mount['collision']) {
-                color = [1, 0, 0];
-            }
+    /*
+    Object.keys(allData["mount"]).forEach(function(blockName){
+      mount = allData["mount"][blockName];
+      color = [1,1,1];
+      if (supportGroupValue == 'all' || supportGroupValue == mount['support_group_name']){
+        if (mount['model_category_name'] in colorChart){
+          color = colorChart[mount['model_category_name']]
         }
-        mountColor[blockName] = color;
-    });
-    applyColor(allData["mount"], mountColor);
+        if (!mount['ci_name']){
+          color = [1, 0.5, 0]
+        }
+        if (mount['collision']){
+          color = [1, 0, 0]
+        }
+      }
+      mountColor[blockName] = color;
+    })
+    applyColor(allData["mount"],mountColor);
+    */
 }
 /**
  * @function overlayObjectModelEndOfLife
  * @description any models that are end of life are shown as red
  */
-function overlayObjectModelEndOfLife() {
-    var supportGroupElement = document.getElementById('mountFilter');
-    var supportGroupValue = supportGroupElement.value;
-    var color = [];
-    var mount;
-    Object.keys(allData["mount"]).forEach(function (blockName) {
-        mount = allData["mount"][blockName];
-        color = [1, 1, 1];
-        if (supportGroupValue == 'all' || supportGroupValue == mount['support_group_name']) {
-            if (mount['model_u_end_of_life'] == '1') {
-                color = [1, 0, 0];
-            }
-        }
-        mountColor[blockName] = color;
-    });
-    applyColor(allData["mount"], mountColor);
+/*
+function overlayObjectModelEndOfLife(){
+  var supportGroupElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
+  var supportGroupValue: string = supportGroupElement.value;
+  var color: Array<number> = [];
+  var mount: object;
+  Object.keys(allData["mount"]).forEach(function(blockName){
+    mount = allData["mount"][blockName];
+    color = [1,1,1];
+    if (supportGroupValue == 'all' || supportGroupValue == mount['support_group_name']){
+      if (mount['model_u_end_of_life'] == '1'){
+        color = [1, 0, 0];
+      }
+    }
+    mountColor[blockName] = color;
+  })
+  applyColor(allData["mount"],mountColor);
 }
+*/
 /**
  * @function overlayObjectLastAudit
  * @description colors objects in a green to red spectrum by the date of their last audit
  */
-function overlayObjectLastAudit() {
-    var supportGroupElement = document.getElementById('mountFilter');
-    var supportGroupValue = supportGroupElement.value;
-    var color = [];
-    var now = Date.now();
-    var lastAudit = 0;
-    var block;
-    // 2 yeasr * 365 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds;
-    var milliseconds = 63072000000;
-    Object.keys(allData["mount"]).forEach(function (blockName) {
-        block = allData["mount"][blockName];
-        color = [1, 1, 1];
-        if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']) {
-            if (block['u_last_audit_date']) {
-                lastAudit = Date.parse(block['u_last_audit_date']);
-                color = spectrumGreenRed((now - lastAudit), milliseconds);
-            }
-            else {
-                color = spectrumGreenRed(1, 1);
-            }
-        }
-        if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']) {
-            if (block['model_u_end_of_life'] == '1') {
-                color = [1, 0, 0];
-            }
-        }
-        mountColor[blockName] = color;
-    });
-    applyColor(allData["mount"], mountColor);
+/*
+function overlayObjectLastAudit(){
+  var supportGroupElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
+  var supportGroupValue: string = supportGroupElement.value;
+  var color: Array<number> = [];
+  var now: number = Date.now();
+  var lastAudit: number = 0
+  var block: object;
+  // 2 yeasr * 365 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds;
+  var milliseconds: number = 63072000000;
+  Object.keys(allData["mount"]).forEach(function(blockName){
+    block = allData["mount"][blockName];
+    color = [1,1,1];
+    if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
+      if (block['u_last_audit_date']){
+        lastAudit = Date.parse(block['u_last_audit_date']);
+        color = spectrumGreenRed((now - lastAudit), milliseconds);
+      } else {
+        color = spectrumGreenRed(1,1);
+      }
+    }
+    if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
+      if (block['model_u_end_of_life'] == '1'){
+        color = [1, 0, 0];
+      }
+    }
+    mountColor[blockName] = color;
+  })
+  //applyColor(allData["mount"],mountColor);
 }
+*/
 /**
  * @function rendererResize
  * @description resizes the renderer when the page is resized
  */
 function rendererResize() {
+    var divTop;
+    var divMyCanvas;
+    var divGhost;
+    var divLower;
     var canvasWidth = window.innerWidth - 4;
     var canvasHeight = window.innerHeight - 4;
     var topHeight = 40;
     var lowerHeight = 68;
     var centerHeight = canvasHeight - topHeight - lowerHeight;
-    // top
-    document.getElementById("top").style.position = 'absolute';
-    document.getElementById("top").style.left = "0px";
-    document.getElementById("top").style.top = "0px";
-    document.getElementById("top").style.width = canvasWidth + "px";
-    document.getElementById("top").style.height = topHeight + "px";
-    // center divs
-    document.getElementById("my_canvas").style.position = 'absolute';
-    document.getElementById("my_canvas").style.left = "0px";
-    document.getElementById("my_canvas").style.top = topHeight + "px";
-    document.getElementById("my_canvas").style.width = canvasWidth + "px";
-    document.getElementById("my_canvas").style.height = centerHeight + "px";
-    document.getElementById("ghost").style.position = 'absolute';
-    document.getElementById("ghost").style.left = "0px";
-    document.getElementById("ghost").style.top = topHeight + "px";
-    document.getElementById("ghost").style.width = canvasWidth + "px";
-    document.getElementById("ghost").style.height = centerHeight + "px";
-    // lower div
-    document.getElementById("lower").style.position = 'absolute';
-    document.getElementById("lower").style.left = "0px";
-    document.getElementById("lower").style.top = topHeight + centerHeight + "px";
-    document.getElementById("lower").style.width = canvasWidth + "px";
-    document.getElementById("lower").style.height = lowerHeight + "px";
-    document.getElementById("lower").style.overflow = 'auto';
-    //document.getElementById("lower").style.border = "#CCCCCC 1px solid";
+    divTop = document.getElementById("top");
+    if (divTop) {
+        divTop.style.position = 'absolute';
+        divTop.style.left = "0px";
+        divTop.style.top = "0px";
+        divTop.style.width = canvasWidth + "px";
+        divTop.style.height = topHeight + "px";
+    }
+    divMyCanvas = document.getElementById("my_canvas");
+    if (divMyCanvas) {
+        divMyCanvas.style.position = 'absolute';
+        divMyCanvas.style.left = "0px";
+        divMyCanvas.style.top = topHeight + "px";
+        divMyCanvas.style.width = canvasWidth + "px";
+        divMyCanvas.style.height = centerHeight + "px";
+    }
+    divGhost = document.getElementById("ghost");
+    if (divGhost) {
+        divGhost.style.position = 'absolute';
+        divGhost.style.left = "0px";
+        divGhost.style.top = topHeight + "px";
+        divGhost.style.width = canvasWidth + "px";
+        divGhost.style.height = centerHeight + "px";
+    }
+    divLower = document.getElementById("lower");
+    if (divLower) {
+        divLower.style.position = 'absolute';
+        divLower.style.left = "0px";
+        divLower.style.top = topHeight + centerHeight + "px";
+        divLower.style.width = canvasWidth + "px";
+        divLower.style.height = lowerHeight + "px";
+        divLower.style.overflow = 'auto';
+    }
     if (threeCamera) {
         threeCamera.aspect = canvasWidth / centerHeight;
         threeCamera.updateProjectionMatrix();
@@ -789,9 +860,9 @@ function rendererResize() {
 function spectrumGreenRed(numerator, denominator) {
     var decimal = 0;
     var saturation = 0.3;
-    var red;
-    var green;
-    var blue;
+    var red = 0;
+    var green = 0;
+    var blue = 0;
     decimal = numerator / denominator;
     if (denominator == 0) {
         decimal = 1;
@@ -857,6 +928,7 @@ function animate() {
     var closestDistance = -1;
     var currentBlockType = "";
     var delta;
+    var fpsOutput;
     var green;
     var previousBlockType = "";
     var targetDarkness = 0.8;
@@ -935,7 +1007,10 @@ function animate() {
         // movement
         time = performance.now();
         delta = (time - prevTime);
-        document.getElementById("fps").innerText = "FPS: " + Math.floor(1000 / delta);
+        fpsOutput = document.getElementById("fps");
+        if (fpsOutput) {
+            fpsOutput.innerText = "FPS: " + Math.floor(1000 / delta);
+        }
         if (speedBoost) {
             delta = delta * 5 / 1000;
         }
@@ -973,15 +1048,17 @@ function animate() {
  * @description opens a page on the selected object
  */
 function mouseClick(event) {
-    if (event.button == 0) {
-        leftMouseClick(event);
+    /*
+    if (event.button == 0){
+      leftMouseClick(event);
     }
-    if (event.button == 1) {
-        middleMouseClick(event);
+    if (event.button == 1){
+      middleMouseClick(event);
     }
-    if (event.button == 2) {
-        rightMouseClick(event);
+    if (event.button == 2){
+      rightMouseClick(event);
     }
+    */
 }
 /**
  * @function xxxxxx
@@ -993,16 +1070,20 @@ function mouseClick(event) {
  * @param {Array.<Object>} xxxxx - xxxxx
  * @return {string} xxxxx - xxxxx
  */
-function middleMouseClick(event) {
-    var lower;
-    var textNode;
-    lower = document.getElementById("lower");
+/*
+function middleMouseClick(event: MouseEvent){
+  var lower: HTMLElement | null;
+  var textNode: Text;
+  lower = document.getElementById("lower");
+  if (lower){
     while (lower.firstChild) {
-        lower.removeChild(lower.lastChild);
+      lower.removeChild(lower.firstChild);
     }
     textNode = document.createTextNode("Middle mouse button clicked");
     lower.appendChild(textNode);
+  }
 }
+*/
 /**
  * @function xxxxxx
  * @description xxxxxxxxx
@@ -1013,114 +1094,107 @@ function middleMouseClick(event) {
  * @param {Array.<Object>} xxxxx - xxxxx
  * @return {string} xxxxx - xxxxx
  */
-function rightMouseClick(event) {
-    var button;
-    var blockType;
-    var addButton = function (title, id, className) {
+/*
+function rightMouseClick(event){
+  var button: HTMLElement;
+  var blockType: string;
+  var addButton: any = function(title,id,className){
         button = document.createElement("BUTTON");
         button.id = id;
         button.className = className;
         button.innerHTML = title;
         document.getElementById('ghost').appendChild(button);
-    };
-    blockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
-    if (blockType == "mount") {
-        addButton('Open Asset Record', 'openAssetRecord', 'btn-group-green');
-        document.getElementById('openAssetRecord').addEventListener('click', onScreeMenuStop, false);
-    }
-    else {
-        addButton('Open Asset Record', 'openAssetRecord', 'btn-group-grey');
-    }
-    if (blockType == "mount") {
-        addButton('Open CI Record', 'openCiRecord', 'btn-group-green');
-        document.getElementById('openCiRecord').addEventListener('click', onScreeMenuStop, false);
-    }
-    else {
-        addButton('Open CI Record', 'openCiRecord', 'btn-group-grey');
-    }
-    if (blockType == "rack") {
-        addButton('Rack visualisation', 'rackVisual', 'btn-group-green');
-        document.getElementById('rackVisual').addEventListener('click', onScreeMenuStop, false);
-    }
-    else {
-        addButton('Rack visualisation', 'rackVisual', 'btn-group-grey');
-    }
-    if (blockType == "mount") {
-        addButton('Reboot Server', 'rebootServer', 'btn-group-green');
-        document.getElementById('rebootServer').addEventListener('click', onScreeMenuStop, false);
-    }
-    else {
-        addButton('Reboot Server', 'rebootServer', 'btn-group-grey');
-    }
-    if (blockType == "mount") {
-        addButton('Request Provisioning', 'requestProvisioning', 'btn-group-green');
-        document.getElementById('requestProvisioning').addEventListener('click', onScreeMenuStop, false);
-    }
-    else {
-        addButton('Request Provisioning', 'requestProvisioning', 'btn-group-grey');
-    }
-    if (blockType == "mount") {
-        addButton('Request Smarthands Support', 'requestSmarthandsSupport', 'btn-group-green');
-        document.getElementById('requestSmarthandsSupport').addEventListener('click', onScreeMenuStop, false);
-    }
-    else {
-        addButton('Request Smarthands Support', 'requestSmarthandsSupport', 'btn-group-grey');
-    }
-    if (blockType == "empty") {
-        addButton('Reserve Space', 'reserveSpace', 'btn-group-green');
-        document.getElementById('reserveSpace').addEventListener('click', onScreeMenuStop, false);
-    }
-    else {
-        addButton('Reserve Space', 'reserveSpace', 'btn-group-grey');
-    }
-    if (blockType == "mount") {
-        addButton('Run QA Test Suite', 'runQaTestSuite', 'btn-group-green');
-        document.getElementById('runQaTestSuite').addEventListener('click', onScreeMenuStop, false);
-    }
-    else {
-        addButton('Run QA Test Suite', 'runQaTestSuite', 'btn-group-grey');
-    }
-    if (blockType == "mount") {
-        addButton('Wipe Drive', 'wipeDrive', 'btn-group-green');
-        document.getElementById('wipeDrive').addEventListener('click', onScreeMenuStop, false);
-    }
-    else {
-        addButton('Wipe Drive', 'wipeDrive', 'btn-group-grey');
-    }
-    // block download
-    addButton('Download blocks', 'downloadBlocks', 'btn-group-green');
-    document.getElementById('downloadBlocks').addEventListener('click', subMenuDownloadBlocks, false);
-    // cancel
-    addButton('Cancel', 'cancel', 'btn-group-green');
-    document.getElementById('cancel').addEventListener('click', onScreeMenuStop, false);
-    onScreenMenuStart();
+  }
+  blockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
+  if (blockType == "mount"){
+    addButton('Open Asset Record','openAssetRecord','btn-group-green');
+    document.getElementById('openAssetRecord').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Open Asset Record','openAssetRecord','btn-group-grey');
+  }
+  if (blockType == "mount"){
+    addButton('Open CI Record','openCiRecord','btn-group-green');
+    document.getElementById('openCiRecord').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Open CI Record','openCiRecord','btn-group-grey');
+  }
+  if (blockType == "rack"){
+    addButton('Rack visualisation','rackVisual','btn-group-green');
+    document.getElementById('rackVisual').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Rack visualisation','rackVisual','btn-group-grey');
+  }
+  if (blockType == "mount"){
+    addButton('Reboot Server','rebootServer','btn-group-green');
+    document.getElementById('rebootServer').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Reboot Server','rebootServer','btn-group-grey');
+  }
+  if (blockType == "mount"){
+    addButton('Request Provisioning','requestProvisioning','btn-group-green');
+    document.getElementById('requestProvisioning').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Request Provisioning','requestProvisioning','btn-group-grey');
+  }
+  if (blockType == "mount"){
+    addButton('Request Smarthands Support','requestSmarthandsSupport','btn-group-green');
+    document.getElementById('requestSmarthandsSupport').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Request Smarthands Support','requestSmarthandsSupport','btn-group-grey');
+  }
+  if (blockType == "empty"){
+    addButton('Reserve Space','reserveSpace','btn-group-green');
+    document.getElementById('reserveSpace').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Reserve Space','reserveSpace','btn-group-grey');
+  }
+  if (blockType == "mount"){
+    addButton('Run QA Test Suite','runQaTestSuite','btn-group-green');
+    document.getElementById('runQaTestSuite').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Run QA Test Suite','runQaTestSuite','btn-group-grey');
+  }
+  if (blockType == "mount"){
+    addButton('Wipe Drive','wipeDrive','btn-group-green');
+    document.getElementById('wipeDrive').addEventListener('click', onScreeMenuStop, false);
+  } else {
+    addButton('Wipe Drive','wipeDrive','btn-group-grey');
+  }
+  // block download
+  addButton('Download blocks','downloadBlocks','btn-group-green');
+  document.getElementById('downloadBlocks').addEventListener('click', subMenuDownloadBlocks, false);
+  // cancel
+  addButton('Cancel','cancel','btn-group-green');
+  document.getElementById('cancel').addEventListener('click', onScreeMenuStop, false);
+  onScreenMenuStart();
 }
-function subMenuDownloadBlocks() {
-    var button;
-    var ghost;
-    // clear main menu
-    ghost = document.getElementById("ghost");
-    while (ghost.firstChild) {
-        ghost.removeChild(ghost.lastChild);
-    }
-    var addButton = function (title, id, className) {
-        button = document.createElement("BUTTON");
-        button.id = id;
-        button.className = className;
-        button.innerHTML = title;
-        document.getElementById('ghost').appendChild(button);
-    };
-    addButton('Download scene blocks', 'downloadSceneBlocks', 'btn-group-green');
-    document.getElementById('downloadSceneBlocks').addEventListener('click', function () {
-        exportBlocks(allData["scene"], "scene");
-        onScreeMenuStop();
-    }, false);
-    addButton('Download rack blocks', 'downloadRackBlocks', 'btn-group-green');
-    document.getElementById('downloadRackBlocks').addEventListener('click', function () {
-        exportBlocks(allData["racks"], "racks");
-        onScreeMenuStop();
-    }, false);
-}
+*/
+//function subMenuDownloadBlocks(){
+//  var button: HTMLElement;
+//  var ghost: HTMLElement;
+// clear main menu
+//  ghost = document.getElementById("ghost");
+//  while (ghost.firstChild) {
+//    ghost.removeChild(ghost.lastChild);
+//  }
+//  var addButton: any = function(title,id,className){
+//        button = document.createElement("BUTTON");
+//        button.id = id;
+//        button.className = className;
+//        button.innerHTML = title;
+//       document.getElementById('ghost').appendChild(button);
+//  }
+//addButton('Download scene blocks','downloadSceneBlocks','btn-group-green');
+//document.getElementById('downloadSceneBlocks').addEventListener('click', function(){
+//  exportBlocks(allData["scene"],"scene");
+//  onScreeMenuStop();
+//}, false);
+//addButton('Download rack blocks','downloadRackBlocks','btn-group-green');
+//document.getElementById('downloadRackBlocks').addEventListener('click', function(){
+//  exportBlocks(allData["racks"],"racks");
+//  onScreeMenuStop();
+//}, false);
+//}
 /**
  * @function exportScene
  * @description downloads json containing anonymous 3d data and color of blocks that are not rack mount objects
@@ -1131,27 +1205,26 @@ function exportBlocks(input, blockType) {
     var encodedData;
     var download;
     var output = {};
-    var block = {};
     Object.keys(input).forEach(function (blockName) {
-        block = input[blockName]["block"];
         output[blockName] = {
-            "x_location": block['x_location'].toFixed(3),
-            "y_location": block['y_location'].toFixed(3),
-            "z_location": block['z_location'].toFixed(3),
-            "x_dimension": block['x_dimension'].toFixed(3),
-            "y_dimension": block['y_dimension'].toFixed(3),
-            "z_dimension": block['z_dimension'].toFixed(3),
-            "rgb_block_red": block['rgb_block_red'].toFixed(3),
-            "rgb_block_green": block['rgb_block_green'].toFixed(3),
-            "rgb_block_blue": block['rgb_block_blue'].toFixed(3),
-            "draw_lines": block['draw_lines'],
-            "rgb_line_red": block['rgb_line_red'].toFixed(3),
-            "rgb_line_green": block['rgb_line_green'].toFixed(3),
-            "rgb_line_blue": block['rgb_line_blue'].toFixed(3)
+            "x_location": input[blockName]['x_location'],
+            "y_location": input[blockName]['y_location'],
+            "z_location": input[blockName]['z_location'],
+            "x_dimension": input[blockName]['x_dimension'],
+            "y_dimension": input[blockName]['y_dimension'],
+            "z_dimension": input[blockName]['z_dimension'],
+            "rgb_block_red": input[blockName]['rgb_block_red'],
+            "rgb_block_green": input[blockName]['rgb_block_green'],
+            "rgb_block_blue": input[blockName]['rgb_block_blue'],
+            "draw_lines": input[blockName]['draw_lines'],
+            "rgb_line_red": input[blockName]['rgb_line_red'],
+            "rgb_line_green": input[blockName]['rgb_line_green'],
+            "rgb_line_blue": input[blockName]['rgb_line_blue']
         };
     });
     jsonData = JSON.stringify(output, null, 2);
-    filename = allData["room"]["room_name"] + '_' + blockType + '.json';
+    //filename = allData["room"]["room_name"] + '_' + blockType + '.json';
+    filename = "test.json";
     encodedData = 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonData);
     download = document.createElement('a');
     download.setAttribute('href', encodedData);
@@ -1171,8 +1244,12 @@ function exportBlocks(input, blockType) {
  * @return {string} xxxxx - xxxxx
  */
 function onScreenMenuStart() {
+    var ghost;
+    ghost = document.getElementById("ghost");
+    if (ghost) {
+        ghost.removeEventListener('click', pointerLockRequest, false);
+    }
     document.exitPointerLock();
-    document.getElementById('ghost').removeEventListener('click', pointerLockRequest, false);
 }
 /**
  * @function xxxxxx
@@ -1187,10 +1264,12 @@ function onScreenMenuStart() {
 function onScreeMenuStop() {
     var ghost;
     ghost = document.getElementById("ghost");
-    while (ghost.firstChild) {
-        ghost.removeChild(ghost.lastChild);
+    if (ghost) {
+        while (ghost.firstChild) {
+            ghost.removeChild(ghost.firstChild);
+        }
+        ghost.addEventListener('click', pointerLockRequest, false);
     }
-    document.getElementById('ghost').addEventListener('click', pointerLockRequest, false);
 }
 /**
  * @function xxxxxx
@@ -1202,54 +1281,529 @@ function onScreeMenuStop() {
  * @param {Array.<Object>} xxxxx - xxxxx
  * @return {string} xxxxx - xxxxx
  */
-function leftMouseClick(event) {
-    var blockData = {};
-    var anchor;
-    var linebreak;
-    var lower;
-    var textNode;
-    var blockType = "";
-    lower = document.getElementById("lower");
-    while (lower.firstChild) {
-        lower.removeChild(lower.lastChild);
+/*
+function leftMouseClick(event){
+  var blockData: object = {};
+  var anchor: HTMLElement;
+  var linebreak: HTMLElement;
+  var lower: HTMLElement;
+  var textNode: Text;
+  var blockType: string = "";
+  lower = document.getElementById("lower");
+  while (lower.firstChild) {
+    lower.removeChild(lower.lastChild);
+  }
+  if (selectedBlock){
+  blockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
+    if (blockType == "mount"){
+      blockData = allData["mount"][selectedBlock];
+      anchor = document.createElement('a');
+      anchor.setAttribute('href',"/nav_to.do?uri=%2Falm_hardware.do%3Fsys_id%3D" + blockData["sys_id"]);
+      anchor.innerText = selectedBlock;
+      lower.appendChild(anchor);
     }
-    if (selectedBlock) {
-        blockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
-        if (blockType == "mount") {
-            blockData = allData["mount"][selectedBlock];
-            anchor = document.createElement('a');
-            anchor.setAttribute('href', "/nav_to.do?uri=%2Falm_hardware.do%3Fsys_id%3D" + blockData["sys_id"]);
-            anchor.innerText = selectedBlock;
-            lower.appendChild(anchor);
+    if (blockType == "rack"){
+      blockData = allData["racks"][selectedBlock];
+      anchor = document.createElement('a');
+      anchor.setAttribute('href',"/nav_to.do?uri=%2Fsp%3Fid%3Ddcscapeng_rackview%26rackSysid%3D" + blockData["sys_id"]);
+      anchor.innerText = selectedBlock;
+      lower.appendChild(anchor);
+      if (rackColor[selectedBlock].length > 3 && rackColor[selectedBlock][3] != ""){
+        linebreak = document.createElement("br");
+        lower.appendChild(linebreak);
+        textNode = document.createTextNode("     " + rackColor[selectedBlock][3]);
+        lower.appendChild(textNode);
+      }
+      if (rackColor[selectedBlock].length > 4 && rackColor[selectedBlock][4] != ""){
+        linebreak = document.createElement("br");
+        lower.appendChild(linebreak);
+        textNode = document.createTextNode("     " + rackColor[selectedBlock][4]);
+        lower.appendChild(textNode);
+      }
+    }
+    if (blockType == "scene"){
+      blockData = allData["scene"][selectedBlock];
+      anchor = document.createElement('a');
+      anchor.setAttribute('href',"/nav_to.do?uri=%2Fu_dcse_vr_scene.do%3Fsys_id%3D" + blockData["sysid"]);
+      anchor.innerText = "scene";
+      lower.appendChild(anchor);
+    }
+  } else {
+    lower.innerHTML = "Room: " + allData["room"]["room_name"];
+  }
+}
+*/
+/*
+function fakeAllData(){
+  var allData: Object = {};
+  var rackMax: number = 20;
+  var roomXDimension: number;
+  var roomYDimension: number;
+  var rowMax: number = 6;
+  roomXDimension = 8 + (rackMax * 0.6);
+  roomYDimension = 8 + (((rowMax * 2) -1) * 1.2);
+  allData["room"] = {}
+  allData["room"]["room_name"] = "roomName";
+  allData["camera"] = {
+      "camera_position_x": 5.672,
+      "camera_position_y": 14.360,
+      "camera_position_z": 2.274,
+      "camera_rotation_x": -2.065,
+      "camera_rotation_y": -0.224,
+      "camera_rotation_z": -2.752
+  }; [5.672, 14.360, 2.274, -2.065, -0.224, -2.752]
+  allData["scene"] = fakeScene(roomXDimension,roomYDimension);
+  allData["racks"] = fakeRacks(rowMax,rackMax);
+  allData["mount"] = fakeMount(allData["racks"]);
+  allData["empty"] = fakeEmpty(allData["racks"]);
+  return allData;
+}
+*/
+function fakeScene(roomXDimension, roomYDimension) {
+    var scene = {};
+    scene["floor"] = {
+        "draw_lines": 0,
+        "rgb_block_red": "0.8",
+        "rgb_block_green": "0.8",
+        "rgb_block_blue": "0.8",
+        "rgb_line_red": "0.0",
+        "rgb_line_green": "0.0",
+        "rgb_line_blue": "0.0",
+        "x_location": (roomXDimension * 0.5).toString(),
+        "y_location": (roomYDimension * 0.5).toString(),
+        "z_location": "-0.1",
+        "x_dimension": roomXDimension.toString(),
+        "y_dimension": roomYDimension.toString(),
+        "z_dimension": "0.2"
+    };
+    scene["x_min_wall"] = {
+        "draw_lines": 0,
+        "rgb_block_red": "0.850",
+        "rgb_block_green": "0.850",
+        "rgb_block_blue": "0.850",
+        "rgb_line_red": "0.000",
+        "rgb_line_green": "0.000",
+        "rgb_line_blue": "0.000",
+        "x_location": "-0.100",
+        "y_location": (roomYDimension * 0.5).toString(),
+        "z_location": "1.500",
+        "x_dimension": "0.200",
+        "y_dimension": roomYDimension.toString(),
+        "z_dimension": "3.000"
+    };
+    scene["x_max_wall"] = {
+        "draw_lines": 0,
+        "rgb_block_red": "0.850",
+        "rgb_block_green": "0.850",
+        "rgb_block_blue": "0.850",
+        "rgb_line_red": "0.000",
+        "rgb_line_green": "0.000",
+        "rgb_line_blue": "0.000",
+        "x_location": (roomXDimension + 0.1).toString(),
+        "y_location": (roomYDimension * 0.5).toString(),
+        "z_location": "1.500",
+        "x_dimension": "0.200",
+        "y_dimension": roomYDimension.toString(),
+        "z_dimension": "3.000"
+    };
+    scene["y_min_wall"] = {
+        "draw_lines": 0,
+        "rgb_block_red": "0.750",
+        "rgb_block_green": "0.750",
+        "rgb_block_blue": "0.750",
+        "rgb_line_red": "0.000",
+        "rgb_line_green": "0.000",
+        "rgb_line_blue": "0.000",
+        "x_location": (roomXDimension * 0.5).toString(),
+        "y_location": "-0.100",
+        "z_location": "1.500",
+        "x_dimension": roomXDimension.toString(),
+        "y_dimension": "0.200",
+        "z_dimension": "3.000"
+    };
+    scene["y_max_wall"] = {
+        "draw_lines": 0,
+        "rgb_block_red": "0.750",
+        "rgb_block_green": "0.750",
+        "rgb_block_blue": "0.750",
+        "rgb_line_red": "0.000",
+        "rgb_line_green": "0.000",
+        "rgb_line_blue": "0.000",
+        "x_location": (roomXDimension * 0.5).toString(),
+        "y_location": (roomYDimension + 0.1).toString(),
+        "z_location": "1.500",
+        "x_dimension": roomXDimension.toString(),
+        "y_dimension": "0.200",
+        "z_dimension": "3.000"
+    };
+    return scene;
+}
+/*
+function fakeMount(rackData){
+  var dateNow: Date;
+  var endOfLife: number;
+  var fakedates: Array<string>;
+  var mountCount: number = 0;
+  var mountData: Object = {};
+  var mountName: string = "";
+  var rack: Object = {};
+  var seconds: number;
+  var unitCount: number;
+  var unitHeight: number = 0.0445;
+  var xDimension: number = 0;
+  var xLocation: number = 0;
+  var yDimension: number = 0;
+  var yLocation: number = 0;
+  var zDimension: number = 0;
+  var zLocation: number = 0;
+  var zLoop: number;
+  var zStart: number = 0;
+  fakedates = ['2018-07-25 04:21:00','2019-01-25 04:21:00','2019-07-25 04:21:00','2020-01-25 04:21:00','2020-07-25 04:21:00'];
+  Object.keys(rackData).forEach(function(rackName){
+    rack = rackData[rackName];
+    if (rack["facing"] == 0){
+      xLocation = rack["block"]["x_location"] - (rack["block"]["x_dimension"] * 0.5) - 0.009;
+      yLocation = rack["block"]["y_location"];
+      xDimension = 0.016;
+      yDimension = rack["block"]["y_dimension"] * 0.9;
+    }
+    if (rack["facing"] == 1){
+      xLocation = rack["block"]["x_location"];
+      yLocation = rack["block"]["y_location"] + (rack["block"]["y_dimension"] * 0.5) + 0.009;
+      xDimension = rack["block"]["x_dimension"] * 0.9;
+      yDimension = 0.016;
+    }
+    if (rack["facing"] == 2){
+      xLocation = rack["block"]["x_location"] + (rack["block"]["x_dimension"] * 0.5) + 0.009;
+      yLocation = rack["block"]["y_location"];
+      xDimension = 0.016;
+      yDimension = rack["block"]["y_dimension"] * 0.9;
+    }
+    if (rack["facing"] == 3){
+      xLocation = rack["block"]["x_location"];
+      yLocation = rack["block"]["y_location"] - (rack["block"]["y_dimension"] * 0.5) - 0.009;
+      xDimension = rack["block"]["x_dimension"] * 0.9;
+      yDimension = 0.016;
+    }
+    zStart = rack["block"]["z_location"] - (rack["block"]["z_dimension"] * 0.5) + (unitHeight * 2);
+    for (zLoop = 0; zLoop < 10; zLoop++){
+      unitCount = (zLoop * 2);
+      zDimension = (unitHeight * 2) -0.002;
+      zLocation = zStart + (unitCount * unitHeight) + unitHeight;
+      mountName = "server_" + mountCount;
+      if (Math.random() > 0.95){
+        endOfLife = 1;
+      } else {
+        endOfLife = 0;
+      }
+      seconds = Math.random() * 5 * 365 * 24 * 60 * 60 * 1000;
+      dateNow = new Date();
+      mountData[mountName] = {
+        "block": {
+          "draw_lines": 1,
+          "rgb_block_red": 1.0,
+          "rgb_block_green": 1.0,
+          "rgb_block_blue": 1.0,
+          "rgb_line_red": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_blue": 0.5,
+          "x_location": xLocation,
+          "y_location": yLocation,
+          "z_location": zLocation,
+          "x_dimension": xDimension,
+          "y_dimension": yDimension,
+          "z_dimension": zDimension
+        },
+        "ci_name": mountName,
+        "ci_sys_id": mountCount.toString(),
+        "sys_id": mountCount,
+        "asset_tag": "fake",
+        "ci_u_cmdb_ci_status_name": "fake",
+        "ci_u_provision_date": "fake",
+        "collision": 0,
+        "model_category_name": "Server",
+        "model_u_end_of_life": endOfLife,
+        "model_name": "fake",
+        "model_rack_units": 1,
+        "support_group_name": randomSupportGroup(),
+        "support_group_manager_email": "fake@fake.com",
+        "sys_class_name": "fake",
+        "u_smdb_table": "fake",
+        "u_last_audit_date": fakedates[Math.floor(Math.random() * 5)],
+        "serial_number": "fake"
+      }
+      mountCount += 1;
+    }
+    for (zLoop = 0; zLoop < 3; zLoop++){
+      unitCount = 20 + zLoop;
+      zDimension = unitHeight - 0.002;
+      zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
+      mountName = "network_" + mountCount;
+      if (Math.random() > 0.95){
+        endOfLife = 1;
+      } else {
+        endOfLife = 0;
+      }
+      seconds = Math.random() * 5 * 365 * 24 * 60 * 60 * 1000;
+      dateNow = new Date();
+      mountData[mountName] = {
+        "block": {
+          "draw_lines": 1,
+          "rgb_block_red": 1.0,
+          "rgb_block_green": 1.0,
+          "rgb_block_blue": 1.0,
+          "rgb_line_red": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_blue": 0.5,
+          "x_location": xLocation,
+          "y_location": yLocation,
+          "z_location": zLocation,
+          "x_dimension": xDimension,
+          "y_dimension": yDimension,
+          "z_dimension": zDimension
+        },
+        "ci_name": mountName,
+        "ci_sys_id": mountCount.toString(),
+        "sys_id": mountCount,
+        "asset_tag": "fake",
+        "ci_u_cmdb_ci_status_name": "fake",
+        "ci_u_provision_date": "fake",
+        "collision": 0,
+        "model_category_name": "Network Gear",
+        "model_u_end_of_life": endOfLife,
+        "model_name": "fake",
+        "model_rack_units": 1,
+        "support_group_name": randomSupportGroup(),
+        "support_group_manager_email": "fake@fake.com",
+        "sys_class_name": "fake",
+        "u_smdb_table": "fake",
+        "u_last_audit_date": fakedates[Math.floor(Math.random() * 5)],
+        "serial_number": "fake"
+      }
+      mountCount += 1;
+    }
+    for (zLoop = 0; zLoop < 4; zLoop++){
+      unitCount = 23 + zLoop * 4;
+      zDimension = (unitHeight * 4) - 0.002;
+      zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 2);
+      mountName = "server_" + mountCount;
+      if (Math.random() > 0.95){
+        endOfLife = 1;
+      } else {
+        endOfLife = 0;
+      }
+      mountData[mountName] = {
+        "block": {
+          "draw_lines": 1,
+          "rgb_block_red": 1.0,
+          "rgb_block_green": 1.0,
+          "rgb_block_blue": 1.0,
+          "rgb_line_red": 0.5,
+          "rgb_line_green": 0.5,
+          "rgb_line_blue": 0.5,
+          "x_location": xLocation,
+          "y_location": yLocation,
+          "z_location": zLocation,
+          "x_dimension": xDimension,
+          "y_dimension": yDimension,
+          "z_dimension": zDimension
+        },
+        "ci_name": mountName,
+        "ci_sys_id": mountCount.toString(),
+        "sys_id": mountCount,
+        "asset_tag": "fake",
+        "ci_u_cmdb_ci_status_name": "fake",
+        "ci_u_provision_date": "fake",
+        "collision": 0,
+        "model_category_name": "Server",
+        "model_u_end_of_life": endOfLife,
+        "model_name": "fake",
+        "model_rack_units": 1,
+        "support_group_name": randomSupportGroup(),
+        "support_group_manager_email": "fake@fake.com",
+        "sys_class_name": "fake",
+        "u_smdb_table": "fake",
+        "u_last_audit_date": fakedates[Math.floor(Math.random() * 5)],
+        "serial_number": "fake"
+      }
+      mountCount += 1;
+    }
+  })
+  return mountData;
+}
+
+function fakeEmpty(rackData){
+  var emptyCount: number = 0;
+  var emptyData: Object = {};
+  var rack: Object = {};
+  var unitCount: number;
+  var unitHeight: number = 0.0445;
+  var xDimension: number = 0;
+  var xLocation: number = 0;
+  var yDimension: number = 0;
+  var yLocation: number = 0;
+  var zDimension: number = 0;
+  var zLocation: number = 0;
+  var zLoop: number = 0;
+  var zStart: number = 0;
+  Object.keys(rackData).forEach(function(rackName){
+    rack = rackData[rackName];
+    if (rack["facing"] == 0){
+      xLocation = rack["block"]["x_location"] - (rack["block"]["x_dimension"] * 0.5) - 0.002;
+      yLocation = rack["block"]["y_location"];
+      xDimension = 0.002;
+      yDimension = rack["block"]["y_dimension"] * 0.9;
+    }
+    if (rack["facing"] == 1){
+      xLocation = rack["block"]["x_location"];
+      yLocation = rack["block"]["y_location"] + (rack["block"]["y_dimension"] * 0.5) + 0.002;
+      xDimension = rack["block"]["x_dimension"] * 0.9;
+      yDimension = 0.002;
+    }
+    if (rack["facing"] == 2){
+      xLocation = rack["block"]["x_location"] + (rack["block"]["x_dimension"] * 0.5) + 0.002;
+      yLocation = rack["block"]["y_location"];
+      xDimension = 0.002;
+      yDimension = rack["block"]["y_dimension"] * 0.9;
+    }
+    if (rack["facing"] == 3){
+      xLocation = rack["block"]["x_location"];
+      yLocation = rack["block"]["y_location"] - (rack["block"]["y_dimension"] * 0.5) - 0.002;
+      xDimension = rack["block"]["x_dimension"] * 0.9;
+      yDimension = 0.002;
+    }
+    zStart = rack["block"]["z_location"] - (rack["block"]["z_dimension"] * 0.5) + (unitHeight * 2);
+    for (zLoop = 0; zLoop < 11; zLoop++){
+      unitCount = 39 + zLoop;
+      zDimension = unitHeight;
+      zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
+      emptyData[emptyCount] = {
+        "block": {
+          "draw_lines": 1,
+          "rgb_block_red": 0.5,
+          "rgb_block_green": 0.5,
+          "rgb_block_blue": 0.5,
+          "rgb_line_red": 1.0,
+          "rgb_line_green": 1.0,
+          "rgb_line_blue": 1.0,
+          "x_location": xLocation,
+          "y_location": yLocation,
+          "z_location": zLocation,
+          "x_dimension": xDimension,
+          "y_dimension": yDimension,
+          "z_dimension": zDimension
+        },
+        "name": rackName + "_" + unitCount,
+        "rack_name": rackName,
+        "unit_height": unitCount
+      }
+      emptyCount += 1;
+    }
+  });
+  return emptyData;
+}
+*/
+function randomEnvironment() {
+    var dice = Math.floor(Math.random() * 6);
+    var environmentList = ["environment1", "environment2", "environment3", "environment4", "environment5", "environment6"];
+    return environmentList[dice];
+}
+/*
+  function randomSupportGroup(){
+    var dice: number = Math.floor(Math.random() * 3);
+    var supportGroupList: Array<string> = ["team1","team2","team3"];
+    return supportGroupList[dice];
+  }
+
+  function fakePower(allData){
+    var powerData: object = {};
+    var randomPower: number = 0;
+    powerData["racks"] = {}
+    Object.keys(allData["racks"]).forEach(function(rackName){
+      if (allData["racks"][rackName]["design"]["u_equip_design_kw"] != "no data"){
+        if (allData["racks"][rackName]["design"]["u_equip_design_kw"] > 0){
+          randomPower = Math.random() * 10;
+          powerData["racks"][rackName] = {
+            "average": randomPower,
+            "maximum": randomPower * (1.0 + Math.random() * 0.3)
+          }
         }
-        if (blockType == "rack") {
-            blockData = allData["racks"][selectedBlock];
-            anchor = document.createElement('a');
-            anchor.setAttribute('href', "/nav_to.do?uri=%2Fsp%3Fid%3Ddcscapeng_rackview%26rackSysid%3D" + blockData["sys_id"]);
-            anchor.innerText = selectedBlock;
-            lower.appendChild(anchor);
-            if (rackColor[selectedBlock].length > 3 && rackColor[selectedBlock][3] != "") {
-                linebreak = document.createElement("br");
-                lower.appendChild(linebreak);
-                textNode = document.createTextNode("     " + rackColor[selectedBlock][3]);
-                lower.appendChild(textNode);
+      } else {
+        randomPower = Math.random() * 10;
+        powerData["racks"][rackName] = {
+          "average": randomPower,
+          "maximum": randomPower * (1.0 + Math.random() * 0.3)
+          }
+      }
+    })
+    powerData["room_maximum"] = 13;
+    return powerData;
+  }
+*/
+/*
+interface Block {
+  "draw_lines": number;
+  'id': string;
+  "rgb_block_red": string;
+  "rgb_block_green": string;
+  "rgb_block_blue": string;
+  "rgb_line_red": string;
+  "rgb_line_green": string;
+  "rgb_line_blue": string;
+  "x_location": string;
+  "y_location": string;
+  "z_location": string;
+  "x_dimension": string;
+  "y_dimension": string;
+  "z_dimension": string;
+}
+*/
+function fakeRacks(rowMax, rackMax) {
+    var facing = 0;
+    var rackCount = 0;
+    var rackData = {};
+    var rackName;
+    var xloop;
+    var yloop;
+    for (yloop = 0; yloop < rowMax; yloop++) {
+        for (xloop = 0; xloop < rackMax; xloop++) {
+            if (yloop % 2 == 0) {
+                facing = 1;
             }
-            if (rackColor[selectedBlock].length > 4 && rackColor[selectedBlock][4] != "") {
-                linebreak = document.createElement("br");
-                lower.appendChild(linebreak);
-                textNode = document.createTextNode("     " + rackColor[selectedBlock][4]);
-                lower.appendChild(textNode);
+            else {
+                facing = 3;
             }
-        }
-        if (blockType == "scene") {
-            blockData = allData["scene"][selectedBlock];
-            anchor = document.createElement('a');
-            anchor.setAttribute('href', "/nav_to.do?uri=%2Fu_dcse_vr_scene.do%3Fsys_id%3D" + blockData["sysid"]);
-            anchor.innerText = "scene";
-            lower.appendChild(anchor);
+            rackName = "rack_" + xloop + "_" + yloop;
+            rackBlocks[rackName] = {
+                "draw_lines": 1,
+                "rgb_block_red": "1.0",
+                "rgb_block_green": "1.0",
+                "rgb_block_blue": "1.0",
+                "rgb_line_red": "0.5",
+                "rgb_line_green": "0.5",
+                "rgb_line_blue": "0.5",
+                "x_location": (4 + 0.3 + (xloop * 0.6)).toString(),
+                "y_location": (4 + 1.2 + (yloop * 2.4)).toString(),
+                "z_location": "1.2",
+                "x_dimension": "0.58",
+                "y_dimension": "1.2",
+                "z_dimension": "1.2"
+            };
+            rackData[rackName] = {
+                "id": rackCount.toString(),
+                "facing": facing,
+                "rack_units": 50,
+                "u_allocated_kw": 10,
+                "u_environment": randomEnvironment(),
+                "u_equip_design_kw": 12,
+                "u_equip_kw_consume_design": 20,
+                "u_facil_design_kw": 16,
+                "u_max_alloc": 10,
+                "u_qty_alloc": xloop % 10,
+                "u_rack_state": "Landed"
+            };
+            rackCount++;
         }
     }
-    else {
-        lower.innerHTML = "Room: " + allData["room"]["room_name"];
-    }
+    return rackData;
 }
