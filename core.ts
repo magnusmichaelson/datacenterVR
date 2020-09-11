@@ -800,7 +800,6 @@
     var threeCameraDirection: any = new THREE.Vector3();
     requestAnimationFrame( animate );
     if ( controlsEnabled ) {
-      /*
       threeCamera.getWorldPosition(threeCameraPostion);
       threeCamera.getWorldDirection(threeCameraDirection);
       threeRaycaster.set( threeCameraPostion, threeCameraDirection );
@@ -862,8 +861,6 @@
           threeScene.getObjectByName(selectedBlock).material.color.setRGB(0.3, 0.3, 0.3);
         }
       }
-
-*/
       // movement
       time = performance.now();
       delta = ( time - prevTime );
