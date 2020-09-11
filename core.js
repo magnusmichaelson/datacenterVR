@@ -15,9 +15,11 @@ var rackResult = fakeRacks(rowMax, rackMax);
 var rackData = rackResult["tempRackData"];
 var rackBlocks = rackResult["tempRackBlocks"];
 var sceneBlocks = fakeScene(roomXDimension, roomYDimension);
-var mountData = fakeMount(rackData, rackBlocks);
-var mountBlocks = {};
+var mountResult = fakeMount(rackData, rackBlocks);
+var mountData = mountResult["tempMountData"];
+var mountBlocks = mountResult["tempMountBlock"];
 console.log(mountData);
+console.log(mountBlocks);
 /*
 allData["racks"] = fakeRacks(rowMax,rackMax);
 allData["mount"] = fakeMount(allData["racks"]);
@@ -261,7 +263,7 @@ function generateScene() {
     threeRenderer.setClearColor(0xf0f3f4);
     generateBlocks(rackBlocks, "rack", false);
     generateBlocks(sceneBlocks, "scene", false);
-    //generateBlocks(allData["mount"],"mount",true)
+    generateBlocks(mountBlocks, "mount", true);
     //generateBlocks(allData["empty"],"empty",false)
     rackDropDown();
     mountDropDown();
@@ -943,68 +945,70 @@ function animate() {
     var threeCameraDirection = new THREE.Vector3();
     requestAnimationFrame(animate);
     if (controlsEnabled) {
+        /*
         threeCamera.getWorldPosition(threeCameraPostion);
         threeCamera.getWorldDirection(threeCameraDirection);
-        threeRaycaster.set(threeCameraPostion, threeCameraDirection);
+        threeRaycaster.set( threeCameraPostion, threeCameraDirection );
         threeIntersects = threeRaycaster.intersectObjects(threeScene.children);
-        if (threeIntersects.length > 0) {
-            for (var i = 0; i < threeIntersects.length; i++) {
-                if (threeIntersects[i].object.type == 'Mesh') {
-                    if (closestDistance == -1) {
-                        closestDistance = threeIntersects[i].distance;
-                        threeClosest = threeIntersects[i];
-                    }
-                    else {
-                        if (threeIntersects[i].distance < closestDistance) {
-                            closestDistance = threeIntersects[i].distance;
-                            threeClosest = threeIntersects[i];
-                        }
-                    }
+        if (threeIntersects.length > 0){
+          for ( var i: number = 0; i < threeIntersects.length; i++ ) {
+            if (threeIntersects[i].object.type == 'Mesh'){
+              if (closestDistance == -1){
+                closestDistance = threeIntersects[i].distance;
+                threeClosest = threeIntersects[i];
+              } else {
+                if (threeIntersects[i].distance < closestDistance){
+                  closestDistance = threeIntersects[i].distance;
+                  threeClosest = threeIntersects[i];
                 }
+              }
             }
+          }
         }
-        if (closestDistance != -1) {
-            // check if the selected block has changed
-            if (threeClosest.object.name != selectedBlock) {
-                if (selectedBlock) {
-                    // unhighlight previous object
-                    previousBlockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
-                    if (previousBlockType == "mount") {
-                        red = mountColor[selectedBlock][0];
-                        green = mountColor[selectedBlock][1];
-                        blue = mountColor[selectedBlock][2];
-                        threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
-                    }
-                    if (previousBlockType == "rack") {
-                        red = rackColor[selectedBlock][0];
-                        green = rackColor[selectedBlock][1];
-                        blue = rackColor[selectedBlock][2];
-                        threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
-                    }
-                    if (previousBlockType == "empty") {
-                        threeScene.getObjectByName(selectedBlock).material.color.setRGB(0.5, 0.5, 0.5);
-                    }
-                }
-                selectedBlock = threeClosest.object.name;
-            }
-            // highlight the selected block
-            currentBlockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
-            if (currentBlockType == "mount") {
-                red = mountColor[selectedBlock][0] * targetDarkness;
-                green = mountColor[selectedBlock][1] * targetDarkness;
-                blue = mountColor[selectedBlock][2] * targetDarkness;
+        if (closestDistance != -1){
+          // check if the selected block has changed
+          if (threeClosest.object.name != selectedBlock){
+            if (selectedBlock){
+              // unhighlight previous object
+              previousBlockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
+              if (previousBlockType == "mount"){
+                red = mountColor[selectedBlock][0];
+                green = mountColor[selectedBlock][1];
+                blue = mountColor[selectedBlock][2];
                 threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
-            }
-            if (currentBlockType == "rack") {
-                red = rackColor[selectedBlock][0] * targetDarkness;
-                green = rackColor[selectedBlock][1] * targetDarkness;
-                blue = rackColor[selectedBlock][2] * targetDarkness;
+              }
+              if (previousBlockType == "rack"){
+                red = rackColor[selectedBlock][0]
+                green = rackColor[selectedBlock][1]
+                blue = rackColor[selectedBlock][2]
                 threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
+              }
+              if (previousBlockType == "empty"){
+                threeScene.getObjectByName(selectedBlock).material.color.setRGB(0.5, 0.5, 0.5);
+              }
             }
-            if (currentBlockType == "empty") {
-                threeScene.getObjectByName(selectedBlock).material.color.setRGB(0.3, 0.3, 0.3);
-            }
+            selectedBlock = threeClosest.object.name;
+          }
+          // highlight the selected block
+          currentBlockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
+          if (currentBlockType == "mount"){
+            red = mountColor[selectedBlock][0] * targetDarkness;
+            green = mountColor[selectedBlock][1] * targetDarkness;
+            blue = mountColor[selectedBlock][2] * targetDarkness;
+            threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
+          }
+          if (currentBlockType == "rack"){
+            red = rackColor[selectedBlock][0] * targetDarkness;
+            green = rackColor[selectedBlock][1] * targetDarkness;
+            blue = rackColor[selectedBlock][2] * targetDarkness;
+            threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
+          }
+          if (currentBlockType == "empty"){
+            threeScene.getObjectByName(selectedBlock).material.color.setRGB(0.3, 0.3, 0.3);
+          }
         }
+  
+  */
         // movement
         time = performance.now();
         delta = (time - prevTime);
@@ -1439,125 +1443,44 @@ function fakeScene(roomXDimension, roomYDimension) {
     };
     return scene;
 }
-function fakeMount(rackData, rackBlocks) {
-    var endOfLife;
-    var fakedates;
-    var mountCount = 0;
-    var mountData = {};
-    var mountName = "";
-    var unitCount;
-    var unitHeight = 0.0445;
-    var xDimension = 0;
-    var xLocation = 0;
-    var yDimension = 0;
-    var yLocation = 0;
-    var zDimension = 0;
-    var zLocation = 0;
-    var zLoop;
-    var zStart = 0;
-    fakedates = ['2018-07-25 04:21:00', '2019-01-25 04:21:00', '2019-07-25 04:21:00', '2020-01-25 04:21:00', '2020-07-25 04:21:00'];
-    Object.keys(rackData).forEach(function (rackName) {
-        if (rackData[rackName]["facing"] == 0) {
-            xLocation = parseInt(rackBlocks[rackName]["x_location"]) - (parseInt(rackBlocks[rackName]["x_dimension"]) * 0.5) - 0.009;
-            yLocation = parseInt(rackBlocks[rackName]["y_location"]);
-            xDimension = 0.016;
-            yDimension = parseInt(rackBlocks[rackName]["y_dimension"]) * 0.9;
-        }
-        if (rackData[rackName]["facing"] == 1) {
-            xLocation = parseInt(rackBlocks[rackName]["x_location"]);
-            yLocation = parseInt(rackBlocks[rackName]["y_location"]) + (parseInt(rackBlocks[rackName]["y_dimension"]) * 0.5) + 0.009;
-            xDimension = parseInt(rackBlocks[rackName]["x_dimension"]) * 0.9;
-            yDimension = 0.016;
-        }
-        if (rackData[rackName]["facing"] == 2) {
-            xLocation = parseInt(rackBlocks[rackName]["x_location"]) + (parseInt(rackBlocks[rackName]["x_dimension"]) * 0.5) + 0.009;
-            yLocation = parseInt(rackBlocks[rackName]["y_location"]);
-            xDimension = 0.016;
-            yDimension = parseInt(rackBlocks[rackName]["y_dimension"]) * 0.9;
-        }
-        if (rackData[rackName]["facing"] == 3) {
-            xLocation = parseInt(rackBlocks[rackName]["x_location"]);
-            yLocation = parseInt(rackBlocks[rackName]["y_location"]) - (parseInt(rackBlocks[rackName]["y_dimension"]) * 0.5) - 0.009;
-            xDimension = parseInt(rackBlocks[rackName]["x_dimension"]) * 0.9;
-            yDimension = 0.016;
-        }
-        zStart = parseInt(rackBlocks[rackName]["z_location"]) - (parseInt(rackBlocks[rackName]["z_dimension"]) * 0.5) + (unitHeight * 2);
-        for (zLoop = 0; zLoop < 10; zLoop++) {
-            unitCount = (zLoop * 2);
-            zDimension = (unitHeight * 2) - 0.002;
-            zLocation = zStart + (unitCount * unitHeight) + unitHeight;
-            mountName = "server_" + mountCount;
-            if (Math.random() > 0.95) {
-                endOfLife = 1;
-            }
-            else {
-                endOfLife = 0;
-            }
-            /*
-            interface Mount {
-              "ci_name": string;
-              "ci_sys_id": string;
-              "collision": number;
-              "model_rack_units": number;
-              "rack_name": string;
-              "rack_u": number;
-            }
-            */
-            mountData[mountName] = {
-                "ci_name": mountName,
-                "ci_sys_id": mountCount.toString(),
-                "collision": 0,
-                "model_rack_units": 1,
-                "rack_name": rackName,
-                "rack_u": unitCount
-            };
-            mountCount += 1;
-        }
-        for (zLoop = 0; zLoop < 3; zLoop++) {
-            unitCount = 20 + zLoop;
-            zDimension = unitHeight - 0.002;
-            zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
-            mountName = "network_" + mountCount;
-            if (Math.random() > 0.95) {
-                endOfLife = 1;
-            }
-            else {
-                endOfLife = 0;
-            }
-            mountData[mountName] = {
-                "ci_name": mountName,
-                "ci_sys_id": mountCount.toString(),
-                "collision": 0,
-                "model_rack_units": 1,
-                "rack_name": rackName,
-                "rack_u": unitCount
-            };
-            mountCount += 1;
-        }
-        for (zLoop = 0; zLoop < 4; zLoop++) {
-            unitCount = 23 + zLoop * 4;
-            zDimension = (unitHeight * 4) - 0.002;
-            zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 2);
-            mountName = "server_" + mountCount;
-            if (Math.random() > 0.95) {
-                endOfLife = 1;
-            }
-            else {
-                endOfLife = 0;
-            }
-            mountData[mountName] = {
-                "ci_name": mountName,
-                "ci_sys_id": mountCount.toString(),
-                "collision": 0,
-                "model_rack_units": 1,
-                "rack_name": rackName,
-                "rack_u": unitCount
-            };
-            mountCount += 1;
-        }
-    });
-    return mountData;
-}
+/*
+  interface Block {
+    "draw_lines": number;
+    "x_location": string;
+    "y_location": string;
+    "z_location": string;
+    "x_dimension": string;
+    "y_dimension": string;
+    "z_dimension": string;
+    "rgb_block_red": string;
+    "rgb_block_green": string;
+    "rgb_block_blue": string;
+    "rgb_line_red": string;
+    "rgb_line_green": string;
+    "rgb_line_blue": string;
+  }
+  interface Rack {
+    "id": string;
+    "facing": number;
+    "rack_units": number;
+    "u_allocated_kw": number;
+    "u_environment": string;
+    "u_equip_design_kw": number;
+    "u_equip_kw_consume_design": number;
+    "u_facil_design_kw": number;
+    "u_max_alloc": number;
+    "u_qty_alloc": number;
+    "u_rack_state": string;
+  }
+  interface Mount {
+    "ci_name": string;
+    "ci_sys_id": string;
+    "collision": number;
+    "model_rack_units": number;
+    "rack_name": string;
+    "rack_u": number;
+  }
+  */
 /*
   function fakeEmpty(rackData){
     var emptyCount: number = 0;
@@ -1702,7 +1625,7 @@ function fakeRacks(rowMax, rackMax) {
             else {
                 facing = 3;
             }
-            rackName = "rack_" + xloop + "_" + yloop;
+            rackName = "rack_" + yloop + "_" + xloop;
             tempRackBlocks[rackName] = {
                 "draw_lines": 1,
                 "rgb_block_red": "1.0",
@@ -1735,4 +1658,159 @@ function fakeRacks(rowMax, rackMax) {
         }
     }
     return { tempRackData: tempRackData, tempRackBlocks: tempRackBlocks };
+}
+function fakeMount(rackData, rackBlocks) {
+    var endOfLife;
+    var fakedates;
+    var mountCount = 0;
+    var mountName = "";
+    var tempMountBlock = {};
+    var tempMountData = {};
+    var unitCount;
+    var unitHeight = 0.0445;
+    var xDimension = 0;
+    var xLocation = 0;
+    var yDimension = 0;
+    var yLocation = 0;
+    var zDimension = 0;
+    var zLocation = 0;
+    var zLoop;
+    var zStart = 0;
+    fakedates = ['2018-07-25 04:21:00', '2019-01-25 04:21:00', '2019-07-25 04:21:00', '2020-01-25 04:21:00', '2020-07-25 04:21:00'];
+    Object.keys(rackData).forEach(function (rackName) {
+        if (rackData[rackName]["facing"] == 0) {
+            xLocation = parseFloat(rackBlocks[rackName]["x_location"]) - (parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.5) - 0.009;
+            yLocation = parseFloat(rackBlocks[rackName]["y_location"]);
+            xDimension = 0.016;
+            yDimension = parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.9;
+        }
+        if (rackData[rackName]["facing"] == 1) {
+            xLocation = parseFloat(rackBlocks[rackName]["x_location"]);
+            yLocation = parseFloat(rackBlocks[rackName]["y_location"]) + (parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.5) + 0.009;
+            xDimension = parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.9;
+            yDimension = 0.016;
+        }
+        if (rackData[rackName]["facing"] == 2) {
+            xLocation = parseFloat(rackBlocks[rackName]["x_location"]) + (parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.5) + 0.009;
+            yLocation = parseFloat(rackBlocks[rackName]["y_location"]);
+            xDimension = 0.016;
+            yDimension = parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.9;
+        }
+        if (rackData[rackName]["facing"] == 3) {
+            xLocation = parseFloat(rackBlocks[rackName]["x_location"]);
+            yLocation = parseFloat(rackBlocks[rackName]["y_location"]) - (parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.5) - 0.009;
+            xDimension = parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.9;
+            yDimension = 0.016;
+        }
+        zStart = parseFloat(rackBlocks[rackName]["z_location"]) - (parseFloat(rackBlocks[rackName]["z_dimension"]) * 0.5) + (unitHeight * 2);
+        for (zLoop = 0; zLoop < 10; zLoop++) {
+            unitCount = (zLoop * 2);
+            zDimension = (unitHeight * 2) - 0.002;
+            zLocation = zStart + (unitCount * unitHeight) + unitHeight;
+            mountName = "server_" + mountCount;
+            if (Math.random() > 0.95) {
+                endOfLife = 1;
+            }
+            else {
+                endOfLife = 0;
+            }
+            tempMountData[mountName] = {
+                "ci_name": mountName,
+                "ci_sys_id": mountCount.toString(),
+                "collision": 0,
+                "model_rack_units": 1,
+                "rack_name": rackName,
+                "rack_u": unitCount
+            };
+            tempMountBlock[mountName] = {
+                "draw_lines": 1,
+                "rgb_block_red": "0.850",
+                "rgb_block_green": "0.850",
+                "rgb_block_blue": "0.850",
+                "rgb_line_red": "0.000",
+                "rgb_line_green": "0.000",
+                "rgb_line_blue": "0.000",
+                "x_location": xLocation.toFixed(3),
+                "y_location": yLocation.toFixed(3),
+                "z_location": zLocation.toFixed(3),
+                "x_dimension": xDimension.toFixed(3),
+                "y_dimension": yDimension.toFixed(3),
+                "z_dimension": zDimension.toFixed(3)
+            };
+            mountCount += 1;
+        }
+        for (zLoop = 0; zLoop < 3; zLoop++) {
+            unitCount = 20 + zLoop;
+            zDimension = unitHeight - 0.002;
+            zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
+            mountName = "network_" + mountCount;
+            if (Math.random() > 0.95) {
+                endOfLife = 1;
+            }
+            else {
+                endOfLife = 0;
+            }
+            tempMountData[mountName] = {
+                "ci_name": mountName,
+                "ci_sys_id": mountCount.toString(),
+                "collision": 0,
+                "model_rack_units": 1,
+                "rack_name": rackName,
+                "rack_u": unitCount
+            };
+            tempMountBlock[mountName] = {
+                "draw_lines": 1,
+                "rgb_block_red": "0.850",
+                "rgb_block_green": "0.850",
+                "rgb_block_blue": "0.850",
+                "rgb_line_red": "0.000",
+                "rgb_line_green": "0.000",
+                "rgb_line_blue": "0.000",
+                "x_location": xLocation.toFixed(3),
+                "y_location": yLocation.toFixed(3),
+                "z_location": zLocation.toFixed(3),
+                "x_dimension": xDimension.toFixed(3),
+                "y_dimension": yDimension.toFixed(3),
+                "z_dimension": zDimension.toFixed(3)
+            };
+            mountCount += 1;
+        }
+        for (zLoop = 0; zLoop < 4; zLoop++) {
+            unitCount = 23 + zLoop * 4;
+            zDimension = (unitHeight * 4) - 0.002;
+            zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 2);
+            mountName = "server_" + mountCount;
+            if (Math.random() > 0.95) {
+                endOfLife = 1;
+            }
+            else {
+                endOfLife = 0;
+            }
+            tempMountData[mountName] = {
+                "ci_name": mountName,
+                "ci_sys_id": mountCount.toString(),
+                "collision": 0,
+                "model_rack_units": 1,
+                "rack_name": rackName,
+                "rack_u": unitCount
+            };
+            tempMountBlock[mountName] = {
+                "draw_lines": 1,
+                "rgb_block_red": "0.850",
+                "rgb_block_green": "0.850",
+                "rgb_block_blue": "0.850",
+                "rgb_line_red": "0.000",
+                "rgb_line_green": "0.000",
+                "rgb_line_blue": "0.000",
+                "x_location": xLocation.toFixed(3),
+                "y_location": yLocation.toFixed(3),
+                "z_location": zLocation.toFixed(3),
+                "x_dimension": xDimension.toFixed(3),
+                "y_dimension": yDimension.toFixed(3),
+                "z_dimension": zDimension.toFixed(3)
+            };
+            mountCount += 1;
+        }
+    });
+    return { tempMountData: tempMountData, tempMountBlock: tempMountBlock };
 }
