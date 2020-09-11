@@ -215,7 +215,6 @@ function generateScene() {
     generateBlocks(sceneBlocks, "scene", false);
     generateBlocks(mountBlocks, "mount", true);
     generateBlocks(emptyBlocks, "empty", false);
-    console.log(emptyBlocks);
     rackDropDown();
     mountDropDown();
     rendererResize();
@@ -767,70 +766,68 @@ function animate() {
     var threeCameraDirection = new THREE.Vector3();
     requestAnimationFrame(animate);
     if (controlsEnabled) {
-        /*
         threeCamera.getWorldPosition(threeCameraPostion);
         threeCamera.getWorldDirection(threeCameraDirection);
-        threeRaycaster.set( threeCameraPostion, threeCameraDirection );
+        threeRaycaster.set(threeCameraPostion, threeCameraDirection);
         threeIntersects = threeRaycaster.intersectObjects(threeScene.children);
-        if (threeIntersects.length > 0){
-          for ( var i: number = 0; i < threeIntersects.length; i++ ) {
-            if (threeIntersects[i].object.type == 'Mesh'){
-              if (closestDistance == -1){
-                closestDistance = threeIntersects[i].distance;
-                threeClosest = threeIntersects[i];
-              } else {
-                if (threeIntersects[i].distance < closestDistance){
-                  closestDistance = threeIntersects[i].distance;
-                  threeClosest = threeIntersects[i];
+        if (threeIntersects.length > 0) {
+            for (var i = 0; i < threeIntersects.length; i++) {
+                if (threeIntersects[i].object.type == 'Mesh') {
+                    if (closestDistance == -1) {
+                        closestDistance = threeIntersects[i].distance;
+                        threeClosest = threeIntersects[i];
+                    }
+                    else {
+                        if (threeIntersects[i].distance < closestDistance) {
+                            closestDistance = threeIntersects[i].distance;
+                            threeClosest = threeIntersects[i];
+                        }
+                    }
                 }
-              }
             }
-          }
         }
-        if (closestDistance != -1){
-          // check if the selected block has changed
-          if (threeClosest.object.name != selectedBlock){
-            if (selectedBlock){
-              // unhighlight previous object
-              previousBlockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
-              if (previousBlockType == "mount"){
-                red = mountColor[selectedBlock][0];
-                green = mountColor[selectedBlock][1];
-                blue = mountColor[selectedBlock][2];
-                threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
-              }
-              if (previousBlockType == "rack"){
-                red = rackColor[selectedBlock][0]
-                green = rackColor[selectedBlock][1]
-                blue = rackColor[selectedBlock][2]
-                threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
-              }
-              if (previousBlockType == "empty"){
-                threeScene.getObjectByName(selectedBlock).material.color.setRGB(0.5, 0.5, 0.5);
-              }
+        if (closestDistance != -1) {
+            // check if the selected block has changed
+            if (threeClosest.object.name != selectedBlock) {
+                if (selectedBlock) {
+                    // unhighlight previous object
+                    previousBlockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
+                    if (previousBlockType == "mount") {
+                        red = mountColor[selectedBlock][0];
+                        green = mountColor[selectedBlock][1];
+                        blue = mountColor[selectedBlock][2];
+                        threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
+                    }
+                    if (previousBlockType == "rack") {
+                        red = rackColor[selectedBlock][0];
+                        green = rackColor[selectedBlock][1];
+                        blue = rackColor[selectedBlock][2];
+                        threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
+                    }
+                    if (previousBlockType == "empty") {
+                        threeScene.getObjectByName(selectedBlock).material.color.setRGB(0.5, 0.5, 0.5);
+                    }
+                }
+                selectedBlock = threeClosest.object.name;
             }
-            selectedBlock = threeClosest.object.name;
-          }
-          // highlight the selected block
-          currentBlockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
-          if (currentBlockType == "mount"){
-            red = mountColor[selectedBlock][0] * targetDarkness;
-            green = mountColor[selectedBlock][1] * targetDarkness;
-            blue = mountColor[selectedBlock][2] * targetDarkness;
-            threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
-          }
-          if (currentBlockType == "rack"){
-            red = rackColor[selectedBlock][0] * targetDarkness;
-            green = rackColor[selectedBlock][1] * targetDarkness;
-            blue = rackColor[selectedBlock][2] * targetDarkness;
-            threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
-          }
-          if (currentBlockType == "empty"){
-            threeScene.getObjectByName(selectedBlock).material.color.setRGB(0.3, 0.3, 0.3);
-          }
+            // highlight the selected block
+            currentBlockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
+            if (currentBlockType == "mount") {
+                red = mountColor[selectedBlock][0] * targetDarkness;
+                green = mountColor[selectedBlock][1] * targetDarkness;
+                blue = mountColor[selectedBlock][2] * targetDarkness;
+                threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
+            }
+            if (currentBlockType == "rack") {
+                red = rackColor[selectedBlock][0] * targetDarkness;
+                green = rackColor[selectedBlock][1] * targetDarkness;
+                blue = rackColor[selectedBlock][2] * targetDarkness;
+                threeScene.getObjectByName(selectedBlock).material.color.setRGB(red, green, blue);
+            }
+            if (currentBlockType == "empty") {
+                threeScene.getObjectByName(selectedBlock).material.color.setRGB(0.3, 0.3, 0.3);
+            }
         }
-  
-  */
         // movement
         time = performance.now();
         delta = (time - prevTime);
@@ -1335,7 +1332,7 @@ function fakeEmpty(tempRackBlock) {
             unitCount = 39 + zLoop;
             zDimension = unitHeight;
             zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
-            emptyName = "server_" + emptyCount;
+            emptyName = "empty_" + emptyCount;
             tempEmptyBlocks[emptyName] = {
                 "draw_lines": 1,
                 "rgb_block_red": "0.5",

@@ -251,7 +251,6 @@
     generateBlocks(sceneBlocks,"scene",false)
     generateBlocks(mountBlocks,"mount",true)
     generateBlocks(emptyBlocks,"empty",false)
-    console.log(emptyBlocks)
     rackDropDown();
     mountDropDown();
     rendererResize();
@@ -1357,7 +1356,7 @@
         unitCount = 39 + zLoop;
         zDimension = unitHeight;
         zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
-        emptyName = "server_" + emptyCount;
+        emptyName = "empty_" + emptyCount;
         tempEmptyBlocks[emptyName] = {
           "draw_lines": 1,
           "rgb_block_red": "0.5",
