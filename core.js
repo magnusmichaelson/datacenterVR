@@ -18,55 +18,7 @@ var sceneBlocks = fakeScene(roomXDimension, roomYDimension);
 var mountResult = fakeMount(rackData, rackBlocks);
 var mountData = mountResult["tempMountData"];
 var mountBlocks = mountResult["tempMountBlock"];
-/*
-allData["racks"] = fakeRacks(rowMax,rackMax);
-allData["mount"] = fakeMount(allData["racks"]);
-allData["empty"] = fakeEmpty(allData["racks"]);
-*/
-//const rackData: Record
-/*
-  var rowMax: number = 6;
-  roomXDimension = 8 + (rackMax * 0.6);
-  roomYDimension = 8 + (((rowMax * 2) -1) * 1.2);
-  allData["room"] = {}
-  allData["room"]["room_name"] = "roomName";
-  allData["camera"] = {
-      "camera_position_x": 5.672,
-      "camera_position_y": 14.360,
-      "camera_position_z": 2.274,
-      "camera_rotation_x": -2.065,
-      "camera_rotation_y": -0.224,
-      "camera_rotation_z": -2.752
-  }; [5.672, 14.360, 2.274, -2.065, -0.224, -2.752]
-  allData["scene"] = fakeScene(roomXDimension,roomYDimension);
-  allData["racks"] = fakeRacks(rowMax,rackMax);
-  allData["mount"] = fakeMount(allData["racks"]);
-  allData["empty"] = fakeEmpty(allData["racks"]);
-*/
-//const allData: Record<string, string> = fakeAllData;
-//const allData: Array<{[index: string]: string}
-//var allData: object = fakeAllData();
-// @ts-ignore
-//var powerData: object = fakePower(allData);
-// test data
-/*
-powerData["rack_19_5"] = {
-  "average": 1,
-  "maximum": 1
-}
-*/
-/*
-allData["racks"]["rack_19_5"]["design"] = {
-  "u_rack_state": "Landed",
-  "u_max_alloc": 10,
-  "u_qty_alloc": 12,
-  "u_environment": -1,
-  "u_allocated_kw": 0,
-  "u_equip_kw_consume_design": 0,
-  "u_equip_design_kw": 0,
-  "u_facil_design_kw": 0
-}
-*/
+var emptyBlocks = fakeEmpty(rackBlocks);
 var anchor;
 var controlsEnabled = false;
 var element = document.body;
@@ -262,7 +214,8 @@ function generateScene() {
     generateBlocks(rackBlocks, "rack", false);
     generateBlocks(sceneBlocks, "scene", false);
     generateBlocks(mountBlocks, "mount", true);
-    //generateBlocks(allData["empty"],"empty",false)
+    generateBlocks(emptyBlocks, "empty", false);
+    console.log(emptyBlocks);
     rackDropDown();
     mountDropDown();
     rendererResize();
@@ -517,95 +470,10 @@ function overlayRackPower() {
     //}
 }
 /**
- * @function powerRender
- * @description colors all objects in a rack according to the racks power usage
- */
-/*
-function powerRender(allData: Object, powerData: Object){
-  var rackEnvironmentElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('rackFilter');
-  var rackEnvironmentValue: string = rackEnvironmentElement.value;
-  var grey: number = 0.8;
-  var longMessage: string = "";
-  var powerDesign: number = 0;
-  var powerUsage: number = 0;
-  var averageOrMax: string;
-  var ratingType: string;
-  var roomMaximum: number = powerData["room_maximum"];
-  var shortMessage: string = "";
-  var singleRackReport: Array<any> = [];
-  var tempColor: Array<number> = [];
-  Object.keys(allData["racks"]).forEach(function(rackName){
-    // power usage
-    if (powerData["racks"].hasOwnProperty(rackName)){
-      if (averageOrMax == "average"){
-        powerUsage = powerData["racks"][rackName]["average"];
-      } else {
-        powerUsage = powerData["racks"][rackName]["maximum"];
-      }
-    } else {
-      powerUsage = -1;
-    }
-    // power rating
-    if (allData["racks"][rackName]["design"].hasOwnProperty("u_equip_design_kw")){
-      if (ratingType == "equip"){
-        powerDesign = allData["racks"][rackName]["design"]["u_equip_design_kw"]
-      }
-      if (ratingType == "facility"){
-        powerDesign = allData["racks"][rackName]["design"]["u_facil_design_kw"]
-      }
-      if (ratingType == "consume"){
-        powerDesign = allData["racks"][rackName]["design"]["u_equip_kw_consume_design"]
-      }
-    } else {
-      powerDesign = -1;
-    }
-    // default for unselected
-    singleRackReport = [1,1,1,"",""];
-    if (rackEnvironmentValue == 'all' || rackEnvironmentValue == allData["racks"][rackName]["design"]["u_environment"]){
-      if (powerDesign == -1 && powerUsage == -1){
-        shortMessage = "";
-        longMessage = "Rack has no design data and no power data";
-        singleRackReport = [grey,grey,grey,shortMessage,longMessage];
-      }
-      if (powerDesign == -1 && powerUsage != -1){
-        tempColor = spectrumBluePink(powerUsage, roomMaximum);
-        shortMessage = powerUsage.toFixed(2) + " / NA KW";
-        longMessage = "Rack has no design data, only power actuals";
-        singleRackReport = [tempColor[0],tempColor[1],tempColor[2],shortMessage,longMessage];
-      }
-      if (powerDesign == 0 && powerUsage == -1){
-        shortMessage = "";
-        longMessage = "Rack is unallocated";
-        singleRackReport = [grey,grey,grey,shortMessage,longMessage];
-      }
-      if (powerDesign == 0 && powerUsage != -1){
-        shortMessage = powerUsage.toFixed(2) + " / 0 KW";
-        longMessage = "Rack is unallocated, but is using power anyway";
-        singleRackReport = [1,0,0,shortMessage,longMessage];
-      }
-      if (powerDesign != -1 && powerDesign > 0 && powerUsage == -1){
-        shortMessage = "NA / " + powerDesign + " KW";
-        longMessage = "Rack has design data, but no power data";
-        singleRackReport = [grey,grey,grey,shortMessage,longMessage];
-      }
-      if (powerDesign != -1 && powerDesign > 0 && powerUsage != -1){
-        tempColor = spectrumGreenRed(powerUsage, powerDesign);
-        shortMessage = powerUsage.toFixed(2) + " / " + powerDesign + " KW";
-        longMessage = "Rack has design data and power actuals";
-        singleRackReport = [tempColor[0],tempColor[1],tempColor[2],shortMessage,longMessage];
-      }
-    }
-    rackColor[rackName] = singleRackReport;
-  });
-  //applyColor(allData["racks"],rackColor);
-}
-*/
-/**
  * @function overlayRackDefault
  * @description all blocks drawn white except collisions, which are red
  */
 function overlayRackDefault() {
-    var color = [];
     Object.keys(rackData).forEach(function (rackName) {
         rackColor[rackName] = [1, 1, 1];
     });
@@ -619,29 +487,27 @@ function overlayRackCapacity() {
     var rackEnvironmentElement = document.getElementById('rackFilter');
     var rackEnvironmentValue = rackEnvironmentElement.value;
     var color = [];
-    var rack = {};
     var singleRackReport = [];
     var tempColor = [];
-    /*
-    Object.keys(allData["racks"]).forEach(function(rackName){
-      rack = allData["racks"][rackName];
-      singleRackReport = [1,1,1]
-        if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rack["design"]["u_environment"]){
-          if (rack['design']["u_max_alloc"] > 0){
-            if (rack['design']["u_qty_alloc"] > 0){
-              tempColor = spectrumGreenRed(rack['design']["u_qty_alloc"], rack['design']["u_max_alloc"]);
-              singleRackReport = [tempColor[0],tempColor[1],tempColor[2],rack['design']["u_qty_alloc"] +" / " + rack['design']["u_max_alloc"]];
-            } else {
-              singleRackReport = spectrumGreenRed(0,1);
+    Object.keys(rackData).forEach(function (rackName) {
+        singleRackReport = [1, 1, 1];
+        if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rackData[rackName]["u_environment"]) {
+            if (rackData[rackName]["u_max_alloc"] > 0) {
+                if (rackData[rackName]["u_qty_alloc"] > 0) {
+                    tempColor = spectrumGreenRed(rackData[rackName]["u_qty_alloc"], rackData[rackName]["u_max_alloc"]);
+                    singleRackReport = [tempColor[0], tempColor[1], tempColor[2], rackData[rackName]["u_qty_alloc"] + " / " + rackData[rackName]["u_max_alloc"]];
+                }
+                else {
+                    singleRackReport = spectrumGreenRed(0, 1);
+                }
             }
-          } else {
-            singleRackReport = [0.8,0.8,0.8];
-          }
+            else {
+                singleRackReport = [0.8, 0.8, 0.8];
+            }
         }
-      rackColor[rackName] = singleRackReport;
+        rackColor[rackName] = singleRackReport;
     });
-    */
-    //applyColor(allData["racks"],rackColor);
+    applyColor(rackData, rackColor);
 }
 /**
  * @function mountDropDown
@@ -1373,78 +1239,71 @@ function fakeScene(roomXDimension, roomYDimension) {
     };
     return scene;
 }
-/*
-  function fakeEmpty(rackData){
-    var emptyCount: number = 0;
-    var emptyData: Object = {};
-    var rack: Object = {};
-    var unitCount: number;
-    var unitHeight: number = 0.0445;
-    var xDimension: number = 0;
-    var xLocation: number = 0;
-    var yDimension: number = 0;
-    var yLocation: number = 0;
-    var zDimension: number = 0;
-    var zLocation: number = 0;
-    var zLoop: number = 0;
-    var zStart: number = 0;
-    Object.keys(rackData).forEach(function(rackName){
-      rack = rackData[rackName];
-      if (rack["facing"] == 0){
-        xLocation = rack["block"]["x_location"] - (rack["block"]["x_dimension"] * 0.5) - 0.002;
-        yLocation = rack["block"]["y_location"];
-        xDimension = 0.002;
-        yDimension = rack["block"]["y_dimension"] * 0.9;
-      }
-      if (rack["facing"] == 1){
-        xLocation = rack["block"]["x_location"];
-        yLocation = rack["block"]["y_location"] + (rack["block"]["y_dimension"] * 0.5) + 0.002;
-        xDimension = rack["block"]["x_dimension"] * 0.9;
-        yDimension = 0.002;
-      }
-      if (rack["facing"] == 2){
-        xLocation = rack["block"]["x_location"] + (rack["block"]["x_dimension"] * 0.5) + 0.002;
-        yLocation = rack["block"]["y_location"];
-        xDimension = 0.002;
-        yDimension = rack["block"]["y_dimension"] * 0.9;
-      }
-      if (rack["facing"] == 3){
-        xLocation = rack["block"]["x_location"];
-        yLocation = rack["block"]["y_location"] - (rack["block"]["y_dimension"] * 0.5) - 0.002;
-        xDimension = rack["block"]["x_dimension"] * 0.9;
-        yDimension = 0.002;
-      }
-      zStart = rack["block"]["z_location"] - (rack["block"]["z_dimension"] * 0.5) + (unitHeight * 2);
-      for (zLoop = 0; zLoop < 11; zLoop++){
-        unitCount = 39 + zLoop;
-        zDimension = unitHeight;
-        zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
-        emptyData[emptyCount] = {
-          "block": {
-            "draw_lines": 1,
-            "rgb_block_red": 0.5,
-            "rgb_block_green": 0.5,
-            "rgb_block_blue": 0.5,
-            "rgb_line_red": 1.0,
-            "rgb_line_green": 1.0,
-            "rgb_line_blue": 1.0,
-            "x_location": xLocation,
-            "y_location": yLocation,
-            "z_location": zLocation,
-            "x_dimension": xDimension,
-            "y_dimension": yDimension,
-            "z_dimension": zDimension
-          },
-          "name": rackName + "_" + unitCount,
-          "rack_name": rackName,
-          "unit_height": unitCount
+function fakeEmpty(tempRackBlock) {
+    var emptyCount = 0;
+    var emptyName;
+    var tempEmptyBlocks = {};
+    var unitCount;
+    var unitHeight = 0.0445;
+    var xDimension = 0;
+    var xLocation = 0;
+    var yDimension = 0;
+    var yLocation = 0;
+    var zDimension = 0;
+    var zLocation = 0;
+    var zLoop = 0;
+    var zStart = 0;
+    Object.keys(tempRackBlock).forEach(function (rackName) {
+        if (rackData[rackName]["facing"] == 0) {
+            xLocation = parseFloat(rackBlocks[rackName]["x_location"]) - (parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.5) - 0.009;
+            yLocation = parseFloat(rackBlocks[rackName]["y_location"]);
+            xDimension = 0.016;
+            yDimension = parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.9;
         }
-        emptyCount += 1;
-      }
+        if (rackData[rackName]["facing"] == 1) {
+            xLocation = parseFloat(rackBlocks[rackName]["x_location"]);
+            yLocation = parseFloat(rackBlocks[rackName]["y_location"]) + (parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.5) + 0.009;
+            xDimension = parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.9;
+            yDimension = 0.016;
+        }
+        if (rackData[rackName]["facing"] == 2) {
+            xLocation = parseFloat(rackBlocks[rackName]["x_location"]) + (parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.5) + 0.009;
+            yLocation = parseFloat(rackBlocks[rackName]["y_location"]);
+            xDimension = 0.016;
+            yDimension = parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.9;
+        }
+        if (rackData[rackName]["facing"] == 3) {
+            xLocation = parseFloat(rackBlocks[rackName]["x_location"]);
+            yLocation = parseFloat(rackBlocks[rackName]["y_location"]) - (parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.5) - 0.009;
+            xDimension = parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.9;
+            yDimension = 0.016;
+        }
+        zStart = parseFloat(rackBlocks[rackName]["z_location"]) - (parseFloat(rackBlocks[rackName]["z_dimension"]) * 0.5) + (unitHeight * 2);
+        for (zLoop = 0; zLoop < 11; zLoop++) {
+            unitCount = 39 + zLoop;
+            zDimension = unitHeight;
+            zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
+            emptyName = "server_" + emptyCount;
+            tempEmptyBlocks[emptyName] = {
+                "draw_lines": 1,
+                "rgb_block_red": "0.5",
+                "rgb_block_green": "0.5",
+                "rgb_block_blue": "0.5",
+                "rgb_line_red": "1.0",
+                "rgb_line_green": "1.0",
+                "rgb_line_blue": "1.0",
+                "x_location": xLocation.toFixed(3),
+                "y_location": yLocation.toFixed(3),
+                "z_location": zLocation.toFixed(3),
+                "x_dimension": xDimension.toFixed(3),
+                "y_dimension": yDimension.toFixed(3),
+                "z_dimension": zDimension.toFixed(3)
+            };
+            emptyCount += 1;
+        }
     });
-    return emptyData;
-  }
-*/
+    return tempEmptyBlocks;
+}
 function randomEnvironment() {
     var dice = Math.floor(Math.random() * 6);
     var environmentList = ["environment1", "environment2", "environment3", "environment4", "environment5", "environment6"];
