@@ -18,8 +18,6 @@ var sceneBlocks = fakeScene(roomXDimension, roomYDimension);
 var mountResult = fakeMount(rackData, rackBlocks);
 var mountData = mountResult["tempMountData"];
 var mountBlocks = mountResult["tempMountBlock"];
-console.log(mountData);
-console.log(mountBlocks);
 /*
 allData["racks"] = fakeRacks(rowMax,rackMax);
 allData["mount"] = fakeMount(allData["racks"]);
@@ -449,13 +447,11 @@ function generateRackFilter() {
     var rackEnvironmentElement = document.getElementById('rackFilter');
     var optionElement;
     var rackEnvironmentList = [];
-    /*
-    Object.keys(allData["racks"]).forEach(function(rackName){
-      if (rackEnvironmentList.indexOf(allData["racks"][rackName]["design"]['u_environment']) < 0){
-        rackEnvironmentList.push(allData["racks"][rackName]["design"]['u_environment']);
-      }
+    Object.keys(rackData).forEach(function (rackName) {
+        if (rackEnvironmentList.indexOf(rackData[rackName]['u_environment']) < 0) {
+            rackEnvironmentList.push(rackData[rackName]['u_environment']);
+        }
     });
-    */
     rackEnvironmentList.sort();
     rackEnvironmentList.forEach(function (group) {
         optionElement = document.createElement('option');
@@ -472,15 +468,11 @@ function generatemountFilter() {
     var mountFilterElement = document.getElementById('mountFilter');
     var optionElement;
     var supportGroupList = [];
-    var mount = {};
-    /*
-    Object.keys(allData["mount"]).forEach(function(blockName){
-      mount = allData["mount"][blockName];
-      if (supportGroupList.indexOf(mount['support_group_name']) < 0){
-        supportGroupList.push(mount['support_group_name']);
-      }
+    Object.keys(mountData).forEach(function (blockName) {
+        if (supportGroupList.indexOf(mountData[blockName]['support_group_name']) < 0) {
+            supportGroupList.push(mountData[blockName]['support_group_name']);
+        }
     });
-    */
     supportGroupList.sort();
     supportGroupList.forEach(function (group) {
         optionElement = document.createElement('option');
@@ -659,16 +651,13 @@ function mountDropDown() {
     var overlayElement = document.getElementById('mountOverlay');
     var overlayValue = overlayElement.value;
     if (overlayValue == 'default') {
-        //overlaymountDefault();
+        overlaymountDefault();
     }
     if (overlayValue == 'objectModelCategory') {
-        //overlayObjectModelCategory();
-    }
-    if (overlayValue == 'objectModelEndOfLife') {
-        //overlayObjectModelEndOfLife();
+        overlayObjectModelCategory();
     }
     if (overlayValue == 'objectLastAudit') {
-        //overlayObjectLastAudit();
+        overlayObjectLastAudit();
     }
 }
 /**
@@ -723,85 +712,52 @@ function overlayObjectModelCategory() {
         "UPS": colorOther,
         "PDU": colorOther
     };
-    var mount = {};
-    /*
-    Object.keys(allData["mount"]).forEach(function(blockName){
-      mount = allData["mount"][blockName];
-      color = [1,1,1];
-      if (supportGroupValue == 'all' || supportGroupValue == mount['support_group_name']){
-        if (mount['model_category_name'] in colorChart){
-          color = colorChart[mount['model_category_name']]
+    Object.keys(mountData).forEach(function (blockName) {
+        color = [1, 1, 1];
+        if (supportGroupValue == 'all' || supportGroupValue == mountData[blockName]['support_group_name']) {
+            if (mountData[blockName]['model_category_name'] in colorChart) {
+                color = colorChart[mountData[blockName]['model_category_name']];
+            }
+            /*
+            if (!mount['ci_name']){
+              color = [1, 0.5, 0]
+            }
+            if (mount['collision']){
+              color = [1, 0, 0]
+            }
+            */
         }
-        if (!mount['ci_name']){
-          color = [1, 0.5, 0]
-        }
-        if (mount['collision']){
-          color = [1, 0, 0]
-        }
-      }
-      mountColor[blockName] = color;
-    })
-    applyColor(allData["mount"],mountColor);
-    */
+        mountColor[blockName] = color;
+    });
+    applyColor(mountData, mountColor);
 }
-/**
- * @function overlayObjectModelEndOfLife
- * @description any models that are end of life are shown as red
- */
-/*
-function overlayObjectModelEndOfLife(){
-  var supportGroupElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
-  var supportGroupValue: string = supportGroupElement.value;
-  var color: Array<number> = [];
-  var mount: object;
-  Object.keys(allData["mount"]).forEach(function(blockName){
-    mount = allData["mount"][blockName];
-    color = [1,1,1];
-    if (supportGroupValue == 'all' || supportGroupValue == mount['support_group_name']){
-      if (mount['model_u_end_of_life'] == '1'){
-        color = [1, 0, 0];
-      }
-    }
-    mountColor[blockName] = color;
-  })
-  applyColor(allData["mount"],mountColor);
-}
-*/
 /**
  * @function overlayObjectLastAudit
  * @description colors objects in a green to red spectrum by the date of their last audit
  */
-/*
-function overlayObjectLastAudit(){
-  var supportGroupElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
-  var supportGroupValue: string = supportGroupElement.value;
-  var color: Array<number> = [];
-  var now: number = Date.now();
-  var lastAudit: number = 0
-  var block: object;
-  // 2 yeasr * 365 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds;
-  var milliseconds: number = 63072000000;
-  Object.keys(allData["mount"]).forEach(function(blockName){
-    block = allData["mount"][blockName];
-    color = [1,1,1];
-    if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
-      if (block['u_last_audit_date']){
-        lastAudit = Date.parse(block['u_last_audit_date']);
-        color = spectrumGreenRed((now - lastAudit), milliseconds);
-      } else {
-        color = spectrumGreenRed(1,1);
-      }
-    }
-    if (supportGroupValue == 'all' || supportGroupValue == block['support_group_name']){
-      if (block['model_u_end_of_life'] == '1'){
-        color = [1, 0, 0];
-      }
-    }
-    mountColor[blockName] = color;
-  })
-  //applyColor(allData["mount"],mountColor);
+function overlayObjectLastAudit() {
+    var supportGroupElement = document.getElementById('mountFilter');
+    var supportGroupValue = supportGroupElement.value;
+    var color = [];
+    var now = Date.now();
+    var lastAudit = 0;
+    // 2 yeasr * 365 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds;
+    var milliseconds = 63072000000;
+    Object.keys(mountData).forEach(function (blockName) {
+        color = [1, 1, 1];
+        if (supportGroupValue == 'all' || supportGroupValue == mountData[blockName]['support_group_name']) {
+            if (mountData[blockName]['u_last_audit_date']) {
+                lastAudit = Date.parse(mountData[blockName]['u_last_audit_date']);
+                color = spectrumGreenRed((now - lastAudit), milliseconds);
+            }
+            else {
+                color = spectrumGreenRed(1, 1);
+            }
+        }
+        mountColor[blockName] = color;
+    });
+    applyColor(mountData, mountColor);
 }
-*/
 /**
  * @function rendererResize
  * @description resizes the renderer when the page is resized
@@ -1338,32 +1294,6 @@ function leftMouseClick(event){
   }
 }
 */
-/*
-function fakeAllData(){
-  var allData: Object = {};
-  var rackMax: number = 20;
-  var roomXDimension: number;
-  var roomYDimension: number;
-  var rowMax: number = 6;
-  roomXDimension = 8 + (rackMax * 0.6);
-  roomYDimension = 8 + (((rowMax * 2) -1) * 1.2);
-  allData["room"] = {}
-  allData["room"]["room_name"] = "roomName";
-  allData["camera"] = {
-      "camera_position_x": 5.672,
-      "camera_position_y": 14.360,
-      "camera_position_z": 2.274,
-      "camera_rotation_x": -2.065,
-      "camera_rotation_y": -0.224,
-      "camera_rotation_z": -2.752
-  }; [5.672, 14.360, 2.274, -2.065, -0.224, -2.752]
-  allData["scene"] = fakeScene(roomXDimension,roomYDimension);
-  allData["racks"] = fakeRacks(rowMax,rackMax);
-  allData["mount"] = fakeMount(allData["racks"]);
-  allData["empty"] = fakeEmpty(allData["racks"]);
-  return allData;
-}
-*/
 function fakeScene(roomXDimension, roomYDimension) {
     var scene = {};
     scene["floor"] = {
@@ -1443,44 +1373,6 @@ function fakeScene(roomXDimension, roomYDimension) {
     };
     return scene;
 }
-/*
-  interface Block {
-    "draw_lines": number;
-    "x_location": string;
-    "y_location": string;
-    "z_location": string;
-    "x_dimension": string;
-    "y_dimension": string;
-    "z_dimension": string;
-    "rgb_block_red": string;
-    "rgb_block_green": string;
-    "rgb_block_blue": string;
-    "rgb_line_red": string;
-    "rgb_line_green": string;
-    "rgb_line_blue": string;
-  }
-  interface Rack {
-    "id": string;
-    "facing": number;
-    "rack_units": number;
-    "u_allocated_kw": number;
-    "u_environment": string;
-    "u_equip_design_kw": number;
-    "u_equip_kw_consume_design": number;
-    "u_facil_design_kw": number;
-    "u_max_alloc": number;
-    "u_qty_alloc": number;
-    "u_rack_state": string;
-  }
-  interface Mount {
-    "ci_name": string;
-    "ci_sys_id": string;
-    "collision": number;
-    "model_rack_units": number;
-    "rack_name": string;
-    "rack_u": number;
-  }
-  */
 /*
   function fakeEmpty(rackData){
     var emptyCount: number = 0;
@@ -1590,28 +1482,9 @@ function fakePower(allData){
   return powerData;
 }
 */
-/*
-interface Block {
-  "draw_lines": number;
-  'id': string;
-  "rgb_block_red": string;
-  "rgb_block_green": string;
-  "rgb_block_blue": string;
-  "rgb_line_red": string;
-  "rgb_line_green": string;
-  "rgb_line_blue": string;
-  "x_location": string;
-  "y_location": string;
-  "z_location": string;
-  "x_dimension": string;
-  "y_dimension": string;
-  "z_dimension": string;
-}
-*/
 function fakeRacks(rowMax, rackMax) {
     var facing = 0;
     var rackCount = 0;
-    //var rackData: Record<string, Rack> = {};
     var tempRackData = {};
     var tempRackBlocks = {};
     var rackName;
@@ -1718,18 +1591,21 @@ function fakeMount(rackData, rackBlocks) {
                 "ci_name": mountName,
                 "ci_sys_id": mountCount.toString(),
                 "collision": 0,
+                "model_category_name": "Server",
                 "model_rack_units": 1,
                 "rack_name": rackName,
-                "rack_u": unitCount
+                "rack_u": unitCount,
+                "support_group_name": randomSupportGroup(),
+                "u_last_audit_date": fakedates[Math.floor(Math.random() * 5)]
             };
             tempMountBlock[mountName] = {
                 "draw_lines": 1,
                 "rgb_block_red": "0.850",
                 "rgb_block_green": "0.850",
                 "rgb_block_blue": "0.850",
-                "rgb_line_red": "0.000",
-                "rgb_line_green": "0.000",
-                "rgb_line_blue": "0.000",
+                "rgb_line_red": "0.500",
+                "rgb_line_green": "0.500",
+                "rgb_line_blue": "0.500",
                 "x_location": xLocation.toFixed(3),
                 "y_location": yLocation.toFixed(3),
                 "z_location": zLocation.toFixed(3),
@@ -1754,18 +1630,21 @@ function fakeMount(rackData, rackBlocks) {
                 "ci_name": mountName,
                 "ci_sys_id": mountCount.toString(),
                 "collision": 0,
+                "model_category_name": "Network Gear",
                 "model_rack_units": 1,
                 "rack_name": rackName,
-                "rack_u": unitCount
+                "rack_u": unitCount,
+                "support_group_name": randomSupportGroup(),
+                "u_last_audit_date": fakedates[Math.floor(Math.random() * 5)]
             };
             tempMountBlock[mountName] = {
                 "draw_lines": 1,
                 "rgb_block_red": "0.850",
                 "rgb_block_green": "0.850",
                 "rgb_block_blue": "0.850",
-                "rgb_line_red": "0.000",
-                "rgb_line_green": "0.000",
-                "rgb_line_blue": "0.000",
+                "rgb_line_red": "0.500",
+                "rgb_line_green": "0.500",
+                "rgb_line_blue": "0.500",
                 "x_location": xLocation.toFixed(3),
                 "y_location": yLocation.toFixed(3),
                 "z_location": zLocation.toFixed(3),
@@ -1790,18 +1669,21 @@ function fakeMount(rackData, rackBlocks) {
                 "ci_name": mountName,
                 "ci_sys_id": mountCount.toString(),
                 "collision": 0,
+                "model_category_name": "Server",
                 "model_rack_units": 1,
                 "rack_name": rackName,
-                "rack_u": unitCount
+                "rack_u": unitCount,
+                "support_group_name": randomSupportGroup(),
+                "u_last_audit_date": fakedates[Math.floor(Math.random() * 5)]
             };
             tempMountBlock[mountName] = {
                 "draw_lines": 1,
                 "rgb_block_red": "0.850",
                 "rgb_block_green": "0.850",
                 "rgb_block_blue": "0.850",
-                "rgb_line_red": "0.000",
-                "rgb_line_green": "0.000",
-                "rgb_line_blue": "0.000",
+                "rgb_line_red": "0.500",
+                "rgb_line_green": "0.500",
+                "rgb_line_blue": "0.500",
                 "x_location": xLocation.toFixed(3),
                 "y_location": yLocation.toFixed(3),
                 "z_location": zLocation.toFixed(3),
