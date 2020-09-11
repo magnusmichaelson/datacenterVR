@@ -38,10 +38,21 @@
     "u_qty_alloc": number;
     "u_rack_state": string;
   }
-  var rackBlocks: Record<string, Block> = {};
-  var rackData: Record<string, Rack> = fakeRacks(rowMax,rackMax);
+  interface Mount {
+    "ci_name": string;
+    "ci_sys_id": string;
+    "collision": number;
+    "model_rack_units": number;
+    "rack_name": string;
+    "rack_u": number;
+  }
+  var rackResult = fakeRacks(rowMax,rackMax);
+  var rackData: Record<string, Rack> = rackResult["tempRackData"];
+  var rackBlocks: Record<string, Block> = rackResult["tempRackBlocks"];
   var sceneBlocks: Record<string, Block> = fakeScene(roomXDimension,roomYDimension);
-
+  var mountData: Record<string, Mount> = fakeMount(rackData,rackBlocks);
+  var mountBlocks: Record<string, Block> = {};
+  console.log(mountData)
   /*
   allData["racks"] = fakeRacks(rowMax,rackMax);
   allData["mount"] = fakeMount(allData["racks"]);
@@ -103,7 +114,6 @@
   var moveRight: boolean = false;
   var moveUp: boolean = false;
   var moveDown: boolean = false;
-  var mountData: object = {};
   var mountColor: Record<string, Array<number>> = {};
   var prevTime: number;
   var rackColor: Record<string, Array<number>> = {};
@@ -283,7 +293,7 @@
     threeRenderer = new THREE.WebGLRenderer({antialias:true, canvas:document.getElementById('my_canvas')});
     threeRenderer.setClearColor( 0xf0f3f4 );
     generateBlocks(rackBlocks,"rack",false)
-    //generateBlocks(allData["scene"],"scene",false)
+    generateBlocks(sceneBlocks,"scene",false)
     //generateBlocks(allData["mount"],"mount",true)
     //generateBlocks(allData["empty"],"empty",false)
     rackDropDown();
@@ -1458,16 +1468,12 @@
     }
     return scene;
   }
-  /*
-  function fakeMount(rackData){
-    var dateNow: Date;
+  function fakeMount(rackData: Record<string, Rack>, rackBlocks: Record<string, Block>){
     var endOfLife: number;
     var fakedates: Array<string>;
     var mountCount: number = 0;
-    var mountData: Object = {};
+    var mountData: Record<string, Mount>= {};
     var mountName: string = "";
-    var rack: Object = {};
-    var seconds: number;
     var unitCount: number;
     var unitHeight: number = 0.0445;
     var xDimension: number = 0;
@@ -1480,32 +1486,31 @@
     var zStart: number = 0;
     fakedates = ['2018-07-25 04:21:00','2019-01-25 04:21:00','2019-07-25 04:21:00','2020-01-25 04:21:00','2020-07-25 04:21:00'];
     Object.keys(rackData).forEach(function(rackName){
-      rack = rackData[rackName];
-      if (rack["facing"] == 0){
-        xLocation = rack["block"]["x_location"] - (rack["block"]["x_dimension"] * 0.5) - 0.009;
-        yLocation = rack["block"]["y_location"];
+      if (rackData[rackName]["facing"] == 0){
+        xLocation = parseInt(rackBlocks[rackName]["x_location"]) - (parseInt(rackBlocks[rackName]["x_dimension"]) * 0.5) - 0.009;
+        yLocation = parseInt(rackBlocks[rackName]["y_location"]);
         xDimension = 0.016;
-        yDimension = rack["block"]["y_dimension"] * 0.9;
+        yDimension = parseInt(rackBlocks[rackName]["y_dimension"]) * 0.9;
       }
-      if (rack["facing"] == 1){
-        xLocation = rack["block"]["x_location"];
-        yLocation = rack["block"]["y_location"] + (rack["block"]["y_dimension"] * 0.5) + 0.009;
-        xDimension = rack["block"]["x_dimension"] * 0.9;
+      if (rackData[rackName]["facing"] == 1){
+        xLocation = parseInt(rackBlocks[rackName]["x_location"]);
+        yLocation = parseInt(rackBlocks[rackName]["y_location"]) + (parseInt(rackBlocks[rackName]["y_dimension"]) * 0.5) + 0.009;
+        xDimension = parseInt(rackBlocks[rackName]["x_dimension"]) * 0.9;
         yDimension = 0.016;
       }
-      if (rack["facing"] == 2){
-        xLocation = rack["block"]["x_location"] + (rack["block"]["x_dimension"] * 0.5) + 0.009;
-        yLocation = rack["block"]["y_location"];
+      if (rackData[rackName]["facing"] == 2){
+        xLocation = parseInt(rackBlocks[rackName]["x_location"]) + (parseInt(rackBlocks[rackName]["x_dimension"]) * 0.5) + 0.009;
+        yLocation = parseInt(rackBlocks[rackName]["y_location"]);
         xDimension = 0.016;
-        yDimension = rack["block"]["y_dimension"] * 0.9;
+        yDimension = parseInt(rackBlocks[rackName]["y_dimension"]) * 0.9;
       }
-      if (rack["facing"] == 3){
-        xLocation = rack["block"]["x_location"];
-        yLocation = rack["block"]["y_location"] - (rack["block"]["y_dimension"] * 0.5) - 0.009;
-        xDimension = rack["block"]["x_dimension"] * 0.9;
+      if (rackData[rackName]["facing"] == 3){
+        xLocation = parseInt(rackBlocks[rackName]["x_location"]);
+        yLocation = parseInt(rackBlocks[rackName]["y_location"]) - (parseInt(rackBlocks[rackName]["y_dimension"]) * 0.5) - 0.009;
+        xDimension = parseInt(rackBlocks[rackName]["x_dimension"]) * 0.9;
         yDimension = 0.016;
       }
-      zStart = rack["block"]["z_location"] - (rack["block"]["z_dimension"] * 0.5) + (unitHeight * 2);
+      zStart = parseInt(rackBlocks[rackName]["z_location"]) - (parseInt(rackBlocks[rackName]["z_dimension"]) * 0.5) + (unitHeight * 2);
       for (zLoop = 0; zLoop < 10; zLoop++){
         unitCount = (zLoop * 2);
         zDimension = (unitHeight * 2) -0.002;
@@ -1516,41 +1521,23 @@
         } else {
           endOfLife = 0;
         }
-        seconds = Math.random() * 5 * 365 * 24 * 60 * 60 * 1000;
-        dateNow = new Date();
+/*
+interface Mount {
+  "ci_name": string;
+  "ci_sys_id": string;
+  "collision": number;
+  "model_rack_units": number;
+  "rack_name": string;
+  "rack_u": number;
+}
+*/
         mountData[mountName] = {
-          "block": {
-            "draw_lines": 1,
-            "rgb_block_red": 1.0,
-            "rgb_block_green": 1.0,
-            "rgb_block_blue": 1.0,
-            "rgb_line_red": 0.5,
-            "rgb_line_green": 0.5,
-            "rgb_line_blue": 0.5,
-            "x_location": xLocation,
-            "y_location": yLocation,
-            "z_location": zLocation,
-            "x_dimension": xDimension,
-            "y_dimension": yDimension,
-            "z_dimension": zDimension
-          },
           "ci_name": mountName,
           "ci_sys_id": mountCount.toString(),
-          "sys_id": mountCount,
-          "asset_tag": "fake",
-          "ci_u_cmdb_ci_status_name": "fake",
-          "ci_u_provision_date": "fake",
           "collision": 0,
-          "model_category_name": "Server",
-          "model_u_end_of_life": endOfLife,
-          "model_name": "fake",
           "model_rack_units": 1,
-          "support_group_name": randomSupportGroup(),
-          "support_group_manager_email": "fake@fake.com",
-          "sys_class_name": "fake",
-          "u_smdb_table": "fake",
-          "u_last_audit_date": fakedates[Math.floor(Math.random() * 5)],
-          "serial_number": "fake"
+          "rack_name": rackName,
+          "rack_u": unitCount
         }
         mountCount += 1;
       }
@@ -1564,41 +1551,13 @@
         } else {
           endOfLife = 0;
         }
-        seconds = Math.random() * 5 * 365 * 24 * 60 * 60 * 1000;
-        dateNow = new Date();
         mountData[mountName] = {
-          "block": {
-            "draw_lines": 1,
-            "rgb_block_red": 1.0,
-            "rgb_block_green": 1.0,
-            "rgb_block_blue": 1.0,
-            "rgb_line_red": 0.5,
-            "rgb_line_green": 0.5,
-            "rgb_line_blue": 0.5,
-            "x_location": xLocation,
-            "y_location": yLocation,
-            "z_location": zLocation,
-            "x_dimension": xDimension,
-            "y_dimension": yDimension,
-            "z_dimension": zDimension
-          },
           "ci_name": mountName,
           "ci_sys_id": mountCount.toString(),
-          "sys_id": mountCount,
-          "asset_tag": "fake",
-          "ci_u_cmdb_ci_status_name": "fake",
-          "ci_u_provision_date": "fake",
           "collision": 0,
-          "model_category_name": "Network Gear",
-          "model_u_end_of_life": endOfLife,
-          "model_name": "fake",
           "model_rack_units": 1,
-          "support_group_name": randomSupportGroup(),
-          "support_group_manager_email": "fake@fake.com",
-          "sys_class_name": "fake",
-          "u_smdb_table": "fake",
-          "u_last_audit_date": fakedates[Math.floor(Math.random() * 5)],
-          "serial_number": "fake"
+          "rack_name": rackName,
+          "rack_u": unitCount
         }
         mountCount += 1;
       }
@@ -1613,45 +1572,19 @@
           endOfLife = 0;
         }
         mountData[mountName] = {
-          "block": {
-            "draw_lines": 1,
-            "rgb_block_red": 1.0,
-            "rgb_block_green": 1.0,
-            "rgb_block_blue": 1.0,
-            "rgb_line_red": 0.5,
-            "rgb_line_green": 0.5,
-            "rgb_line_blue": 0.5,
-            "x_location": xLocation,
-            "y_location": yLocation,
-            "z_location": zLocation,
-            "x_dimension": xDimension,
-            "y_dimension": yDimension,
-            "z_dimension": zDimension
-          },
           "ci_name": mountName,
           "ci_sys_id": mountCount.toString(),
-          "sys_id": mountCount,
-          "asset_tag": "fake",
-          "ci_u_cmdb_ci_status_name": "fake",
-          "ci_u_provision_date": "fake",
           "collision": 0,
-          "model_category_name": "Server",
-          "model_u_end_of_life": endOfLife,
-          "model_name": "fake",
           "model_rack_units": 1,
-          "support_group_name": randomSupportGroup(),
-          "support_group_manager_email": "fake@fake.com",
-          "sys_class_name": "fake",
-          "u_smdb_table": "fake",
-          "u_last_audit_date": fakedates[Math.floor(Math.random() * 5)],
-          "serial_number": "fake"
+          "rack_name": rackName,
+          "rack_u": unitCount
         }
         mountCount += 1;
       }
     })
     return mountData;
   }
-
+/*
   function fakeEmpty(rackData){
     var emptyCount: number = 0;
     var emptyData: Object = {};
@@ -1728,12 +1661,12 @@
     var environmentList: Array<string> = ["environment1","environment2","environment3","environment4","environment5","environment6"];
     return environmentList[dice];
   }
-/*
   function randomSupportGroup(){
     var dice: number = Math.floor(Math.random() * 3);
     var supportGroupList: Array<string> = ["team1","team2","team3"];
     return supportGroupList[dice];
   }
+  /*
 
   function fakePower(allData){
     var powerData: object = {};
@@ -1783,7 +1716,9 @@ interface Block {
   function fakeRacks(rowMax: number, rackMax: number){
     var facing: number = 0;
     var rackCount: number = 0;
-    var rackData: Record<string, Rack> = {};
+    //var rackData: Record<string, Rack> = {};
+    var tempRackData: Record<string, Rack> = {};
+    var tempRackBlocks: Record<string, Block> = {};
     var rackName: string;
     var xloop: number;
     var yloop: number;
@@ -1795,7 +1730,7 @@ interface Block {
           facing = 3;
         }
         rackName = "rack_" + xloop + "_" + yloop;
-        rackBlocks[rackName] = {
+        tempRackBlocks[rackName] = {
           "draw_lines": 1,
           "rgb_block_red": "1.0",
           "rgb_block_green": "1.0",
@@ -1808,9 +1743,9 @@ interface Block {
           "z_location": "1.2",
           "x_dimension": "0.58",
           "y_dimension": "1.2",
-          "z_dimension": "1.2"
+          "z_dimension": "2.4"
         }
-        rackData[rackName] = {
+        tempRackData[rackName] = {
           "id": rackCount.toString(),
           "facing": facing,
           "rack_units": 50,
@@ -1826,5 +1761,5 @@ interface Block {
         rackCount++;
       }
     }
-    return rackData;
+    return {tempRackData, tempRackBlocks};
   }
