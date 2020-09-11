@@ -1288,28 +1288,28 @@
     var zStart: number = 0;
     Object.keys(tempRackBlock).forEach(function(rackName){
       if (rackData[rackName]["facing"] == 0){
-        xLocation = parseFloat(rackBlocks[rackName]["x_location"]) - (parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.5) - 0.009;
+        xLocation = parseFloat(rackBlocks[rackName]["x_location"]) - (parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.5) - 0.002;
         yLocation = parseFloat(rackBlocks[rackName]["y_location"]);
-        xDimension = 0.016;
+        xDimension = 0.002;
         yDimension = parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.9;
       }
       if (rackData[rackName]["facing"] == 1){
         xLocation = parseFloat(rackBlocks[rackName]["x_location"]);
-        yLocation = parseFloat(rackBlocks[rackName]["y_location"]) + (parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.5) + 0.009;
+        yLocation = parseFloat(rackBlocks[rackName]["y_location"]) + (parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.5) + 0.002;
         xDimension = parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.9;
-        yDimension = 0.016;
+        yDimension = 0.002;
       }
       if (rackData[rackName]["facing"] == 2){
-        xLocation = parseFloat(rackBlocks[rackName]["x_location"]) + (parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.5) + 0.009;
+        xLocation = parseFloat(rackBlocks[rackName]["x_location"]) + (parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.5) + 0.002;
         yLocation = parseFloat(rackBlocks[rackName]["y_location"]);
-        xDimension = 0.016;
+        xDimension = 0.002;
         yDimension = parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.9;
       }
       if (rackData[rackName]["facing"] == 3){
         xLocation = parseFloat(rackBlocks[rackName]["x_location"]);
-        yLocation = parseFloat(rackBlocks[rackName]["y_location"]) - (parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.5) - 0.009;
+        yLocation = parseFloat(rackBlocks[rackName]["y_location"]) - (parseFloat(rackBlocks[rackName]["y_dimension"]) * 0.5) - 0.002;
         xDimension = parseFloat(rackBlocks[rackName]["x_dimension"]) * 0.9;
-        yDimension = 0.016;
+        yDimension = 0.002;
       }
       zStart = parseFloat(rackBlocks[rackName]["z_location"]) - (parseFloat(rackBlocks[rackName]["z_dimension"]) * 0.5) + (unitHeight * 2);
       for (zLoop = 0; zLoop < 11; zLoop++){
