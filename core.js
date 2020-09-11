@@ -19,6 +19,8 @@ var mountResult = fakeMount(rackData, rackBlocks);
 var mountData = mountResult["tempMountData"];
 var mountBlocks = mountResult["tempMountBlock"];
 var emptyBlocks = fakeEmpty(rackBlocks);
+//var rackPowerData: Record<string, number> = {};
+//
 var anchor;
 var controlsEnabled = false;
 var element = document.body;
@@ -441,40 +443,51 @@ function rackDropDown() {
     var overlayElement = document.getElementById('rackOverlay');
     var overlayValue = overlayElement.value;
     if (overlayValue == 'default') {
-        overlayRackDefault();
+        overlayRackDefault(rackData);
     }
-    if (overlayValue == 'Power') {
-        overlayRackPower();
+    if (overlayValue == 'power') {
+        overlayRackPower(rackData);
     }
     if (overlayValue == 'rackCapacity') {
-        overlayRackCapacity();
+        overlayRackCapacity(rackData);
     }
+}
+/**
+ * @function overlayRackDefault
+ * @description all blocks drawn white except collisions, which are red
+ */
+function overlayRackDefault(rackData) {
+    var rackEnvironmentElement = document.getElementById('rackFilter');
+    var rackEnvironmentValue = rackEnvironmentElement.value;
+    var color = [];
+    Object.keys(rackData).forEach(function (rackName) {
+        color = [1, 1, 1];
+        if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rackData[rackName]["u_environment"]) {
+            rackColor[rackName] = [1, 1, 1];
+        }
+    });
+    applyColor(rackData, rackColor);
 }
 /**
  * @function overlayRackPower
  * @description pulls power data from the server and triggers visualisation
  * @param {string} visualisationType - either average or maximum
  */
-function overlayRackPower() {
-    //if (Object.keys(powerData["racks"]).length > 0) {
-    //powerRender(allData,powerData);
-    //} else {
-    //serverLink.data.roomName = roomName;
-    //serverLink.data.getPower = true;
-    //serverLink.server.update().then(function (d) {
-    //serverLink.data.getPower = false;
-    //powerData = serverLink.data.powerIqMax;
-    //powerRender(allData,powerData);
-    //});
-    //}
-}
-/**
- * @function overlayRackDefault
- * @description all blocks drawn white except collisions, which are red
- */
-function overlayRackDefault() {
+function overlayRackPower(rackData) {
+    var rackEnvironmentElement = document.getElementById('rackFilter');
+    var rackEnvironmentValue = rackEnvironmentElement.value;
+    var color = [];
     Object.keys(rackData).forEach(function (rackName) {
-        rackColor[rackName] = [1, 1, 1];
+        color = [1, 1, 1];
+        if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rackData[rackName]["u_environment"]) {
+            if (rackData[rackName]["u_equip_kw_consume_design"] > -1) {
+                color = spectrumGreenRed(rackData[rackName]["u_equip_kw_consume_design"], rackData[rackName]["u_equip_design_kw"]);
+            }
+            else {
+                color = [0.8, 0.8, 0.8];
+            }
+        }
+        rackColor[rackName] = color;
     });
     applyColor(rackData, rackColor);
 }
@@ -482,29 +495,26 @@ function overlayRackDefault() {
  * @function overlayRackCapacity
  * @description colors all objects in a rack to show that rack's capacity
  */
-function overlayRackCapacity() {
+function overlayRackCapacity(rackData) {
     var rackEnvironmentElement = document.getElementById('rackFilter');
     var rackEnvironmentValue = rackEnvironmentElement.value;
     var color = [];
-    var singleRackReport = [];
-    var tempColor = [];
     Object.keys(rackData).forEach(function (rackName) {
-        singleRackReport = [1, 1, 1];
+        color = [1, 1, 1];
         if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rackData[rackName]["u_environment"]) {
             if (rackData[rackName]["u_max_alloc"] > 0) {
                 if (rackData[rackName]["u_qty_alloc"] > 0) {
-                    tempColor = spectrumGreenRed(rackData[rackName]["u_qty_alloc"], rackData[rackName]["u_max_alloc"]);
-                    singleRackReport = [tempColor[0], tempColor[1], tempColor[2], rackData[rackName]["u_qty_alloc"] + " / " + rackData[rackName]["u_max_alloc"]];
+                    color = spectrumGreenRed(rackData[rackName]["u_qty_alloc"], rackData[rackName]["u_max_alloc"]);
                 }
                 else {
-                    singleRackReport = spectrumGreenRed(0, 1);
+                    color = spectrumGreenRed(0, 1);
                 }
             }
             else {
-                singleRackReport = [0.8, 0.8, 0.8];
+                color = [0.8, 0.8, 0.8];
             }
         }
-        rackColor[rackName] = singleRackReport;
+        rackColor[rackName] = color;
     });
     applyColor(rackData, rackColor);
 }
@@ -530,19 +540,22 @@ function mountDropDown() {
  * @description all blocks drawn white except collisions, which are red
  */
 function overlaymountDefault() {
+    var supportGroupElement = document.getElementById('mountFilter');
+    var supportGroupValue = supportGroupElement.value;
     var color = [];
-    var mount = {};
-    /*
-    Object.keys(allData["mount"]).forEach(function(blockName){
-      mount = allData["mount"][blockName];
-      color = [1,1,1];
-      if (mount['collision']){
-        color = [1, 0, 0];
-      }
-      mountColor[blockName] = color;
-    })
-    */
-    //applyColor(allData["mount"],mountColor);
+    Object.keys(mountData).forEach(function (blockName) {
+        color = [1, 1, 1];
+        if (supportGroupValue == 'all' || supportGroupValue == mountData[blockName]['support_group_name']) {
+            if (!mountData[blockName]['ci_name']) {
+                color = [1, 0.5, 0];
+            }
+            if (mountData[blockName]['collision']) {
+                color = [1, 0, 0];
+            }
+        }
+        mountColor[blockName] = color;
+    });
+    applyColor(mountData, mountColor);
 }
 /**
  * @function overlayObjectModelCategory
@@ -583,14 +596,6 @@ function overlayObjectModelCategory() {
             if (mountData[blockName]['model_category_name'] in colorChart) {
                 color = colorChart[mountData[blockName]['model_category_name']];
             }
-            /*
-            if (!mount['ci_name']){
-              color = [1, 0.5, 0]
-            }
-            if (mount['collision']){
-              color = [1, 0, 0]
-            }
-            */
         }
         mountColor[blockName] = color;
     });
@@ -872,14 +877,8 @@ function animate() {
  * @description opens a page on the selected object
  */
 function mouseClick(event) {
-    //if (event.button == 0){
-    //  leftMouseClick(event);
-    //}
-    if (event.button == 1) {
-        middleMouseClick(event);
-    }
     if (event.button == 2) {
-        rightMouseClick(event);
+        mouseMenu(event);
     }
 }
 /**
@@ -892,29 +891,7 @@ function mouseClick(event) {
  * @param {Array.<Object>} xxxxx - xxxxx
  * @return {string} xxxxx - xxxxx
  */
-function middleMouseClick(event) {
-    var lower;
-    var textNode;
-    lower = document.getElementById("lower");
-    if (lower) {
-        while (lower.firstChild) {
-            lower.removeChild(lower.firstChild);
-        }
-        textNode = document.createTextNode("Middle mouse button clicked");
-        lower.appendChild(textNode);
-    }
-}
-/**
- * @function xxxxxx
- * @description xxxxxxxxx
- * @param {string} xxxxx - xxxxx
- * @param {boolean} xxxxx - xxxxx
- * @param {number} xxxxx - xxxxx
- * @param {Object} xxxxx - xxxxx
- * @param {Array.<Object>} xxxxx - xxxxx
- * @return {string} xxxxx - xxxxx
- */
-function rightMouseClick(event) {
+function mouseMenu(event) {
     var button;
     var blockType;
     var htmlElement;
@@ -1147,68 +1124,6 @@ function onScreeMenuStop() {
         ghost.addEventListener('click', pointerLockRequest, false);
     }
 }
-/**
- * @function xxxxxx
- * @description xxxxxxxxx
- * @param {string} xxxxx - xxxxx
- * @param {boolean} xxxxx - xxxxx
- * @param {number} xxxxx - xxxxx
- * @param {Object} xxxxx - xxxxx
- * @param {Array.<Object>} xxxxx - xxxxx
- * @return {string} xxxxx - xxxxx
- */
-/*
-function leftMouseClick(event){
-  var blockData: object = {};
-  var anchor: HTMLElement;
-  var linebreak: HTMLElement;
-  var lower: HTMLElement;
-  var textNode: Text;
-  var blockType: string = "";
-  lower = document.getElementById("lower");
-  while (lower.firstChild) {
-    lower.removeChild(lower.lastChild);
-  }
-  if (selectedBlock){
-  blockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
-    if (blockType == "mount"){
-      blockData = allData["mount"][selectedBlock];
-      anchor = document.createElement('a');
-      anchor.setAttribute('href',"/nav_to.do?uri=%2Falm_hardware.do%3Fsys_id%3D" + blockData["sys_id"]);
-      anchor.innerText = selectedBlock;
-      lower.appendChild(anchor);
-    }
-    if (blockType == "rack"){
-      blockData = allData["racks"][selectedBlock];
-      anchor = document.createElement('a');
-      anchor.setAttribute('href',"/nav_to.do?uri=%2Fsp%3Fid%3Ddcscapeng_rackview%26rackSysid%3D" + blockData["sys_id"]);
-      anchor.innerText = selectedBlock;
-      lower.appendChild(anchor);
-      if (rackColor[selectedBlock].length > 3 && rackColor[selectedBlock][3] != ""){
-        linebreak = document.createElement("br");
-        lower.appendChild(linebreak);
-        textNode = document.createTextNode("     " + rackColor[selectedBlock][3]);
-        lower.appendChild(textNode);
-      }
-      if (rackColor[selectedBlock].length > 4 && rackColor[selectedBlock][4] != ""){
-        linebreak = document.createElement("br");
-        lower.appendChild(linebreak);
-        textNode = document.createTextNode("     " + rackColor[selectedBlock][4]);
-        lower.appendChild(textNode);
-      }
-    }
-    if (blockType == "scene"){
-      blockData = allData["scene"][selectedBlock];
-      anchor = document.createElement('a');
-      anchor.setAttribute('href',"/nav_to.do?uri=%2Fu_dcse_vr_scene.do%3Fsys_id%3D" + blockData["sysid"]);
-      anchor.innerText = "scene";
-      lower.appendChild(anchor);
-    }
-  } else {
-    lower.innerHTML = "Room: " + allData["room"]["room_name"];
-  }
-}
-*/
 function fakeScene(roomXDimension, roomYDimension) {
     var scene = {};
     scene["floor"] = {
@@ -1364,12 +1279,10 @@ function randomSupportGroup() {
     return supportGroupList[dice];
 }
 /*
-
-function fakePower(allData){
-  var powerData: object = {};
+function fakePower(rackData: Record<string, Rack>){
+  var tempPowerData: Record<string, number> = {};
   var randomPower: number = 0;
-  powerData["racks"] = {}
-  Object.keys(allData["racks"]).forEach(function(rackName){
+  Object.keys(rackData).forEach(function(rackName){
     if (allData["racks"][rackName]["design"]["u_equip_design_kw"] != "no data"){
       if (allData["racks"][rackName]["design"]["u_equip_design_kw"] > 0){
         randomPower = Math.random() * 10;
@@ -1396,6 +1309,7 @@ function fakeRacks(rowMax, rackMax) {
     var tempRackData = {};
     var tempRackBlocks = {};
     var rackName;
+    var rackPower;
     var xloop;
     var yloop;
     for (yloop = 0; yloop < rowMax; yloop++) {
@@ -1422,15 +1336,16 @@ function fakeRacks(rowMax, rackMax) {
                 "y_dimension": "1.2",
                 "z_dimension": "2.4"
             };
+            rackPower = Math.floor(Math.random() * 21);
             tempRackData[rackName] = {
                 "id": rackCount.toString(),
                 "facing": facing,
                 "rack_units": 50,
-                "u_allocated_kw": 10,
+                "u_allocated_kw": 0,
                 "u_environment": randomEnvironment(),
-                "u_equip_design_kw": 12,
-                "u_equip_kw_consume_design": 20,
-                "u_facil_design_kw": 16,
+                "u_equip_design_kw": 20,
+                "u_equip_kw_consume_design": rackPower,
+                "u_facil_design_kw": 0,
                 "u_max_alloc": 10,
                 "u_qty_alloc": xloop % 10,
                 "u_rack_state": "Landed"
@@ -1441,7 +1356,8 @@ function fakeRacks(rowMax, rackMax) {
     return { tempRackData: tempRackData, tempRackBlocks: tempRackBlocks };
 }
 function fakeMount(rackData, rackBlocks) {
-    var endOfLife;
+    var ciName;
+    var collision;
     var fakedates;
     var mountCount = 0;
     var mountName = "";
@@ -1489,16 +1405,18 @@ function fakeMount(rackData, rackBlocks) {
             zDimension = (unitHeight * 2) - 0.002;
             zLocation = zStart + (unitCount * unitHeight) + unitHeight;
             mountName = "server_" + mountCount;
+            ciName = "fake";
             if (Math.random() > 0.95) {
-                endOfLife = 1;
+                ciName = "";
             }
-            else {
-                endOfLife = 0;
+            collision = 0;
+            if (Math.random() > 0.95) {
+                collision = 1;
             }
             tempMountData[mountName] = {
-                "ci_name": mountName,
+                "ci_name": ciName,
                 "ci_sys_id": mountCount.toString(),
-                "collision": 0,
+                "collision": collision,
                 "model_category_name": "Server",
                 "model_rack_units": 1,
                 "rack_name": rackName,
@@ -1528,12 +1446,6 @@ function fakeMount(rackData, rackBlocks) {
             zDimension = unitHeight - 0.002;
             zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 0.5);
             mountName = "network_" + mountCount;
-            if (Math.random() > 0.95) {
-                endOfLife = 1;
-            }
-            else {
-                endOfLife = 0;
-            }
             tempMountData[mountName] = {
                 "ci_name": mountName,
                 "ci_sys_id": mountCount.toString(),
@@ -1567,12 +1479,6 @@ function fakeMount(rackData, rackBlocks) {
             zDimension = (unitHeight * 4) - 0.002;
             zLocation = zStart + (unitCount * unitHeight) + (unitHeight * 2);
             mountName = "server_" + mountCount;
-            if (Math.random() > 0.95) {
-                endOfLife = 1;
-            }
-            else {
-                endOfLife = 0;
-            }
             tempMountData[mountName] = {
                 "ci_name": mountName,
                 "ci_sys_id": mountCount.toString(),
