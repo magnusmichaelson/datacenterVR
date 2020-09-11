@@ -906,17 +906,15 @@
    * @description opens a page on the selected object
    */
   function mouseClick(event: MouseEvent){
-    /*
-    if (event.button == 0){
-      leftMouseClick(event);
-    }
+    //if (event.button == 0){
+    //  leftMouseClick(event);
+    //}
     if (event.button == 1){
       middleMouseClick(event);
     }
     if (event.button == 2){
       rightMouseClick(event);
     }
-    */
   }
   /**
    * @function xxxxxx
@@ -928,7 +926,6 @@
    * @param {Array.<Object>} xxxxx - xxxxx
    * @return {string} xxxxx - xxxxx
    */
-  /*
   function middleMouseClick(event: MouseEvent){
     var lower: HTMLElement | null;
     var textNode: Text;
@@ -941,7 +938,6 @@
       lower.appendChild(textNode);
     }
   }
-  */
   /**
    * @function xxxxxx
    * @description xxxxxxxxx
@@ -952,108 +948,156 @@
    * @param {Array.<Object>} xxxxx - xxxxx
    * @return {string} xxxxx - xxxxx
    */
-  /*
-  function rightMouseClick(event){
+  function rightMouseClick(event: MouseEvent){
     var button: HTMLElement;
     var blockType: string;
-    var addButton: any = function(title,id,className){
-          button = document.createElement("BUTTON");
-          button.id = id;
-          button.className = className;
-          button.innerHTML = title;
-          document.getElementById('ghost').appendChild(button);
+    var htmlElement: HTMLElement | null;
+    var addButton: any = function(title: string, id: string, className: string){
+      htmlElement = document.getElementById('ghost');
+      if (htmlElement){
+        button = document.createElement("BUTTON");
+        button.id = id;
+        button.className = className;
+        button.innerHTML = title;
+        htmlElement.appendChild(button);
+      }
     }
     blockType = threeScene.getObjectByName(selectedBlock).userData.blockType;
     if (blockType == "mount"){
       addButton('Open Asset Record','openAssetRecord','btn-group-green');
-      document.getElementById('openAssetRecord').addEventListener('click', onScreeMenuStop, false);
+      htmlElement = document.getElementById('openAssetRecord');
+      if (htmlElement){
+        htmlElement.addEventListener('click', onScreeMenuStop, false);
+      }
     } else {
       addButton('Open Asset Record','openAssetRecord','btn-group-grey');
     }
     if (blockType == "mount"){
       addButton('Open CI Record','openCiRecord','btn-group-green');
-      document.getElementById('openCiRecord').addEventListener('click', onScreeMenuStop, false);
+      htmlElement = document.getElementById('openCiRecord');
+      if (htmlElement){
+        htmlElement.addEventListener('click', onScreeMenuStop, false);
+      }
     } else {
       addButton('Open CI Record','openCiRecord','btn-group-grey');
     }
     if (blockType == "rack"){
       addButton('Rack visualisation','rackVisual','btn-group-green');
-      document.getElementById('rackVisual').addEventListener('click', onScreeMenuStop, false);
+      htmlElement = document.getElementById('rackVisual');
+      if (htmlElement){
+        htmlElement.addEventListener('click', onScreeMenuStop, false);
+      }
     } else {
       addButton('Rack visualisation','rackVisual','btn-group-grey');
     }
     if (blockType == "mount"){
       addButton('Reboot Server','rebootServer','btn-group-green');
-      document.getElementById('rebootServer').addEventListener('click', onScreeMenuStop, false);
+      htmlElement = document.getElementById('rebootServer');
+      if (htmlElement){
+        htmlElement.addEventListener('click', onScreeMenuStop, false);
+      }
     } else {
       addButton('Reboot Server','rebootServer','btn-group-grey');
     }
     if (blockType == "mount"){
       addButton('Request Provisioning','requestProvisioning','btn-group-green');
-      document.getElementById('requestProvisioning').addEventListener('click', onScreeMenuStop, false);
+      htmlElement = document.getElementById('requestProvisioning');
+      if (htmlElement){
+        htmlElement.addEventListener('click', onScreeMenuStop, false);
+      }
     } else {
       addButton('Request Provisioning','requestProvisioning','btn-group-grey');
     }
     if (blockType == "mount"){
       addButton('Request Smarthands Support','requestSmarthandsSupport','btn-group-green');
-      document.getElementById('requestSmarthandsSupport').addEventListener('click', onScreeMenuStop, false);
+      htmlElement = document.getElementById('requestSmarthandsSupport');
+      if (htmlElement){
+        htmlElement.addEventListener('click', onScreeMenuStop, false);
+      }
     } else {
       addButton('Request Smarthands Support','requestSmarthandsSupport','btn-group-grey');
     }
     if (blockType == "empty"){
       addButton('Reserve Space','reserveSpace','btn-group-green');
-      document.getElementById('reserveSpace').addEventListener('click', onScreeMenuStop, false);
+      htmlElement = document.getElementById('reserveSpace');
+      if (htmlElement){
+        htmlElement.addEventListener('click', onScreeMenuStop, false);
+      }
     } else {
       addButton('Reserve Space','reserveSpace','btn-group-grey');
     }
     if (blockType == "mount"){
       addButton('Run QA Test Suite','runQaTestSuite','btn-group-green');
-      document.getElementById('runQaTestSuite').addEventListener('click', onScreeMenuStop, false);
+      htmlElement = document.getElementById('runQaTestSuite');
+      if (htmlElement){
+        htmlElement.addEventListener('click', onScreeMenuStop, false);
+      }
     } else {
       addButton('Run QA Test Suite','runQaTestSuite','btn-group-grey');
     }
     if (blockType == "mount"){
       addButton('Wipe Drive','wipeDrive','btn-group-green');
-      document.getElementById('wipeDrive').addEventListener('click', onScreeMenuStop, false);
+      htmlElement = document.getElementById('wipeDrive');
+      if (htmlElement){
+        htmlElement.addEventListener('click', onScreeMenuStop, false);
+      }
     } else {
       addButton('Wipe Drive','wipeDrive','btn-group-grey');
     }
     // block download
     addButton('Download blocks','downloadBlocks','btn-group-green');
-    document.getElementById('downloadBlocks').addEventListener('click', subMenuDownloadBlocks, false);
+    htmlElement = document.getElementById('downloadBlocks');
+    if (htmlElement){
+      htmlElement.addEventListener('click', subMenuDownloadBlocks, false);
+    }
     // cancel
     addButton('Cancel','cancel','btn-group-green');
-    document.getElementById('cancel').addEventListener('click', onScreeMenuStop, false);
+    htmlElement = document.getElementById('cancel');
+    if (htmlElement){
+      htmlElement.addEventListener('click', onScreeMenuStop, false);
+    }
     onScreenMenuStart();
   }
-  */
 
-  //function subMenuDownloadBlocks(){
-  //  var button: HTMLElement;
-  //  var ghost: HTMLElement;
+  function subMenuDownloadBlocks(){
+    var button: HTMLElement;
+    var htmlElement: HTMLElement | null;
+    var ghost: HTMLElement | null;
     // clear main menu
-  //  ghost = document.getElementById("ghost");
-  //  while (ghost.firstChild) {
-  //    ghost.removeChild(ghost.lastChild);
-  //  }
-  //  var addButton: any = function(title,id,className){
-  //        button = document.createElement("BUTTON");
-  //        button.id = id;
-  //        button.className = className;
-  //        button.innerHTML = title;
-   //       document.getElementById('ghost').appendChild(button);
-  //  }
-    //addButton('Download scene blocks','downloadSceneBlocks','btn-group-green');
-    //document.getElementById('downloadSceneBlocks').addEventListener('click', function(){
-    //  exportBlocks(allData["scene"],"scene");
-    //  onScreeMenuStop();
-    //}, false);
-    //addButton('Download rack blocks','downloadRackBlocks','btn-group-green');
-    //document.getElementById('downloadRackBlocks').addEventListener('click', function(){
-    //  exportBlocks(allData["racks"],"racks");
-    //  onScreeMenuStop();
-    //}, false);
-  //}
+    ghost = document.getElementById("ghost");
+    if (ghost){
+      while (ghost.firstChild) {
+        ghost.removeChild(ghost.firstChild);
+      }
+      var addButton: any = function(title: string,id: string,className: string){
+        htmlElement = document.getElementById('ghost');
+        if (htmlElement){
+          button = document.createElement("BUTTON");
+          button.id = id;
+          button.className = className;
+          button.innerHTML = title;
+          htmlElement.appendChild(button);
+        }
+      }
+      addButton('Download scene blocks','downloadSceneBlocks','btn-group-green');
+      htmlElement = document.getElementById('downloadSceneBlocks')
+      if (htmlElement){
+        htmlElement.addEventListener('click', function(){
+          exportBlocks(mountBlocks,"scene");
+          onScreeMenuStop();
+        }, false);
+      }
+      addButton('Download rack blocks','downloadRackBlocks','btn-group-green');
+      htmlElement = document.getElementById('downloadRackBlocks')
+      if (htmlElement){
+        htmlElement.addEventListener('click', function(){
+          exportBlocks(rackBlocks,"racks");
+          onScreeMenuStop();
+        }, false);
+      }
+    }
+  }
+
   /**
    * @function exportScene
    * @description downloads json containing anonymous 3d data and color of blocks that are not rack mount objects
