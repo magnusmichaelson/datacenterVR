@@ -70,8 +70,8 @@
   var rackColor: Record<string, Array<number>> = {};
   var rackData: Record<string, Rack> = {};
   var roomNameElement: HTMLElement | null;
-  var roomName: string = "roomName";
-  var roomSysid: string = "abcde";
+  var roomName: string;
+  var roomSysid: string;
   var sceneBlocks: Record<string, Block> = {};
   var selectedBlock: string = "";
   var selectedPreviousName: string = "";
@@ -99,6 +99,8 @@
       serverLink.data.generatingRoom = false;
       allData = serverLink.data.allData;
       */
+      roomName = "Datacenter";
+      roomSysid = "abcde";
       var rackResult = fakeRacks(rowMax,rackMax);
       rackData = rackResult["tempRackData"];
       rackBlocks = rackResult["tempRackBlocks"];
@@ -462,7 +464,7 @@
         speedBoost = true;
         break;
       case 80: // p
-        cameraPosRot();
+        cameraPositionRotation();
         break;
     }
   }
@@ -599,10 +601,10 @@
       overlaymountDefault();
     }
     if (overlayValue == 'objectModelCategory'){
-      overlayObjectModelCategory();
+      overlayMountModelCategory();
     }
     if (overlayValue == 'objectLastAudit'){
-      overlayObjectLastAudit();
+      overlayMountLastAudit();
     }
   }
   function overlaymountDefault(){
@@ -623,7 +625,7 @@
     })
     applyColor(mountData,mountColor);
   }
-  function overlayObjectModelCategory(){
+  function overlayMountModelCategory(){
     var supportGroupElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
     var supportGroupValue: string = supportGroupElement.value;
     var color: Array<number> = [];
@@ -663,7 +665,7 @@
     })
     applyColor(mountData,mountColor);
   }
-  function overlayObjectLastAudit(){
+  function overlayMountLastAudit(){
     var supportGroupElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
     var supportGroupValue: string = supportGroupElement.value;
     var color: Array<number> = [];
@@ -742,7 +744,7 @@
     blue = 1;
     return [red,green,blue];
   }
-  function cameraPosRot(){
+  function cameraPositionRotation(){
     var lower: HTMLElement | null = document.getElementById("lower");
     if (lower){
       var camXPos: number = threeControls.getObject().position.x.toFixed(3);
@@ -817,10 +819,8 @@
       moveDown = false;
       prevTime= performance.now();
       document.addEventListener( 'click', mouseClick, false);
-      //document.addEventListener('mousewheel', mouseWheelZoom, false);
     } else {
       document.removeEventListener( 'click', mouseClick, false );
-      //document.removeEventListener('mousewheel', mouseWheelZoom, false);
       controlsEnabled = false;
     }
   }

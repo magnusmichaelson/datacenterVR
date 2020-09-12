@@ -32,8 +32,8 @@ var rackBlocks = {};
 var rackColor = {};
 var rackData = {};
 var roomNameElement;
-var roomName = "roomName";
-var roomSysid = "abcde";
+var roomName;
+var roomSysid;
 var sceneBlocks = {};
 var selectedBlock = "";
 var selectedPreviousName = "";
@@ -61,6 +61,8 @@ if (roomSysid == null) {
     serverLink.data.generatingRoom = false;
     allData = serverLink.data.allData;
     */
+roomName = "Datacenter";
+roomSysid = "abcde";
 var rackResult = fakeRacks(rowMax, rackMax);
 rackData = rackResult["tempRackData"];
 rackBlocks = rackResult["tempRackBlocks"];
@@ -431,7 +433,7 @@ function onKeyDown(event) {
             speedBoost = true;
             break;
         case 80: // p
-            cameraPosRot();
+            cameraPositionRotation();
             break;
     }
 }
@@ -571,10 +573,10 @@ function mountDropDown() {
         overlaymountDefault();
     }
     if (overlayValue == 'objectModelCategory') {
-        overlayObjectModelCategory();
+        overlayMountModelCategory();
     }
     if (overlayValue == 'objectLastAudit') {
-        overlayObjectLastAudit();
+        overlayMountLastAudit();
     }
 }
 function overlaymountDefault() {
@@ -595,7 +597,7 @@ function overlaymountDefault() {
     });
     applyColor(mountData, mountColor);
 }
-function overlayObjectModelCategory() {
+function overlayMountModelCategory() {
     var supportGroupElement = document.getElementById('mountFilter');
     var supportGroupValue = supportGroupElement.value;
     var color = [];
@@ -635,7 +637,7 @@ function overlayObjectModelCategory() {
     });
     applyColor(mountData, mountColor);
 }
-function overlayObjectLastAudit() {
+function overlayMountLastAudit() {
     var supportGroupElement = document.getElementById('mountFilter');
     var supportGroupValue = supportGroupElement.value;
     var color = [];
@@ -715,7 +717,7 @@ function spectrumBluePink(numerator, denominator) {
     blue = 1;
     return [red, green, blue];
 }
-function cameraPosRot() {
+function cameraPositionRotation() {
     var lower = document.getElementById("lower");
     if (lower) {
         var camXPos = threeControls.getObject().position.x.toFixed(3);
@@ -790,11 +792,9 @@ function pointerlockchange() {
         moveDown = false;
         prevTime = performance.now();
         document.addEventListener('click', mouseClick, false);
-        //document.addEventListener('mousewheel', mouseWheelZoom, false);
     }
     else {
         document.removeEventListener('click', mouseClick, false);
-        //document.removeEventListener('mousewheel', mouseWheelZoom, false);
         controlsEnabled = false;
     }
 }
