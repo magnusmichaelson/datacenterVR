@@ -13,11 +13,9 @@ var roomXDimension = 8 + (rackMax * 0.6);
 var roomYDimension = 8 + (((rowMax * 2) - 1) * 1.2);
 var anchor;
 var controlsEnabled = false;
-var element = document.body;
 var emptyBlocks = {};
 var ghostDiv;
 var havePointerLock;
-var htmlElement;
 var moveForward = false;
 var moveBackward = false;
 var moveLeft = false;
@@ -36,7 +34,6 @@ var roomName;
 var roomSysid;
 var sceneBlocks = {};
 var selectedBlock = "";
-var selectedPreviousName = "";
 var serverLink = this;
 var speed = 6;
 var speedBoost = false;
@@ -92,16 +89,14 @@ if (havePointerLock) {
 else {
     console.log('Your browser doesn\'t seem to support Pointer Lock API');
 }
+generateEventListeners();
 generateScene();
 animate();
 //});
 //}
-function generateScene() {
+function generateEventListeners() {
+    var htmlElement;
     var speedElement = document.getElementById('speed');
-    var threeCrosshair;
-    var threeGeometry;
-    var threeLight;
-    var threeMaterial;
     htmlElement = document.getElementById('rackOverlay');
     if (htmlElement) {
         htmlElement.addEventListener('change', rackDropDown, false);
@@ -126,6 +121,12 @@ function generateScene() {
     }
     document.addEventListener('keydown', onKeyDown, false);
     document.addEventListener('keyup', onKeyUp, false);
+}
+function generateScene() {
+    var threeCrosshair;
+    var threeGeometry;
+    var threeLight;
+    var threeMaterial;
     // fill dropdowns
     generateRackFilter();
     generatemountFilter();

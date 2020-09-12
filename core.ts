@@ -51,11 +51,9 @@
   }
   var anchor: HTMLAnchorElement;
   var controlsEnabled: boolean = false;
-  var element: HTMLElement = document.body;
   var emptyBlocks: Record<string, Block> = {};
   var ghostDiv: HTMLElement | null;
   var havePointerLock: boolean;
-  var htmlElement: HTMLElement | null;
   var moveForward: boolean = false;
   var moveBackward: boolean = false;
   var moveLeft: boolean = false;
@@ -74,7 +72,6 @@
   var roomSysid: string;
   var sceneBlocks: Record<string, Block> = {};
   var selectedBlock: string = "";
-  var selectedPreviousName: string = "";
   var serverLink: any = this;
   var speed: number = 6;
   var speedBoost: boolean = false;
@@ -129,16 +126,14 @@
       } else {
         console.log('Your browser doesn\'t seem to support Pointer Lock API');
       }
+      generateEventListeners();
       generateScene();
       animate();
     //});
   //}
-  function generateScene(){
+  function generateEventListeners(){
+    var htmlElement: HTMLElement | null;
     var speedElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('speed');
-    var threeCrosshair: any;
-    var threeGeometry: any;
-    var threeLight: any;
-    var threeMaterial: any;
     htmlElement = document.getElementById('rackOverlay');
     if (htmlElement){
       htmlElement.addEventListener('change', rackDropDown, false);
@@ -163,6 +158,12 @@
     }
     document.addEventListener( 'keydown', onKeyDown, false );
     document.addEventListener( 'keyup', onKeyUp, false );
+  }
+  function generateScene(){
+    var threeCrosshair: any;
+    var threeGeometry: any;
+    var threeLight: any;
+    var threeMaterial: any;
     // fill dropdowns
     generateRackFilter()
     generatemountFilter();
