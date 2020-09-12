@@ -165,16 +165,13 @@
     var threeLight: any;
     var threeMaterial: any;
     // fill dropdowns
-    generateRackFilter()
-    generatemountFilter();
-    // scene
+    generateRackDropDown()
+    generatemountDropDown();
     // @ts-ignore
     threeScene = new THREE.Scene();
-    // light
     // @ts-ignore
     threeLight = new THREE.AmbientLight(0xffffff);
     threeScene.add(threeLight);
-    // camera
     // @ts-ignore
     threeCamera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.01, 1000 );
     // @ts-ignore
@@ -182,7 +179,6 @@
     threeControls.getObject().position.set(cameraData["camera_position_x"],cameraData["camera_position_y"],cameraData["camera_position_z"]);
     threeControls.getObject().rotation.set(cameraData["camera_rotation_x"],cameraData["camera_rotation_y"],cameraData["camera_rotation_z"]);
     threeScene.add(threeCamera);
-    // threeCrosshair
     // @ts-ignore
     threeGeometry = new THREE.Geometry();
     // @ts-ignore
@@ -198,10 +194,8 @@
     // @ts-ignore
     threeCrosshair = new THREE.LineSegments( threeGeometry, threeMaterial );
     threeCamera.add(threeCrosshair);
-    // raycaster
     // @ts-ignore
     threeRaycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 100 );
-    // renderer
     // @ts-ignore
     threeRenderer = new THREE.WebGLRenderer({antialias:true, canvas:document.getElementById('my_canvas')});
     threeRenderer.setClearColor( 0xf0f3f4 );
@@ -498,7 +492,7 @@
         break;
     }
   }
-  function generateRackFilter(){
+  function generateRackDropDown(){
     var rackEnvironmentElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('rackFilter');
     var optionElement: HTMLOptionElement;
     var rackEnvironmentList: Array<string> = [];
@@ -515,23 +509,6 @@
       rackEnvironmentElement.add(optionElement);
     });
   }
-  function generatemountFilter(){
-    var mountFilterElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
-    var optionElement: HTMLOptionElement;
-    var supportGroupList: Array<string> = [];
-    Object.keys(mountData).forEach(function(blockName){
-      if (supportGroupList.indexOf(mountData[blockName]['support_group_name']) < 0){
-        supportGroupList.push(mountData[blockName]['support_group_name']);
-      }
-    });
-    supportGroupList.sort();
-    supportGroupList.forEach(function(group){
-      optionElement = document.createElement('option');
-      optionElement.text = group;
-      optionElement.value = group;
-      mountFilterElement.add(optionElement);
-    });
-  }
   function rackDropDown(){
     var overlayElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('rackOverlay');
     var overlayValue: string = overlayElement.value;
@@ -546,14 +523,8 @@
     }
   }
   function overlayRackDefault(rackData: Record<string, Rack>){
-    var rackEnvironmentElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('rackFilter');
-    var rackEnvironmentValue: string = rackEnvironmentElement.value;
-    var color: Array<number> = [];
     Object.keys(rackData).forEach(function(rackName){
-      color = [1,1,1];
-      if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rackData[rackName]["u_environment"]){
-        rackColor[rackName] = [1,1,1];
-      }
+      rackColor[rackName] = [1,1,1];
     });
     applyColor(rackData,rackColor);
   }
@@ -594,6 +565,23 @@
       rackColor[rackName] = color;
     });
     applyColor(rackData,rackColor);
+  }
+  function generatemountDropDown(){
+    var mountFilterElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountFilter');
+    var optionElement: HTMLOptionElement;
+    var supportGroupList: Array<string> = [];
+    Object.keys(mountData).forEach(function(blockName){
+      if (supportGroupList.indexOf(mountData[blockName]['support_group_name']) < 0){
+        supportGroupList.push(mountData[blockName]['support_group_name']);
+      }
+    });
+    supportGroupList.sort();
+    supportGroupList.forEach(function(group){
+      optionElement = document.createElement('option');
+      optionElement.text = group;
+      optionElement.value = group;
+      mountFilterElement.add(optionElement);
+    });
   }
   function mountDropDown(){
     var overlayElement: HTMLSelectElement = <HTMLSelectElement>document.getElementById('mountOverlay');
