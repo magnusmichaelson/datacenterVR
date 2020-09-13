@@ -797,6 +797,7 @@
     element.requestPointerLock();
   }
   function pointerlockchange(){
+    var element: HTMLElement = document.body;
     // @ts-ignore
     if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
       controlsEnabled = true;

@@ -128,16 +128,13 @@ function generateScene() {
     var threeLight;
     var threeMaterial;
     // fill dropdowns
-    generateRackFilter();
-    generatemountFilter();
-    // scene
+    generateRackDropDown();
+    generatemountDropDown();
     // @ts-ignore
     threeScene = new THREE.Scene();
-    // light
     // @ts-ignore
     threeLight = new THREE.AmbientLight(0xffffff);
     threeScene.add(threeLight);
-    // camera
     // @ts-ignore
     threeCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 1000);
     // @ts-ignore
@@ -145,7 +142,6 @@ function generateScene() {
     threeControls.getObject().position.set(cameraData["camera_position_x"], cameraData["camera_position_y"], cameraData["camera_position_z"]);
     threeControls.getObject().rotation.set(cameraData["camera_rotation_x"], cameraData["camera_rotation_y"], cameraData["camera_rotation_z"]);
     threeScene.add(threeCamera);
-    // threeCrosshair
     // @ts-ignore
     threeGeometry = new THREE.Geometry();
     // @ts-ignore
@@ -161,10 +157,8 @@ function generateScene() {
     // @ts-ignore
     threeCrosshair = new THREE.LineSegments(threeGeometry, threeMaterial);
     threeCamera.add(threeCrosshair);
-    // raycaster
     // @ts-ignore
     threeRaycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 100);
-    // renderer
     // @ts-ignore
     threeRenderer = new THREE.WebGLRenderer({ antialias: true, canvas: document.getElementById('my_canvas') });
     threeRenderer.setClearColor(0xf0f3f4);
@@ -467,7 +461,7 @@ function onKeyUp(event) {
             break;
     }
 }
-function generateRackFilter() {
+function generateRackDropDown() {
     var rackEnvironmentElement = document.getElementById('rackFilter');
     var optionElement;
     var rackEnvironmentList = [];
@@ -484,23 +478,6 @@ function generateRackFilter() {
         rackEnvironmentElement.add(optionElement);
     });
 }
-function generatemountFilter() {
-    var mountFilterElement = document.getElementById('mountFilter');
-    var optionElement;
-    var supportGroupList = [];
-    Object.keys(mountData).forEach(function (blockName) {
-        if (supportGroupList.indexOf(mountData[blockName]['support_group_name']) < 0) {
-            supportGroupList.push(mountData[blockName]['support_group_name']);
-        }
-    });
-    supportGroupList.sort();
-    supportGroupList.forEach(function (group) {
-        optionElement = document.createElement('option');
-        optionElement.text = group;
-        optionElement.value = group;
-        mountFilterElement.add(optionElement);
-    });
-}
 function rackDropDown() {
     var overlayElement = document.getElementById('rackOverlay');
     var overlayValue = overlayElement.value;
@@ -515,14 +492,8 @@ function rackDropDown() {
     }
 }
 function overlayRackDefault(rackData) {
-    var rackEnvironmentElement = document.getElementById('rackFilter');
-    var rackEnvironmentValue = rackEnvironmentElement.value;
-    var color = [];
     Object.keys(rackData).forEach(function (rackName) {
-        color = [1, 1, 1];
-        if (rackEnvironmentValue == 'all' || rackEnvironmentValue == rackData[rackName]["u_environment"]) {
-            rackColor[rackName] = [1, 1, 1];
-        }
+        rackColor[rackName] = [1, 1, 1];
     });
     applyColor(rackData, rackColor);
 }
@@ -566,6 +537,23 @@ function overlayRackCapacity(rackData) {
         rackColor[rackName] = color;
     });
     applyColor(rackData, rackColor);
+}
+function generatemountDropDown() {
+    var mountFilterElement = document.getElementById('mountFilter');
+    var optionElement;
+    var supportGroupList = [];
+    Object.keys(mountData).forEach(function (blockName) {
+        if (supportGroupList.indexOf(mountData[blockName]['support_group_name']) < 0) {
+            supportGroupList.push(mountData[blockName]['support_group_name']);
+        }
+    });
+    supportGroupList.sort();
+    supportGroupList.forEach(function (group) {
+        optionElement = document.createElement('option');
+        optionElement.text = group;
+        optionElement.value = group;
+        mountFilterElement.add(optionElement);
+    });
 }
 function mountDropDown() {
     var overlayElement = document.getElementById('mountOverlay');
@@ -782,6 +770,7 @@ function pointerLockRequest() {
     element.requestPointerLock();
 }
 function pointerlockchange() {
+    var element = document.body;
     // @ts-ignore
     if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
         controlsEnabled = true;
