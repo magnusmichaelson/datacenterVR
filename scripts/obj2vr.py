@@ -70,22 +70,19 @@ with open(inputObjFile) as fp:
         if (line.startswith('usemtl')):
           material = line.rstrip("\n").split(' ')[1]
           blocklist.append({
-            "name": name,
-            "block": {
-              "x_location": '%.3f' % ((xmin + xmax) * 0.5),
-              "y_location": '%.3f' % ((ymin + ymax) * 0.5),
-              "z_location": '%.3f' % ((zmin + zmax) * 0.5),
-              "x_dimension": '%.3f' % (xmax - xmin),
-              "y_dimension": '%.3f' % (ymax - ymin),
-              "z_dimension": '%.3f' % (zmax - zmin),
-              "rgb_block_red": '%.3f' % materials[material]["red"],
-              "rgb_block_green": '%.3f' % materials[material]["green"],
-              "rgb_block_blue": '%.3f' % materials[material]["blue"],
-              "draw_lines": 1,
-              "rgb_line_red": 0.5,
-              "rgb_line_green": 0.5,
-              "rgb_line_blue": 0.5
-            }
+            "x_location": '%.3f' % ((xmin + xmax) * 0.5),
+            "y_location": '%.3f' % ((ymin + ymax) * 0.5),
+            "z_location": '%.3f' % ((zmin + zmax) * 0.5),
+            "x_dimension": '%.3f' % (xmax - xmin),
+            "y_dimension": '%.3f' % (ymax - ymin),
+            "z_dimension": '%.3f' % (zmax - zmin),
+            "rgb_block_red": '%.3f' % materials[material]["red"],
+            "rgb_block_green": '%.3f' % materials[material]["green"],
+            "rgb_block_blue": '%.3f' % materials[material]["blue"],
+            "draw_lines": 1,
+            "rgb_line_red": "0.500",
+            "rgb_line_green": "0.500",
+            "rgb_line_blue": "0.500"
           })
           reading = False
         line = fp.readline()
