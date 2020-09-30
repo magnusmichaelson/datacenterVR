@@ -745,8 +745,7 @@ function exportBlocks(input, blockType) {
         };
     });
     jsonData = JSON.stringify(output, null, 2);
-    //filename = allData["room"]["room_name"] + '_' + blockType + '.json';
-    filename = "test.json";
+    filename = roomName + '_' + blockType + '.json';
     encodedData = 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonData);
     download = document.createElement('a');
     download.setAttribute('href', encodedData);
@@ -937,7 +936,7 @@ function subMenuDownloadBlocks() {
         htmlElement = document.getElementById('downloadSceneBlocks');
         if (htmlElement) {
             htmlElement.addEventListener('click', function () {
-                exportBlocks(mountBlocks, "scene");
+                exportBlocks(sceneBlocks, "scene");
                 onScreeMenuStop();
             }, false);
         }
