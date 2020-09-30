@@ -965,6 +965,12 @@
           onScreeMenuStop();
         }, false);
       }
+      // cancel
+      addButton('Cancel','cancel','btn-group-green');
+      htmlElement = document.getElementById('cancel');
+      if (htmlElement){
+        htmlElement.addEventListener('click', onScreeMenuStop, false);
+      }
     }
   }
   function onScreenMenuStart(){
